@@ -1,0 +1,11 @@
+project(":applications:user-application") {
+    bootJar{enabled = true}
+    jar {enabled = false}
+
+    dependencies {
+        implementation 'org.springframework.boot:spring-boot-starter-web'
+        implementation 'org.springframework.boot:spring-boot-starter'
+        testImplementation 'org.springframework.boot:spring-boot-starter-test'
+        implementation 'org.springframework.boot:spring-boot-starter-validation'
+    }
+}

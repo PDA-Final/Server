@@ -1,0 +1,6 @@
+rootProject.name = 'tofin'
+include 'applications'
+include 'applications:user-application'
+include 'applications:challenge-application'
+include 'applications:board-application'
+include 'applications:product-application'
