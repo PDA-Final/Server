@@ -1,0 +1,33 @@
+service-url: /api
+
+server:
+  port: 8080
+  servlet:
+    context-path: ${service-url}
+
+spring:
+  application:
+    name: api-gateway
+  cloud:
+    gateway:
+      routes:
+        - id: user-service
+          uri: http://localhost:8084
+          predicates:
+            - Path= ${service-url}/user-service/**
+          filters:
+            - RewritePath=${service-url}/user-service/(?<path>.*),/$\{path}
+
+springdoc:
+  default-consumes-media-type: application/json;charset=UTF-8
+  default-produces-media-type: application/json;charset=UTF-8
+  webjars:
+    prefix: ${service-url}
+  swagger-ui:
+    operations-sorter: alpha
+    use-root-path: true
+    urls:
+      - url: /v3/api-docs
+        name: API Gateway Service
+      - url: ${service-url}/user-service/v3/api-docs
+        name: User Service
