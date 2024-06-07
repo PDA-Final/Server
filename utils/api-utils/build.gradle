@@ -1,0 +1,9 @@
+project(":utils:api-utils") {
+    bootJar{enabled = false}
+    jar {enabled = true}
+
+    dependencies {
+        implementation 'org.springframework:spring-web'
+        implementation 'org.springdoc:springdoc-openapi-common:1.8.0'
+    }
+}
