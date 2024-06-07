@@ -3,8 +3,8 @@ package com.pda.userapplication.inadapters.controllers.auth;
 import com.pda.apiutils.ApiUtils;
 import com.pda.apiutils.GlobalResponse;
 import com.pda.userapplication.inadapters.controllers.auth.dto.req.SignUpRequest;
-import com.pda.userapplication.services.auth.in.SignUpUseCase;
-import com.pda.userapplication.services.auth.in.dto.req.SignUpServiceRequest;
+import com.pda.userapplication.services.in.SignUpUseCase;
+import com.pda.userapplication.services.in.dto.req.SignUpServiceRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -21,6 +21,9 @@ public class AuthController {
         signUpUseCase.signUp(SignUpServiceRequest.builder()
                 .tofinId(signUpRequest.getTofinId())
                 .userInfo(signUpRequest.getUserInfo())
+                .birth(signUpRequest.getBirth())
+                .nickname(signUpRequest.getNickname())
+                .job(signUpRequest.getJob())
             .build());
         return ApiUtils.created("유저 회원가입 완료");
     }

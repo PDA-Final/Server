@@ -2,7 +2,7 @@ package com.pda.userapplication.inadapters.controllers.user;
 
 import com.pda.apiutils.ApiUtils;
 import com.pda.apiutils.GlobalResponse;
-import com.pda.userapplication.services.job.in.GetJobsUseCase;
+import com.pda.userapplication.services.in.GetJobsUseCase;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;

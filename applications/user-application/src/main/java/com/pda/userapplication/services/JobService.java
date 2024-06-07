@@ -1,7 +1,7 @@
-package com.pda.userapplication.services.job;
+package com.pda.userapplication.services;
 
 import com.pda.tofinenums.user.Jobs;
-import com.pda.userapplication.services.job.in.GetJobsUseCase;
+import com.pda.userapplication.services.in.GetJobsUseCase;
 import org.springframework.stereotype.Service;
 
 import java.util.Arrays;

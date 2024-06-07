@@ -1,4 +1,4 @@
-package com.pda.userapplication.services.job.in;
+package com.pda.userapplication.services.in;
 
 import java.util.List;
 
