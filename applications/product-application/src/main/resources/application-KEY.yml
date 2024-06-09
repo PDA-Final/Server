@@ -1,0 +1,4 @@
+mysql:
+  url: jdbc:mysql://localhost:3311/product-db?useSSL=false&allowPublicKeyRetrieval=true&useUnicode=true&serverTimezone=Asia/Seoul
+  username: root
+  password: root
