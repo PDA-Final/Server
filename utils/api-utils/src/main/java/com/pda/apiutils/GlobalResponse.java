@@ -5,6 +5,8 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 
+;
+
 @Getter
 @Schema(description = "Response Wrapper")
 public class GlobalResponse<T> {

@@ -1,3 +1,5 @@
+service-url: /api/challenge-service
+
 server:
   port: 8081
 
@@ -5,3 +7,13 @@ spring:
   application:
     name: challenge-application
 
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3310/challenge_db?
+    username: root
+    password: root
+
+springdoc:
+  default-consumes-media-type: application/json;charset=UTF-8
+  default-produces-media-type: application/json;charset=UTF-8
+  packages-to-scan: com.pda
