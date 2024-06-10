@@ -1,4 +1,4 @@
-server-url: /api/product-service
+service-url: /api/product-service
 
 server:
   port: 8083
@@ -8,9 +8,9 @@ spring:
     name: product-application
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: ${mysql.url}
-    username: ${mysql.username}
-    password: ${mysql.password}
+    url: jdbc:mysql://localhost:3344/product-db?useSSL=false&allowPublicKeyRetrieval=true&useUnicode=true&serverTimezone=Asia/Seoul
+    username: root
+    password: root
 
   sql:
     init:
