@@ -1,10 +1,13 @@
 package com.pda.boardapplication.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+
+import java.util.List;
 
 @Entity
 @Getter
@@ -13,6 +16,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class Board extends BaseEntity {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
     private long userId;
@@ -27,7 +31,25 @@ public class Board extends BaseEntity {
 
     private String authorNickname;
 
-//    private String authorProfile;
-
     private int authorType;
+
+    @OneToMany(mappedBy = "board")
+    @JsonBackReference
+    private List<Comment> comments;
+
+    @OneToMany(mappedBy = "likePK.board")
+    @JsonBackReference
+    private List<Like> likes;
+
+    @OneToMany(mappedBy = "viewPK.board")
+    @JsonBackReference
+    private List<View> views;
+
+    @OneToMany(mappedBy = "boardChallengeTagPK.board")
+    @JsonBackReference
+    private List<BoardChallengeTag> taggedChallenges;
+
+    @OneToMany(mappedBy = "boardProductTagPK.board")
+    @JsonBackReference
+    private List<BoardProductTag> taggedProducts;
 }

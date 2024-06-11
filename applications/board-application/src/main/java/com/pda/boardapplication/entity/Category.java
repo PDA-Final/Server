@@ -2,8 +2,6 @@ package com.pda.boardapplication.entity;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -16,12 +14,10 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Category extends BaseEntity {
+public class Category {
     @Id
     private int id;
 
     private String name;
 
-    @OneToMany(mappedBy = "category")
-    private List<Board> boards;
 }
