@@ -4,8 +4,6 @@ import com.pda.apiutils.ApiUtils;
 import com.pda.apiutils.GlobalExceptionResponse;
 import com.pda.apiutils.GlobalResponse;
 import com.pda.boardapplication.dto.BoardDto;
-import com.pda.boardapplication.entity.Board;
-import com.pda.boardapplication.exception.NotFoundException;
 import com.pda.boardapplication.service.BoardService;
 import com.pda.exceptionhandler.exceptions.BadRequestException;
 import io.swagger.v3.oas.annotations.Operation;
@@ -20,7 +18,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.web.bind.annotation.*;
 
-import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;

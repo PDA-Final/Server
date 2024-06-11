@@ -3,23 +3,16 @@ package com.pda.boardapplication.service;
 import com.pda.boardapplication.dto.BoardDto;
 import com.pda.boardapplication.dto.CommentDto;
 import com.pda.boardapplication.entity.Board;
-import com.pda.boardapplication.exception.NotFoundException;
 import com.pda.boardapplication.repository.BoardRepository;
 import com.pda.boardapplication.repository.CategoryRepository;
 import com.pda.exceptionhandler.exceptions.BadRequestException;
+import com.pda.exceptionhandler.exceptions.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-import java.awt.print.Pageable;
-import java.sql.SQLIntegrityConstraintViolationException;
-import java.sql.SQLNonTransientException;
 import java.util.List;
-import java.util.NoSuchElementException;
 
 @Service
 @Slf4j
@@ -52,7 +45,7 @@ public class BoardService {
      * Get board detail
      * @param boardId target board id
      * @return
-     * @throws NotFoundException - target does not exists
+     * @throws com.pda.exceptionhandler.exceptions.NotFoundException - target does not exists
      */
     public BoardDto.DetailRespDto getBoardDetail(long boardId) {
         log.debug("Get detail of board : {}", boardId);
