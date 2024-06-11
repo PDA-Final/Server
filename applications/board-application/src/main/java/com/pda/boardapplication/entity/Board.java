@@ -52,4 +52,9 @@ public class Board extends BaseEntity {
     @OneToMany(mappedBy = "boardProductTagPK.board")
     @JsonBackReference
     private List<BoardProductTag> taggedProducts;
+
+    public void updateEntity(String title, String content) {
+        this.title = title == null ? this.title : title;
+        this.content = content == null ? this.content : content;
+    }
 }
