@@ -1,4 +1,4 @@
-package com.pda.boardapplication.exception;
+package com.pda.exceptionhandler.exceptions;
 
 public class NotFoundException extends RuntimeException {
 
