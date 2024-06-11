@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 public class CommentDto {
@@ -27,6 +28,7 @@ public class CommentDto {
         private String authorName;
         private String authorProfile;
         private List<ReplyInfoDto> replies;
+        private LocalDateTime createdTime;
     }
 
     @Builder
@@ -36,5 +38,6 @@ public class CommentDto {
         private long authorId;
         private String authorName;
         private String authorProfile;
+        private LocalDateTime createdTime;
     }
 }

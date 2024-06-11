@@ -69,9 +69,11 @@ public class BoardService {
                 ).map((elem) ->
                     CommentDto.CommentInfoDto.builder()
                             .content(elem.getContent())
+                            .createdTime(elem.getCreatedAt())
                             .replies(elem.getReplies().stream().map((el) ->
                                 CommentDto.ReplyInfoDto.builder()
                                         .content(el.getContent())
+                                        .createdTime(el.getCreatedAt())
                                         .build()
                             ).toList())
                             .build()
