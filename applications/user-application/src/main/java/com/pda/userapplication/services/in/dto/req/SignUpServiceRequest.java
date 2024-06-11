@@ -14,6 +14,7 @@ public class SignUpServiceRequest {
     private String tofinId;
     private String userInfo;
     private String nickname;
+    private String profileImage;
     private LocalDate birth;
     private String job;
 }

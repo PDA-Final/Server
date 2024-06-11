@@ -1,6 +1,6 @@
 package com.pda.userapplication.services;
 
-import com.pda.tofinenums.user.Jobs;
+import com.pda.tofinenums.user.Job;
 import com.pda.userapplication.services.in.GetJobsUseCase;
 import org.springframework.stereotype.Service;
 
@@ -11,8 +11,8 @@ import java.util.List;
 public class JobService implements GetJobsUseCase {
     @Override
     public List<String> getJobs() {
-        return Arrays.stream(Jobs.values())
-            .map(Jobs::toKorean)
+        return Arrays.stream(Job.values())
+            .map(Job::toKorean)
             .toList();
     }
 }

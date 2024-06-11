@@ -4,7 +4,7 @@ import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
-public enum Jobs {
+public enum Job {
     CIVIL_SERVANT(26, "공무원"),
     MANAGER(25, "경영자"),
     MENTOR(24, "교직자"),
@@ -36,8 +36,8 @@ public enum Jobs {
     private int code;
     private String korean;
 
-    public Jobs of(String korean) {
-        for(Jobs job: Jobs.values()) {
+    public static Job of(String korean) {
+        for(Job job: Job.values()) {
             if (job.toKorean().equals(korean))
                 return job;
         }
@@ -45,8 +45,8 @@ public enum Jobs {
         throw new IllegalArgumentException(String.format("Can't find %s in Jobs", korean));
     }
 
-    public Jobs of(int code) {
-        for(Jobs job: Jobs.values()) {
+    public static Job of(int code) {
+        for(Job job: Job.values()) {
             if (job.toCode() == code)
                 return job;
         }
