@@ -12,4 +12,5 @@ public interface ChallengeRepository extends JpaRepository<Challenge, Integer> {
 
     List<Challenge> findAll();
     List<Challenge> findAllByOrderByEndAtAsc();
+    Challenge findFirstByOrderByIdDesc();
 }

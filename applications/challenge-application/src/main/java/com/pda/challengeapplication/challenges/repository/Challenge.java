@@ -30,6 +30,17 @@ public class Challenge {
     private Timestamp startAt;
     private Timestamp endAt;
 
+    public void editChallenge(String name, String description, String logoUrl, Timestamp startAt, Timestamp endAt) {
+        this.name = name;
+        this.description = description;
+        this.logoUrl = logoUrl;
+        this.startAt = startAt;
+        this.endAt = endAt;
+    }
+
+
+
+
 }
 
 
