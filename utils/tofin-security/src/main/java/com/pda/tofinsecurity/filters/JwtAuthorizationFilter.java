@@ -3,7 +3,7 @@ package com.pda.tofinsecurity.filters;
 import com.pda.tofinenums.user.UserRole;
 import com.pda.tofinsecurity.jwt.JwtProvider;
 import com.pda.tofinsecurity.jwt.TokenStatus;
-import com.pda.tofinsecurity.user.AuthUserInfo;
+import com.pda.tofinsecurity.jwt.TokenableInfo;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -42,13 +42,13 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
     }
 
     private void setAuthentication(String token) {
-        AuthUserInfo authUserInfo = jwtProvider.parseAccessToken(token);
+        TokenableInfo tokenableInfo = jwtProvider.parseAccessToken(token);
 
-        UserDetails principal = new User(authUserInfo.getId().toString(),"", toGrantedAuthorities(authUserInfo.getUserRole()));
+        UserDetails principal = new User(tokenableInfo.getId().toString(),"", toGrantedAuthorities(tokenableInfo.getUserRole()));
 
         SecurityContextHolder.getContext()
             .setAuthentication(new UsernamePasswordAuthenticationToken(principal, "",
-                toGrantedAuthorities(authUserInfo.getUserRole())));
+                toGrantedAuthorities(tokenableInfo.getUserRole())));
     }
 
     private boolean isValidAccessToken(HttpServletRequest request, Optional<String> token) {
