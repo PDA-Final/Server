@@ -24,7 +24,7 @@ public class Comment extends BaseEntity {
     @JsonBackReference
     private Board board;
 
-    private long user_id;
+    private long userId;
 
     @ManyToOne(targetEntity = Comment.class, fetch = FetchType.LAZY)
     @JoinColumn(name = "parent_id")
