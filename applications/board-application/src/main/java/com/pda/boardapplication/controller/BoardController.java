@@ -4,13 +4,17 @@ import com.pda.apiutils.ApiUtils;
 import com.pda.apiutils.GlobalExceptionResponse;
 import com.pda.apiutils.GlobalResponse;
 import com.pda.boardapplication.dto.BoardDto;
+import com.pda.boardapplication.dto.UserDto;
 import com.pda.boardapplication.service.BoardService;
 import com.pda.exceptionhandler.exceptions.BadRequestException;
+import com.pda.tofinsecurity.jwt.TokenableUser;
+import com.pda.tofinsecurity.user.AuthUser;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -32,17 +36,19 @@ public class BoardController {
     private final BoardService boardService;
 
     @PostMapping
-    @Operation(summary = "Register board item")
+    @Operation(summary = "Register board item", security = @SecurityRequirement(name = "bearerAuth"))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Created", content = @Content(schema = @Schema(implementation = GlobalResponse.class))),
             @ApiResponse(responseCode = "400", description = "Invalid Request body", content = @Content(schema = @Schema(implementation = GlobalExceptionResponse.class)))
     })
-    public GlobalResponse<Object> registerBoard(@RequestBody @Valid BoardDto.RegisterReqDto registerReqDto) {
+    public GlobalResponse<Object> registerBoard(@RequestBody @Valid BoardDto.RegisterReqDto registerReqDto, @AuthUser TokenableUser user) {
         log.debug("Register Board with title : {}", registerReqDto.getTitle());
+        log.debug("Parsing jwt, got user id : {}", user.getId());
         Map<String, Object> result = new HashMap<>();
 
         try {
-            long boardId = boardService.registerBoard(registerReqDto);
+            UserDto.InfoDto userInfoDto = UserDto.InfoDto.fromTokenableUser(user);
+            long boardId = boardService.registerBoard(registerReqDto, userInfoDto);
             log.debug("Board Item registered with PK : {}", boardId);
             result.put("boardId", boardId);
         } catch (DataIntegrityViolationException e) {
@@ -91,7 +97,7 @@ public class BoardController {
     }
 
     @PutMapping("/{boardId}")
-    @Operation(summary = "Modify board")
+    @Operation(summary = "Modify board", security = @SecurityRequirement(name = "bearerAuth"))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK"),
             @ApiResponse(responseCode = "404", description = "Not found"),
@@ -99,7 +105,8 @@ public class BoardController {
     })
     public GlobalResponse<Object> modifyBoard(
             @RequestBody BoardDto.ModifyReqDto modifyReqDto,
-            @PathVariable("boardId") long boardId
+            @PathVariable("boardId") long boardId,
+            @AuthUser TokenableUser user
     ) {
         log.debug("Update board : {}", boardId);
         Map<String, Object> result = new HashMap<>();
@@ -109,20 +116,23 @@ public class BoardController {
             throw new BadRequestException("At least one property required");
         }
 
-        int count = boardService.modifyBoard(boardId, modifyReqDto);
+        UserDto.InfoDto userInfoDto = UserDto.InfoDto.fromTokenableUser(user);
+
+        int count = boardService.modifyBoard(boardId, modifyReqDto, userInfoDto);
         result.put("modified", count);
 
         return ApiUtils.success("success", result);
     }
 
     @DeleteMapping("/{boardId}")
-    @Operation(summary = "Delete board")
-    public GlobalResponse<Object> deleteBoard(@PathVariable("boardId") long boardId) {
+    @Operation(summary = "Delete board", security = @SecurityRequirement(name = "bearerAuth"))
+    public GlobalResponse<Object> deleteBoard(@PathVariable("boardId") long boardId, @AuthUser TokenableUser user) {
 
         log.debug("Delete board : {}", boardId);
         Map<String, Object> result = new HashMap<>();
 
-        int count = boardService.deleteBoard(boardId);
+        UserDto.InfoDto userInfoDto = UserDto.InfoDto.fromTokenableUser(user);
+        int count = boardService.deleteBoard(boardId, userInfoDto);
         result.put("deleted", count);
 
         return ApiUtils.success("success", result);

@@ -49,6 +49,9 @@ public class BoardDto {
         private int commentCount;
         private List<CommentDto.CommentInfoDto> comments;
         private LocalDateTime createdTime;
+        private long authorId;
+        private String authorNickname;
+        private String authorProfile;
 
         // TODO : tagged product/challenges
     }
@@ -62,7 +65,7 @@ public class BoardDto {
         private LocalDateTime createdTime;
         private int likeCount;
         private int commentCount;
-        private String username;
+        private String authorNickname;
 
     }
 

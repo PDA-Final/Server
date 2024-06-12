@@ -2,15 +2,19 @@ package com.pda.boardapplication.service;
 
 import com.pda.boardapplication.dto.BoardDto;
 import com.pda.boardapplication.dto.CommentDto;
+import com.pda.boardapplication.dto.UserDto;
 import com.pda.boardapplication.entity.Board;
 import com.pda.boardapplication.repository.BoardRepository;
 import com.pda.boardapplication.repository.CategoryRepository;
+import com.pda.boardapplication.utils.UserUtils;
 import com.pda.exceptionhandler.exceptions.BadRequestException;
+import com.pda.exceptionhandler.exceptions.ForbiddenException;
 import com.pda.exceptionhandler.exceptions.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.PathVariable;
 
 import java.util.List;
 
@@ -29,13 +33,17 @@ public class BoardService {
      * @return registered id
      * @throws BadRequestException - given boardId does not exist
      */
-    public long registerBoard(BoardDto.RegisterReqDto registerReqDto) {
-        log.debug("Register Board with title : {}, user name : {}", registerReqDto.getTitle(), "anonymous");
+    public long registerBoard(BoardDto.RegisterReqDto registerReqDto, UserDto.InfoDto authorInfoDto) {
+        log.debug("Register Board with title : {}, user name : {}", registerReqDto.getTitle(), authorInfoDto.getNickname());
 
         Board board = Board.builder()
                 .title(registerReqDto.getTitle())
                 .content(registerReqDto.getContent())
                 .category(categoryRepository.getReferenceById(registerReqDto.getCategoryId()))
+                .userId(authorInfoDto.getId())
+                .authorNickname(authorInfoDto.getNickname())
+                .authorType(UserUtils.getUserRoleCode(authorInfoDto.getType()))
+                .authorProfile(authorInfoDto.getProfile())
                 .build();
 
         return boardRepository.save(board).getId();
@@ -72,7 +80,11 @@ public class BoardService {
                             .build()
                 ).toList())
                 .likeCount(board.getLikes().size())
+                .commentCount(board.getComments().size())
                 .createdTime(board.getCreatedAt())
+                .authorId(board.getUserId())
+                .authorNickname(board.getAuthorNickname())
+                .authorProfile(board.getAuthorProfile())
                 .build();
     }
 
@@ -88,13 +100,14 @@ public class BoardService {
 
         return boards.stream().map((elem) ->
                 BoardDto.AbstractRespDto.builder()
-                    .title(elem.getTitle())
-                    .summary(elem.getContent())
-                    .createdTime(elem.getCreatedAt())
-//                    .thumbnail()
-                    .likeCount(elem.getLikes().size())
-                    .commentCount(elem.getComments().size())
-                    .build()
+                        .title(elem.getTitle())
+                        .summary(elem.getContent())
+                        .createdTime(elem.getCreatedAt())
+    //                    .thumbnail()
+                        .likeCount(elem.getLikes().size())
+                        .commentCount(elem.getComments().size())
+                        .authorNickname(elem.getAuthorNickname())
+                        .build()
         ).toList();
     }
 
@@ -104,9 +117,10 @@ public class BoardService {
      * @param modifyReqDto
      * @return 1 for success
      */
-    public int modifyBoard(long boardId, BoardDto.ModifyReqDto modifyReqDto) {
+    public int modifyBoard(long boardId, BoardDto.ModifyReqDto modifyReqDto, UserDto.InfoDto userInfoDto) {
         Board board = boardRepository.findById(boardId).orElseThrow(NotFoundException::new);
-
+        if(board.getUserId() != userInfoDto.getId())
+            throw new ForbiddenException("Illegal access to board by unauthorized user");
         board.updateEntity(modifyReqDto.getTitle(), modifyReqDto.getContent());
 
         boardRepository.save(board);
@@ -118,11 +132,12 @@ public class BoardService {
      * @param boardId
      * @return
      */
-    public int deleteBoard(long boardId) {
+    public int deleteBoard(long boardId, UserDto.InfoDto userInfoDto) {
         Board board = boardRepository.findById(boardId).orElseThrow(NotFoundException::new);
+        if(board.getUserId() != userInfoDto.getId())
+            throw new ForbiddenException(("Illegal access to board by unauthorized user"));
 
         boardRepository.delete(board);
-
         return 1;
     }
 }

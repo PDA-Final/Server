@@ -33,6 +33,8 @@ public class Board extends BaseEntity {
 
     private int authorType;
 
+    private String authorProfile;
+
     @OneToMany(mappedBy = "board")
     @JsonBackReference
     private List<Comment> comments;
