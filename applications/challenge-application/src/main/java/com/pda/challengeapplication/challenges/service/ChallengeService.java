@@ -55,6 +55,7 @@ public class ChallengeService {
                         .description(challenge.getChallenge().getDescription())
                         .logoUrl(challenge.getChallenge().getLogoUrl())
                         .endAt(challenge.getChallenge().getEndAt())
+                        .term(challenge.getChallenge().getTerm())
                         .challengeUrl(challenge.getChallengeUrl())
                         .corpName(challenge.getCorpName())
                         .build())
@@ -73,6 +74,7 @@ public class ChallengeService {
                         .description(challenge.getChallenge().getDescription())
                         .logoUrl(challenge.getChallenge().getLogoUrl())
                         .endAt(challenge.getChallenge().getEndAt())
+                        .term(challenge.getChallenge().getTerm())
                         .challengeUrl(challenge.getChallengeUrl())
                         .corpName(challenge.getCorpName())
                         .build())
@@ -96,6 +98,7 @@ public class ChallengeService {
                .logoUrl(challengeDetail.get().getChallenge().getLogoUrl())
                .startAt(challengeDetail.get().getChallenge().getStartAt())
                .endAt(challengeDetail.get().getChallenge().getEndAt())
+               .term(challengeDetail.get().getChallenge().getTerm())
                .detailDescription(challengeDetail.get().getDetailDescription())
                .build();
     }

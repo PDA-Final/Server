@@ -18,5 +18,6 @@ public class ChallengeDetailResponse {
     String logoUrl;
     Timestamp startAt;
     Timestamp endAt;
+    int term;
     String detailDescription;
 }

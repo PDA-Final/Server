@@ -11,9 +11,9 @@ project(":applications:challenge-application") {
         implementation project(':utils:tofin-enums')
         implementation project(':utils:exception-handler')
         implementation project(':utils:api-utils')
-        implementation group: 'com.mysql', name: 'mysql-connector-j'
+        implementation project(':utils:tofin-security')
+        runtimeOnly 'com.mysql:mysql-connector-j'
         implementation 'org.springframework.boot:spring-boot-starter-jdbc'
         implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-        implementation group: 'org.javassist', name: 'javassist', version: '3.15.0-GA'
     }
 }

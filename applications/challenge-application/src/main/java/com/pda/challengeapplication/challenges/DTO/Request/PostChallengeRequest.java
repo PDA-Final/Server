@@ -24,11 +24,12 @@ public class PostChallengeRequest {
     Timestamp startAt;
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     Timestamp endAt;
+    int term;
     @NotNull
     String detailDescription;
 
     public Challenge convertToChallengeEntity() {
-        return new Challenge(id, challengeType, name, participants, description, logoUrl, startAt,endAt);
+        return new Challenge(id, challengeType, name, participants, description, logoUrl, startAt,endAt, term);
     }
 
     public ChallengeDetail convertToCDEntity(Challenge challenge) {

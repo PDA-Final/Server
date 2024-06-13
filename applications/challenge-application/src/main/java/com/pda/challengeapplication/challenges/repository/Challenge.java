@@ -29,6 +29,8 @@ public class Challenge {
     private String logoUrl;
     private Timestamp startAt;
     private Timestamp endAt;
+    private int term;
+
 
     public void editChallenge(String name, String description, String logoUrl, Timestamp startAt, Timestamp endAt) {
         this.name = name;

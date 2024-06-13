@@ -29,7 +29,7 @@ spring:
   data:
     redis:
       host: localhost
-      password: dkssudgktpdy
+      password: ""
       port: 6379
 
 springdoc:
