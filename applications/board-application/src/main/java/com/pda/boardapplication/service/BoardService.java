@@ -69,14 +69,22 @@ public class BoardService {
                         comment.getParentComment() == null
                 ).map((elem) ->
                     CommentDto.CommentInfoDto.builder()
+                            .id(elem.getId())
                             .content(elem.getContent())
-                            .createdTime(elem.getCreatedAt())
+                            .authorId(elem.getUserId())
+                            .authorName(elem.getAuthorNickname())
+                            .authorProfile(elem.getAuthorProfile())
                             .replies(elem.getReplies().stream().map((el) ->
                                 CommentDto.ReplyInfoDto.builder()
+                                        .id(el.getId())
                                         .content(el.getContent())
+                                        .authorId(el.getUserId())
+                                        .authorName(el.getAuthorNickname())
+                                        .authorProfile(el.getAuthorProfile())
                                         .createdTime(el.getCreatedAt())
                                         .build()
                             ).toList())
+                            .createdTime(elem.getCreatedAt())
                             .build()
                 ).toList())
                 .likeCount(board.getLikes().size())

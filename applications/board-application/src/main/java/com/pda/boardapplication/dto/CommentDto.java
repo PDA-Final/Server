@@ -31,6 +31,7 @@ public class CommentDto {
     @Builder
     @Getter
     public static class CommentInfoDto {
+        private long id;
         private String content;
         private long authorId;
         private String authorName;
@@ -42,6 +43,7 @@ public class CommentDto {
     @Builder
     @Getter
     public static class ReplyInfoDto {
+        private long id;
         private String content;
         private long authorId;
         private String authorName;

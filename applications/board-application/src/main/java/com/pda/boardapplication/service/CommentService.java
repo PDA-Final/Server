@@ -60,12 +60,14 @@ public class CommentService {
                 .filter((comment) -> comment.getParentComment() == null)
                 .map((comment ->
                         CommentDto.CommentInfoDto.builder()
+                                .id(comment.getId())
                                 .content(comment.getContent())
                                 .authorId(comment.getUserId())
                                 .authorName(comment.getAuthorNickname())
                                 .authorProfile(comment.getAuthorProfile())
                                 .replies(comment.getReplies().stream().map((reply) ->
                                                 CommentDto.ReplyInfoDto.builder()
+                                                        .id(reply.getId())
                                                         .content(reply.getContent())
                                                         .authorId(reply.getUserId())
                                                         .authorName(reply.getAuthorNickname())
