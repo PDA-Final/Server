@@ -5,6 +5,7 @@ import com.pda.apiutils.GlobalExceptionResponse;
 import com.pda.apiutils.GlobalResponse;
 import com.pda.boardapplication.dto.BoardDto;
 import com.pda.boardapplication.dto.UserDto;
+import com.pda.boardapplication.service.BoardInteractionService;
 import com.pda.boardapplication.service.BoardService;
 import com.pda.exceptionhandler.exceptions.BadRequestException;
 import com.pda.tofinsecurity.jwt.TokenableUser;
@@ -34,6 +35,7 @@ import java.util.Map;
 public class BoardController {
 
     private final BoardService boardService;
+    private final BoardInteractionService boardInteractionService;
 
     @PostMapping
     @Operation(summary = "Register board item", security = @SecurityRequirement(name = "bearerAuth"))
@@ -136,5 +138,45 @@ public class BoardController {
         result.put("deleted", count);
 
         return ApiUtils.success("success", result);
+    }
+
+    @PostMapping("/{boardId}/like")
+    @Operation(summary = "Post like toggle event", security = @SecurityRequirement(name = "bearerAuth"))
+    public GlobalResponse<Object> toggleLike(
+            @PathVariable("boardId") long boardId,
+            @AuthUser TokenableUser user
+    ) {
+        log.debug("Post like to board {}", boardId);
+        Map<String, Object> result = new HashMap<>();
+
+        UserDto.InfoDto userInfoDto = UserDto.InfoDto.fromTokenableUser(user);
+        int count = boardInteractionService.toggleLike(boardId, userInfoDto);
+        result.put("modifiedStatus", count > 0 ? "created" : "canceled");
+
+        log.info("Like to board {} toggled : {}", boardId, count);
+
+        return count > 0 ?
+                ApiUtils.created("created",result) :
+                ApiUtils.success("deleted", result);
+    }
+
+    @PostMapping("/{boardId}/bookmark")
+    @Operation(summary = "Post bookmark toggle event", security = @SecurityRequirement(name = "bearerAuth"))
+    public GlobalResponse<Object> toggleBookmark(
+            @PathVariable("boardId") long boardId,
+            @AuthUser TokenableUser user
+    ) {
+        log.debug("Post bookmark to board {}", boardId);
+        Map<String, Object> result = new HashMap<>();
+
+        UserDto.InfoDto userInfoDto = UserDto.InfoDto.fromTokenableUser(user);
+        int count = boardInteractionService.toggleBookmark(boardId, userInfoDto);
+        result.put("modifiedStatus", count > 0 ? "created" : "canceled");
+
+        log.debug("Bookmark of board {} toggled {}", boardId, count);
+
+        return count > 0 ?
+                ApiUtils.created("created", result) :
+                ApiUtils.success("deleted", result);
     }
 }
