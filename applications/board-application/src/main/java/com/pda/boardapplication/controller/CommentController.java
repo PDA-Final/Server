@@ -10,6 +10,7 @@ import com.pda.tofinsecurity.jwt.TokenableUser;
 import com.pda.tofinsecurity.user.AuthUser;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -23,6 +24,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 @RequestMapping("/boards/{boardId}/comments")
 @Slf4j
+@Tag(name = "[Comment]")
 public class CommentController {
 
     private final CommentService commentService;
