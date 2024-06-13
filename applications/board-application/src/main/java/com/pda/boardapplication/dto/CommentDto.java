@@ -20,6 +20,14 @@ public class CommentDto {
         private String content;
     }
 
+    @NoArgsConstructor
+    @Getter
+    @Schema(description = "Modify comment")
+    public static class ModifyReqDto {
+        @Schema(description = "Comment")
+        private String comment;
+    }
+
     @Builder
     @Getter
     public static class CommentInfoDto {
