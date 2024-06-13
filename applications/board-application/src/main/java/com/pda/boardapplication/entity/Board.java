@@ -39,11 +39,11 @@ public class Board extends BaseEntity {
     @JsonBackReference
     private List<Comment> comments;
 
-    @OneToMany(mappedBy = "likePK.board")
+    @OneToMany(mappedBy = "board")
     @JsonBackReference
     private List<Like> likes;
 
-    @OneToMany(mappedBy = "viewPK.board")
+    @OneToMany(mappedBy = "board")
     @JsonBackReference
     private List<View> views;
 
