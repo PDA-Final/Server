@@ -1,11 +1,11 @@
 version: '3'
 services:
   mysql:
-    container_name: product-db
+    container_name: product_db
     image: mysql:8.0.33-oracle
     environment:
       - MYSQL_ROOT_PASSWORD=root
-      - MYSQL_DATABASE=product-db
+      - MYSQL_DATABASE=product_db
       - TZ="Asia/Seoul"
     ports:
       - "3344:3306"
