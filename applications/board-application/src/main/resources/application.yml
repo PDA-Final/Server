@@ -19,10 +19,10 @@ spring:
       mode: always
   jpa:
     hibernate:
-      ddl-auto: create-drop
+      ddl-auto: update
     properties:
       hibernate:
-        show-sql: true
+        show_sql: true
         highlight_sql: true
         use_sql_comments: true
         format_sql: true
@@ -32,3 +32,4 @@ springdoc:
   default-consumes-media-type: application/json;charset=UTF-8
   default-produces-media-type: application/json;charset=UTF-8
   packages-to-scan: com.pda
+  use-fqn: true
