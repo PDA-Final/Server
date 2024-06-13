@@ -2,6 +2,7 @@ package com.pda.tofinsecurity.user;
 
 import com.pda.tofinsecurity.jwt.JwtProvider;
 import com.pda.tofinsecurity.jwt.TokenStatus;
+import com.pda.tofinsecurity.jwt.TokenableInfo;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.MethodParameter;
@@ -29,8 +30,19 @@ public class AuthUserArgumentResolver implements HandlerMethodArgumentResolver {
 
         Optional<String> token = jwtProvider.resolveToken(httpServletRequest);
 
-        if (token.isPresent() && jwtProvider.validateAccessToken(token.get()).equals(TokenStatus.VALID))
-            return jwtProvider.parseAccessToken(token.get());
+        if (token.isPresent() && jwtProvider.validateAccessToken(token.get()).equals(TokenStatus.VALID)) {
+            TokenableInfo tokenableInfo = jwtProvider.parseAccessToken(token.get());
+
+            return AuthUserInfoImpl.builder()
+                .id(tokenableInfo.getId())
+                .userRole(tokenableInfo.getUserRole())
+                .profileImage(tokenableInfo.getProfileImage())
+                .job(tokenableInfo.getJob())
+                .birth(tokenableInfo.getBirth())
+                .nickname(tokenableInfo.getNickname())
+                .token(token.get())
+                .build();
+        }
 
         return null;
     }
