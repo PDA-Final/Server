@@ -2,7 +2,6 @@ package com.pda.tofinsecurity.jwt;
 
 import com.pda.tofinenums.user.Job;
 import com.pda.tofinenums.user.UserRole;
-import com.pda.tofinsecurity.user.AuthUserInfo;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
@@ -58,7 +57,7 @@ public class JwtProvider {
         return Keys.hmacShaKeyFor(properties.getProperty(propertyKey).getBytes());
     }
 
-    public TokenInfo generateToken(AuthUserInfo payload) {
+    public TokenInfo generateToken(TokenableInfo payload) {
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime accessExpiredTime = now.plusMinutes(15);
         LocalDateTime refreshExpiredTime = now.plusDays(30);
@@ -108,7 +107,7 @@ public class JwtProvider {
         }
     }
 
-    public AuthUserInfo parseAccessToken(String token) {
+    public TokenableInfo parseAccessToken(String token) {
         Claims claims = getClaims(accessKey, token);
         if (claims == null)
             return null;
