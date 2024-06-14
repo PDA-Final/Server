@@ -85,12 +85,13 @@ public class BoardController {
     public GlobalResponse<Object> getBoardList(
             @RequestParam(required = false, defaultValue = "0", value = "pageNo") int pageNo,
             @RequestParam(required = false, defaultValue = "10", value = "size") int size,
-            BoardDto.SearchConditionDto searchConditionDto
+            @RequestParam(required = false) BoardDto.SearchConditionDto searchConditionDto
     ) {
         log.debug("Get board lists with page {}, size {}", pageNo, size);
         Map<String, Object> result = new HashMap<>();
 
-        log.info(searchConditionDto.getCategory());
+        if(searchConditionDto != null)
+            log.info(searchConditionDto.getCategory());
 
         List<BoardDto.AbstractRespDto> boards = boardService.getBoards(pageNo, size);
         result.put("boards", boards);
