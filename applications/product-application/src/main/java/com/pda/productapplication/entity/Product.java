@@ -27,7 +27,6 @@ public class Product extends BaseEntity {
     private int usefulCnt;
 
     @OneToMany(mappedBy = "product")
-    private List<Review> reviews;
 
     @OneToMany(mappedBy = "product")
     private List<Tag> tags;
