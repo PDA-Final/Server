@@ -1,7 +1,7 @@
 package com.pda.boardapplication.dto;
 
 import com.pda.tofinenums.user.UserRole;
-import com.pda.tofinsecurity.jwt.TokenableUser;
+import com.pda.tofinsecurity.user.AuthUserInfo;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -15,12 +15,12 @@ public class UserDto {
         private String profile;
         private UserRole type;
 
-        public static InfoDto fromTokenableUser(TokenableUser tokenableUser) {
+        public static InfoDto fromAuthUserInfo(AuthUserInfo authUserInfo) {
             return builder()
-                    .id(tokenableUser.getId())
-                    .nickname(tokenableUser.getNickname())
-                    .profile(tokenableUser.getProfileImage())
-                    .type(tokenableUser.getUserRole())
+                    .id(authUserInfo.getId())
+                    .nickname(authUserInfo.getNickname())
+                    .profile(authUserInfo.getProfileImage())
+                    .type(authUserInfo.getUserRole())
                     .build();
         }
     }

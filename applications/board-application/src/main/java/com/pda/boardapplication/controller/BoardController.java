@@ -1,20 +1,15 @@
 package com.pda.boardapplication.controller;
 
 import com.pda.apiutils.ApiUtils;
-import com.pda.apiutils.GlobalExceptionResponse;
 import com.pda.apiutils.GlobalResponse;
 import com.pda.boardapplication.dto.BoardDto;
 import com.pda.boardapplication.dto.UserDto;
 import com.pda.boardapplication.service.BoardInteractionService;
 import com.pda.boardapplication.service.BoardService;
 import com.pda.exceptionhandler.exceptions.BadRequestException;
-import com.pda.tofinsecurity.jwt.TokenableUser;
 import com.pda.tofinsecurity.user.AuthUser;
+import com.pda.tofinsecurity.user.AuthUserInfo;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -39,12 +34,12 @@ public class BoardController {
 
     @PostMapping
     @Operation(summary = "Register board item", security = @SecurityRequirement(name = "bearerAuth"))
-    public GlobalResponse<BoardDto.RegisteredRespDto> registerBoard(@RequestBody @Valid BoardDto.RegisterReqDto registerReqDto, @AuthUser TokenableUser user) {
+    public GlobalResponse<BoardDto.RegisteredRespDto> registerBoard(@RequestBody @Valid BoardDto.RegisterReqDto registerReqDto, @AuthUser AuthUserInfo user) {
         log.debug("Register Board with title : {}", registerReqDto.getTitle());
         log.debug("Parsing jwt, got user id : {}", user.getId());
 
         try {
-            UserDto.InfoDto userInfoDto = UserDto.InfoDto.fromTokenableUser(user);
+            UserDto.InfoDto userInfoDto = UserDto.InfoDto.fromAuthUserInfo(user);
             long boardId = boardService.registerBoard(registerReqDto, userInfoDto);
             log.debug("Board Item registered with PK : {}", boardId);
 
@@ -87,7 +82,7 @@ public class BoardController {
     public GlobalResponse<BoardDto.UpdatedCountRespDto> modifyBoard(
             @RequestBody BoardDto.ModifyReqDto modifyReqDto,
             @PathVariable("boardId") long boardId,
-            @AuthUser TokenableUser user
+            @AuthUser AuthUserInfo user
     ) {
         log.debug("Update board : {}", boardId);
 
@@ -96,7 +91,7 @@ public class BoardController {
             throw new BadRequestException("At least one property required");
         }
 
-        UserDto.InfoDto userInfoDto = UserDto.InfoDto.fromTokenableUser(user);
+        UserDto.InfoDto userInfoDto = UserDto.InfoDto.fromAuthUserInfo(user);
 
         int count = boardService.modifyBoard(boardId, modifyReqDto, userInfoDto);
 
@@ -105,11 +100,11 @@ public class BoardController {
 
     @DeleteMapping("/{boardId}")
     @Operation(summary = "Delete board", security = @SecurityRequirement(name = "bearerAuth"))
-    public GlobalResponse<BoardDto.UpdatedCountRespDto> deleteBoard(@PathVariable("boardId") long boardId, @AuthUser TokenableUser user) {
+    public GlobalResponse<BoardDto.UpdatedCountRespDto> deleteBoard(@PathVariable("boardId") long boardId, @AuthUser AuthUserInfo user) {
 
         log.debug("Delete board : {}", boardId);
 
-        UserDto.InfoDto userInfoDto = UserDto.InfoDto.fromTokenableUser(user);
+        UserDto.InfoDto userInfoDto = UserDto.InfoDto.fromAuthUserInfo(user);
         int count = boardService.deleteBoard(boardId, userInfoDto);
 
         return ApiUtils.success("success", new BoardDto.UpdatedCountRespDto(count));
@@ -119,12 +114,12 @@ public class BoardController {
     @Operation(summary = "Post like toggle event", security = @SecurityRequirement(name = "bearerAuth"))
     public GlobalResponse<Object> toggleLike(
             @PathVariable("boardId") long boardId,
-            @AuthUser TokenableUser user
+            @AuthUser AuthUserInfo user
     ) {
         log.debug("Post like to board {}", boardId);
         Map<String, Object> result = new HashMap<>();
 
-        UserDto.InfoDto userInfoDto = UserDto.InfoDto.fromTokenableUser(user);
+        UserDto.InfoDto userInfoDto = UserDto.InfoDto.fromAuthUserInfo(user);
         int count = boardInteractionService.toggleLike(boardId, userInfoDto);
         result.put("modifiedStatus", count > 0 ? "created" : "canceled");
 
@@ -139,12 +134,12 @@ public class BoardController {
     @Operation(summary = "Post bookmark toggle event", security = @SecurityRequirement(name = "bearerAuth"))
     public GlobalResponse<Object> toggleBookmark(
             @PathVariable("boardId") long boardId,
-            @AuthUser TokenableUser user
+            @AuthUser AuthUserInfo user
     ) {
         log.debug("Post bookmark to board {}", boardId);
         Map<String, Object> result = new HashMap<>();
 
-        UserDto.InfoDto userInfoDto = UserDto.InfoDto.fromTokenableUser(user);
+        UserDto.InfoDto userInfoDto = UserDto.InfoDto.fromAuthUserInfo(user);
         int count = boardInteractionService.toggleBookmark(boardId, userInfoDto);
         result.put("modifiedStatus", count > 0 ? "created" : "canceled");
 
