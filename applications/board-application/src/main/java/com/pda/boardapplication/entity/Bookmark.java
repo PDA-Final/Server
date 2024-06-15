@@ -1,7 +1,6 @@
 package com.pda.boardapplication.entity;
 
-import jakarta.persistence.EmbeddedId;
-import jakarta.persistence.Entity;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -12,8 +11,15 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@IdClass(BookmarkPk.class)
 public class Bookmark extends BaseEntity {
 
-    @EmbeddedId
-    private BookmarkPk bookmarkPk;
+    @Id
+    @ManyToOne
+    @JoinColumn(name = "board_id")
+    private Board board;
+
+    @Id
+    @Column(name = "user_id")
+    private long userId;
 }

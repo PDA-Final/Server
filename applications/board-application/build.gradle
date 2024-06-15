@@ -12,6 +12,7 @@ project(":applications:board-application") {
         implementation project(':utils:tofin-enums')
         implementation project(':utils:exception-handler')
         implementation project(':utils:api-utils')
+        implementation project(':utils:tofin-security')
 
         testImplementation 'org.springframework.boot:spring-boot-starter-test'
     }
