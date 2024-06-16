@@ -64,6 +64,7 @@ public class AuthController {
     @GetMapping("/reissue")
     @Operation(summary = "토큰 재발급", description = "액세스 / 리프레쉬 토큰 재발급 (Authorization 헤더에 리프레쉬 토큰 삽입)",
         security = @SecurityRequirement(name = "bearerAuth"))
+    @ApiResponse(responseCode = "200", description = "성공")
     public GlobalResponse<TokenInfoServiceResponse> reissue(HttpServletRequest request) {
         return ApiUtils.success("토큰 재발급 완료", reissueUseCase.reissue(jwtProvider.resolveToken(request)));
     }
