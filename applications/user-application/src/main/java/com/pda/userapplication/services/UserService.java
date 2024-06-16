@@ -79,10 +79,6 @@ public class UserService implements SignUpUseCase, ReissueUseCase, IsAvailableTo
         }
     }
 
-    public boolean isDuplicateTofinId(final TofinId tofinId) {
-        return readUserOutputPort.isExistsByTofinId(tofinId);
-    }
-
     @Transactional
     @Override
     public TokenInfoServiceResponse signIn(final SignInServiceRequest request) {
@@ -92,18 +88,8 @@ public class UserService implements SignUpUseCase, ReissueUseCase, IsAvailableTo
         if (!userInfoEncoder.matches(request.getUserInfo(), user.getUserInfo()))
             throw new UnAuthorizedException("아이디 혹은 비밀번호가 틀렸습니다.");
 
-        TokenInfo tokenInfo = jwtProvider.generateToken(TokenableUser.builder()
-                .id(user.getId().toLong())
-                .birth(user.getBirth().toLocalDate())
-                .userRole(user.getRole())
-                .nickname(user.getNickname().toString())
-                .profileImage(user.getProfileImage().toString())
-                .job(user.getJob())
-            .build());
-
-        refreshTokenOutputPort.save(user, tokenInfo.getRefreshToken());
-
-        return toTokenInfoServiceResponse(tokenInfo);
+        return toTokenInfoServiceResponse(
+            generateTokenAndSaveRefresh(user));
     }
 
     @Transactional
@@ -111,9 +97,18 @@ public class UserService implements SignUpUseCase, ReissueUseCase, IsAvailableTo
     public TokenInfoServiceResponse reissue(Optional<String> refreshToken) {
         String token = refreshToken.orElseThrow(() -> new UnAuthorizedException("리프레쉬 토큰 이상"));
 
-        User user = refreshTokenOutputPort.findByRefreshTokenAndDelete(token)
+        User user = refreshTokenOutputPort.deleteByRefreshToken(token)
             .orElseThrow(() -> new UnAuthorizedException("해당 리프레쉬 토큰은 사용할 수 없음"));
 
+        return toTokenInfoServiceResponse(
+            generateTokenAndSaveRefresh(user));
+    }
+
+    private boolean isDuplicateTofinId(final TofinId tofinId) {
+        return readUserOutputPort.isExistsByTofinId(tofinId);
+    }
+
+    private TokenInfo generateTokenAndSaveRefresh(User user) {
         TokenInfo tokenInfo = jwtProvider.generateToken(TokenableUser.builder()
             .id(user.getId().toLong())
             .userRole(user.getRole())
@@ -123,8 +118,9 @@ public class UserService implements SignUpUseCase, ReissueUseCase, IsAvailableTo
             .birth(user.getBirth().toLocalDate())
             .build());
 
-        refreshTokenOutputPort.save(user, tokenInfo.getRefreshToken());
-        return toTokenInfoServiceResponse(tokenInfo);
+        refreshTokenOutputPort.saveOnlyOneUser(user, tokenInfo.getRefreshToken());
+
+        return tokenInfo;
     }
 
     private Job toJobFrom(String job) {

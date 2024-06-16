@@ -18,7 +18,9 @@ public class RedisAdapter implements RefreshTokenOutputPort {
     private final RefreshInfoRepository refreshInfoRepository;
 
     @Override
-    public void save(User user, String refreshToken) {
+    public void saveOnlyOneUser(User user, String refreshToken) {
+        refreshInfoRepository.deleteById(user.getId().toLong());
+
         refreshInfoRepository.save(RefreshInfoEntity.builder()
                 .id(user.getId().toLong())
                 .job(user.getJob().toKorean())
@@ -30,7 +32,7 @@ public class RedisAdapter implements RefreshTokenOutputPort {
     }
 
     @Override
-    public Optional<User> findByRefreshTokenAndDelete(String refreshToken) {
+    public Optional<User> deleteByRefreshToken(String refreshToken) {
         RefreshInfoEntity refreshInfo = refreshInfoRepository.findByRefreshToken(refreshToken).orElse(null);
 
         if (refreshInfo == null) return Optional.empty();
