@@ -24,7 +24,7 @@ spring:
           filters:
             - RewritePath=${service-url}/product-service/(?<path>.*),/$\{path}
         - id: board-service
-          uri: http://localhost:8082
+          uri: lb://BOARD-APPLICATION
           predicates:
             - Path= ${service-url}/board-service/**
           filters:
@@ -33,13 +33,15 @@ spring:
 springdoc:
   default-consumes-media-type: application/json;charset=UTF-8
   default-produces-media-type: application/json;charset=UTF-8
+  api-docs:
+    path: /api/v3/api-docs
   webjars:
     prefix: ${service-url}
   swagger-ui:
     operations-sorter: alpha
     use-root-path: true
     urls:
-      - url: /v3/api-docs
+      - url: ${service-url}/v3/api-docs
         name: API Gateway Service
       - url: ${service-url}/user-service/v3/api-docs
         name: User Service
@@ -47,3 +49,12 @@ springdoc:
         name: Product Service
       - url: ${service-url}/board-service/v3/api-docs
         name: Board Service
+
+eureka:
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    registry-fetch-interval-seconds: 3
+    disable-delta: true
+    service-url:
+      defaultZone: http://192.168.2.20:8761/eureka
