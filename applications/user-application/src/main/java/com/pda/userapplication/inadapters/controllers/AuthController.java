@@ -40,16 +40,15 @@ public class AuthController {
     @Operation(
         summary = "일반 회원가입", description = "일반 유저에 대한 회원가입입니다. 아직 성향 / 자산 연결은 제공하지 않습니다.")
     @ApiResponse(responseCode = "201", description = "회원 생성(성공)")
-    public GlobalResponse signUp(@Valid @RequestBody SignUpRequest signUpRequest) {
-        signUpUseCase.signUp(SignUpServiceRequest.builder()
-                .tofinId(signUpRequest.getTofinId())
-                .userInfo(signUpRequest.getUserInfo())
-                .birth(signUpRequest.getBirth())
-                .profileImage(signUpRequest.getProfileImg())
-                .nickname(signUpRequest.getNickname())
-                .job(signUpRequest.getJob())
-            .build());
-        return ApiUtils.created("유저 회원가입 완료");
+    public GlobalResponse<TokenInfoServiceResponse> signUp(@Valid @RequestBody SignUpRequest signUpRequest) {
+        return ApiUtils.created("유저 회원가입 완료", signUpUseCase.signUp(SignUpServiceRequest.builder()
+            .tofinId(signUpRequest.getTofinId())
+            .userInfo(signUpRequest.getUserInfo())
+            .birth(signUpRequest.getBirth())
+            .profileImage(signUpRequest.getProfileImg())
+            .nickname(signUpRequest.getNickname())
+            .job(signUpRequest.getJob())
+            .build()));
     }
 
     @PostMapping("/sign-in")

@@ -44,11 +44,11 @@ public class UserService implements SignUpUseCase, ReissueUseCase, IsAvailableTo
 
     @Transactional
     @Override
-    public void signUp(final SignUpServiceRequest request) {
+    public TokenInfoServiceResponse signUp(final SignUpServiceRequest request) {
         if (isDuplicateTofinId(TofinId.of(request.getTofinId())))
             throw new ConflictException("해당 아이디는 이미 존재합니다.");
 
-        createUserOutputPort.create(NormalUser.builder()
+        User user = createUserOutputPort.create(NormalUser.builder()
             .toFinId(TofinId.of(request.getTofinId()))
             .userInfo(userInfoEncoder.hashed(request.getUserInfo()))
             .birth(Birth.of(request.getBirth()))
@@ -57,6 +57,9 @@ public class UserService implements SignUpUseCase, ReissueUseCase, IsAvailableTo
             .nickname(Nickname.of(request.getNickname()))
             .role(UserRole.NORMAL)
             .build());
+
+        return toTokenInfoServiceResponse(
+            generateTokenAndSaveRefresh(user));
     }
 
     @Override
