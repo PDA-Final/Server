@@ -1,26 +1,21 @@
 package com.pda.productapplication.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.experimental.SuperBuilder;
+import lombok.*;
 
 import java.util.Date;
 
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-@SuperBuilder
+@Builder
 @Entity
 @Table(name = "Fund")
 @DiscriminatorValue("Fund")
-public class Fund extends Product {
+public class Fund {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
-    private Long id;
+    @Column(name = "product_id")
+    private Long productId;
 
     @Column(name = "fund_code", nullable = false)
     private String fundCode;
@@ -64,16 +59,16 @@ public class Fund extends Product {
     @Column(name = "risk_grade", nullable = false)
     private int riskGrade;
 
-    @Column(name = "risk_grade_text", nullable = false, length = 10)
+    @Column(name = "risk_grade_text", nullable = false)
     private String riskGradeText;
 
-    @Column(name = "fee_gb", nullable = false, length = 20)
+    @Column(name = "fee_gb", nullable = false)
     private String feeGb;
 
-    @Column(name = "category1", nullable = false, length = 10)
+    @Column(name = "category1", nullable = false)
     private String category1;
 
-    @Column(name = "category2", nullable = false, length = 10)
+    @Column(name = "category2", nullable = false)
     private String category2;
 
     @Column(name = "info_object", nullable = false)
@@ -103,7 +98,8 @@ public class Fund extends Product {
     @Column(name = "small_scale_yn", nullable = false)
     private String smallScaleYn;
 
-    @OneToOne
+    @MapsId
+    @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "product_id", nullable = false, foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
     private Product product;
 }
