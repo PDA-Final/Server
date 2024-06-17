@@ -1,5 +1,6 @@
 package com.pda.userapplication.domains;
 
+import com.pda.tofinenums.user.ServicePurpose;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -21,6 +22,11 @@ public class NormalUser extends User {
     private boolean publicPercent;
     private String socialName;
     private String contact;
+    private boolean accountTendency;
+    private boolean cardTendency;
+    private boolean loanTendency;
+    private boolean investTendency;
+    private ServicePurpose purpose;
 
     public boolean isPublicAsset() {
         return publicAmount || publicPercent;

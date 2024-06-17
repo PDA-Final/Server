@@ -5,6 +5,7 @@ import com.pda.exceptionhandler.exceptions.ConflictException;
 import com.pda.exceptionhandler.exceptions.NotFoundException;
 import com.pda.exceptionhandler.exceptions.UnAuthorizedException;
 import com.pda.tofinenums.user.Job;
+import com.pda.tofinenums.user.ServicePurpose;
 import com.pda.tofinenums.user.UserRole;
 import com.pda.tofinsecurity.UserInfoEncoder;
 import com.pda.tofinsecurity.jwt.JwtProvider;
@@ -22,10 +23,12 @@ import com.pda.userapplication.services.in.IsAvailableContact;
 import com.pda.userapplication.services.in.IsAvailableTofinIdUseCase;
 import com.pda.userapplication.services.in.ReissueUseCase;
 import com.pda.userapplication.services.in.SetPublicOptionUseCase;
+import com.pda.userapplication.services.in.SetTendencyUseCase;
 import com.pda.userapplication.services.in.SignInUseCase;
 import com.pda.userapplication.services.in.SignUpUseCase;
 import com.pda.userapplication.services.in.dto.req.ConnectAssetsServiceRequest;
 import com.pda.userapplication.services.in.dto.req.SetPublicOptionServiceRequest;
+import com.pda.userapplication.services.in.dto.req.SetTendencyServiceRequest;
 import com.pda.userapplication.services.in.dto.req.SignInServiceRequest;
 import com.pda.userapplication.services.in.dto.req.SignUpServiceRequest;
 import com.pda.userapplication.services.in.dto.res.AvailableContactServiceResponse;
@@ -37,7 +40,7 @@ import com.pda.userapplication.services.out.GetAssetsOutputPort;
 import com.pda.userapplication.services.out.ReadNormalUserOutputPort;
 import com.pda.userapplication.services.out.ReadUserOutputPort;
 import com.pda.userapplication.services.out.RefreshTokenOutputPort;
-import com.pda.userapplication.services.out.SaveUserDetailOutputPort;
+import com.pda.userapplication.services.out.SaveNormalUserOutputPort;
 import com.pda.userapplication.services.out.dto.res.AccountResponse;
 import com.pda.userapplication.services.out.dto.res.AssetInfoResponse;
 import com.pda.userapplication.services.out.dto.res.CardResponse;
@@ -55,13 +58,13 @@ import java.util.regex.Pattern;
 @Transactional(readOnly = true)
 public class UserService implements SignUpUseCase, ReissueUseCase,
     IsAvailableTofinIdUseCase, SignInUseCase, ConnectAssetUseCase,
-    IsAvailableContact, SetPublicOptionUseCase {
+    IsAvailableContact, SetPublicOptionUseCase, SetTendencyUseCase {
     private final CreateUserOutputPort createUserOutputPort;
     private final ReadUserOutputPort readUserOutputPort;
     private final UserInfoEncoder userInfoEncoder;
     private final JwtProvider jwtProvider;
     private final RefreshTokenOutputPort refreshTokenOutputPort;
-    private final SaveUserDetailOutputPort saveUserDetailOutputPort;
+    private final SaveNormalUserOutputPort saveNormalUserOutputPort;
     private final GetAssetsOutputPort getAssetsOutputPort;
     private final ReadNormalUserOutputPort readNormalUserOutputPort;
 
@@ -162,7 +165,7 @@ public class UserService implements SignUpUseCase, ReissueUseCase,
         user.setBackSocialId(request.getBackSocialId());
         user.setSocialName(request.getSocialName());
 
-        user = saveUserDetailOutputPort.save(user);
+        user = saveNormalUserOutputPort.save(user);
 
         return toConnectAssetInfoListFrom(getAssetsOutputPort.getAssets(user));
     }
@@ -178,7 +181,29 @@ public class UserService implements SignUpUseCase, ReissueUseCase,
         user.setPublicAmount(request.isPublicAmount());
         user.setPublicPercent(request.isPublicPercent());
 
-        saveUserDetailOutputPort.save(user);
+        saveNormalUserOutputPort.save(user);
+    }
+
+    @Transactional
+    @Override
+    public void setTendency(final SetTendencyServiceRequest request) {
+        NormalUser user = readNormalUserOutputPort.findByUserId(UserId.of(request.getUserId()))
+            .orElseThrow(() -> new NotFoundException("해당 유저의 세부 정보가 존재하지 않습니다."));
+
+        if (user.getBackSocialId() == null) throw new BadRequestException("자산 연결부터 하세요");
+
+        user.setAccountTendency(request.isAccount());
+        user.setCardTendency(request.isCard());
+        user.setLoanTendency(request.isLoan());
+        user.setInvestTendency(request.isInvest());
+
+        try {
+            user.setPurpose(ServicePurpose.valueOf(request.getPurpose()));
+        } catch (IllegalArgumentException e) {
+            throw new BadRequestException("서비스 이용 목적이 올바르지 않습니다.");
+        }
+
+        saveNormalUserOutputPort.save(user);
     }
 
     private boolean isDuplicateTofinId(final TofinId tofinId) {

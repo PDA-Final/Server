@@ -1,5 +1,6 @@
 package com.pda.userapplication.outadapters.jpa;
 
+import com.pda.tofinenums.user.ServicePurpose;
 import jakarta.persistence.Column;
 import jakarta.persistence.ConstraintMode;
 import jakarta.persistence.Entity;
@@ -40,6 +41,9 @@ public class UserDetailEntity {
     @Column(name = "tendency", length = 20)
     @Comment("유저 성향")
     private String tendency;
+
+    @Column(name = "purpose")
+    private ServicePurpose purpose;
 
     @Column(name = "social_name", length = 40)
     @Comment("유저 실명")
