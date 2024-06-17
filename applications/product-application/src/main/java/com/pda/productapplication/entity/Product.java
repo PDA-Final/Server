@@ -10,7 +10,7 @@ import java.util.List;
 @Entity
 @Getter
 @SuperBuilder
-@AllArgsConstructor
+@AllArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "Product")
 @Inheritance(strategy = InheritanceType.JOINED)
 @DiscriminatorColumn(name = "DTYPE")
@@ -23,14 +23,16 @@ public class Product extends BaseEntity {
     @Column(name = "name", nullable = false)
     private String name;
 
-    @Column(name = "useful_cnt")
+    @Column(name = "useful_cnt", nullable = false, columnDefinition = "int default 0")
     private int usefulCnt;
 
-    @OneToMany(mappedBy = "product")
-    private List<Review> reviews;
+    @Column(name = "card_image")
+    private String cardImg;
 
-    @OneToMany(mappedBy = "product")
-    private List<Tag> tags;
+    @Column(name = "tags")
+    private String tags;
+
+    // TODO : 관련 핀 작성자 수
 
     @ManyToOne
     @JoinColumn(name = "category_id", nullable = false, foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
@@ -39,6 +41,18 @@ public class Product extends BaseEntity {
     @ManyToOne
     @JoinColumn(name = "corp_id", nullable = false, foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
     private Corp corp;
+
+    @OneToOne(mappedBy = "product", cascade = CascadeType.ALL)
+    private Card card;
+
+    @OneToOne(mappedBy = "product", cascade = CascadeType.ALL)
+    private Saving saving;
+
+    @OneToOne(mappedBy = "product", cascade = CascadeType.ALL)
+    private Fund fund;
+
+    @OneToOne(mappedBy = "product", cascade = CascadeType.ALL)
+    private Loan loan;
 
     protected Product() {
         super();
