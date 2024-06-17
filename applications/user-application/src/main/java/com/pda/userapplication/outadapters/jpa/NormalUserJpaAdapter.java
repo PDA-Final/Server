@@ -10,7 +10,7 @@ import com.pda.userapplication.outadapters.jpa.mapper.UserEntityMapper;
 import com.pda.userapplication.services.out.CreateUserOutputPort;
 import com.pda.userapplication.services.out.ReadNormalUserOutputPort;
 import com.pda.userapplication.services.out.ReadUserOutputPort;
-import com.pda.userapplication.services.out.SaveUserDetailOutputPort;
+import com.pda.userapplication.services.out.SaveNormalUserOutputPort;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -18,7 +18,7 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
-public class UserJpaAdapter implements CreateUserOutputPort, ReadUserOutputPort, SaveUserDetailOutputPort, ReadNormalUserOutputPort {
+public class NormalUserJpaAdapter implements CreateUserOutputPort, ReadUserOutputPort, SaveNormalUserOutputPort, ReadNormalUserOutputPort {
     private final UserRepository userRepository;
     private final UserDetailRepository userDetailRepository;
     private final UserEntityMapper userMapper;

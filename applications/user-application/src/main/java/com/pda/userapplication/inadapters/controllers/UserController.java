@@ -6,13 +6,16 @@ import com.pda.tofinsecurity.user.AuthUser;
 import com.pda.tofinsecurity.user.AuthUserInfo;
 import com.pda.userapplication.inadapters.controllers.dto.req.ConnectAssetsRequest;
 import com.pda.userapplication.inadapters.controllers.dto.req.SetPublicOptionRequest;
+import com.pda.userapplication.inadapters.controllers.dto.req.SetTendencyRequest;
 import com.pda.userapplication.services.in.ConnectAssetUseCase;
 import com.pda.userapplication.services.in.GetJobsUseCase;
 import com.pda.userapplication.services.in.IsAvailableContact;
 import com.pda.userapplication.services.in.IsAvailableTofinIdUseCase;
 import com.pda.userapplication.services.in.SetPublicOptionUseCase;
+import com.pda.userapplication.services.in.SetTendencyUseCase;
 import com.pda.userapplication.services.in.dto.req.ConnectAssetsServiceRequest;
 import com.pda.userapplication.services.in.dto.req.SetPublicOptionServiceRequest;
+import com.pda.userapplication.services.in.dto.req.SetTendencyServiceRequest;
 import com.pda.userapplication.services.in.dto.res.AvailableContactServiceResponse;
 import com.pda.userapplication.services.in.dto.res.AvailableTofinIdServiceResponse;
 import com.pda.userapplication.services.in.dto.res.ConnectAssetInfoResponse;
@@ -44,6 +47,7 @@ public class UserController {
     private final ConnectAssetUseCase connectAssetUseCase;
     private final IsAvailableContact isAvailableContact;
     private final SetPublicOptionUseCase setPublicOptionUseCase;
+    private final SetTendencyUseCase setTendencyUseCase;
 
     @GetMapping("/jobs")
     @Operation(summary = "직업 리스트 조회", description = "모든 직업들의 리스트를 한글로 반환합니다")
@@ -94,5 +98,21 @@ public class UserController {
             .build());
 
         return ApiUtils.success("유저 자산 공개 설정");
+    }
+
+    @PostMapping("/tendency")
+    @Operation(summary = "투자 성향 설정", description = "유저의 투자성향을 설정하는 API",
+        security = @SecurityRequirement(name = "bearerAuth"))
+    @ApiResponse(responseCode = "201", description = "성공")
+    public GlobalResponse<Void> setTendency(@AuthUser AuthUserInfo authUser, @Valid @RequestBody SetTendencyRequest request) {
+        setTendencyUseCase.setTendency(SetTendencyServiceRequest.builder()
+                .card(request.isCard())
+                .loan(request.isLoan())
+                .account(request.isAccount())
+                .invest(request.isInvest())
+                .purpose(request.getPurpose())
+                .userId(authUser.getId())
+            .build());
+        return ApiUtils.success("유저 성향 설정 완료");
     }
 }

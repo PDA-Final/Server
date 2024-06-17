@@ -17,9 +17,11 @@ public class UserDetailEntityMapper {
         return UserDetailEntity.builder()
             .id(normalUser.getDetailId())
             .contact(normalUser.getContact())
-            .backSocialId(normalUser.getSocialId())
+            .backSocialId(normalUser.getBackSocialId())
             .socialName(normalUser.getSocialName())
             .publicOptions(toPublicOptions(normalUser))
+            .purpose(normalUser.getPurpose())
+            .tendency(toTendency(normalUser))
             .user(userMapper.toUserEntity(normalUser))
             .build();
     }
@@ -29,6 +31,15 @@ public class UserDetailEntityMapper {
         String percentOption = user.isPublicPercent()?"1":"0";
 
         return amountOption + percentOption;
+    }
+
+    private String toTendency(NormalUser user) {
+        String account = user.isAccountTendency()?"1":"0";
+        String card = user.isCardTendency()?"1":"0";
+        String loan = user.isLoanTendency()?"1":"0";
+        String invest = user.isInvestTendency()?"1":"0";
+
+        return account + card + loan + invest;
     }
 
     public NormalUser toNormalUser(final UserDetailEntity userDetail) {
@@ -43,6 +54,14 @@ public class UserDetailEntityMapper {
         String[] options = userDetail.getPublicOptions().split("");
         user.setPublicAmount(options[0].equals("1"));
         user.setPublicPercent(options[1].equals("1"));
+
+        String[] tendencies = userDetail.getTendency().split("");
+        user.setAccountTendency(tendencies[0].equals("1"));
+        user.setCardTendency(tendencies[1].equals("1"));
+        user.setLoanTendency(tendencies[2].equals("1"));
+        user.setInvestTendency(tendencies[3].equals("1"));
+
+        user.setPurpose(userDetail.getPurpose());
 
         return user;
     }
