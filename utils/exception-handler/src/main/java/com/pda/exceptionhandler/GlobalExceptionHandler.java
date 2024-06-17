@@ -2,7 +2,12 @@ package com.pda.exceptionhandler;
 
 import com.pda.apiutils.ApiUtils;
 import com.pda.apiutils.GlobalExceptionResponse;
-import com.pda.exceptionhandler.exceptions.*;
+import com.pda.exceptionhandler.exceptions.BadRequestException;
+import com.pda.exceptionhandler.exceptions.ConflictException;
+import com.pda.exceptionhandler.exceptions.ForbiddenException;
+import com.pda.exceptionhandler.exceptions.InternalServerException;
+import com.pda.exceptionhandler.exceptions.NotFoundException;
+import com.pda.exceptionhandler.exceptions.UnAuthorizedException;
 import io.swagger.v3.oas.annotations.Hidden;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpStatus;
@@ -50,9 +55,15 @@ public class GlobalExceptionHandler {
         return ApiUtils.exception(e.getMessage());
     }
 
-    @org.springframework.web.bind.annotation.ExceptionHandler(NotFoundException.class)
+    @ExceptionHandler(NotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public GlobalExceptionResponse<String> handleNotFoundException(final NotFoundException e) {
+        return ApiUtils.exception(e.getMessage());
+    }
+
+    @ExceptionHandler(InternalServerException.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public GlobalExceptionResponse<String> handleInternalServerException(final InternalServerException e) {
         return ApiUtils.exception(e.getMessage());
     }
 }

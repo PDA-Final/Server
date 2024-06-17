@@ -5,6 +5,7 @@ import com.pda.tofinenums.user.UserRole;
 import com.pda.userapplication.domains.User;
 import com.pda.userapplication.domains.vo.Birth;
 import com.pda.userapplication.domains.vo.ImageUrl;
+import com.pda.userapplication.domains.vo.Nickname;
 import com.pda.userapplication.domains.vo.UserId;
 import com.pda.userapplication.services.out.RefreshTokenOutputPort;
 import lombok.RequiredArgsConstructor;
@@ -26,6 +27,7 @@ public class RedisAdapter implements RefreshTokenOutputPort {
                 .job(user.getJob().toKorean())
                 .role(user.getRole().toString())
                 .birth(user.getBirth().toLocalDate())
+                .nickname(user.getNickname().toString())
                 .profile(user.getProfileImage().toString())
                 .refreshToken(refreshToken)
             .build());
@@ -44,6 +46,7 @@ public class RedisAdapter implements RefreshTokenOutputPort {
                 .job(Job.of(refreshInfo.getJob()))
                 .role(UserRole.valueOf(refreshInfo.getRole()))
                 .birth(Birth.of(refreshInfo.getBirth()))
+                .nickname(Nickname.of(refreshInfo.getNickname()))
                 .profileImage(ImageUrl.of(refreshInfo.getProfile()))
             .build());
     }

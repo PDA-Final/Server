@@ -1,4 +1,13 @@
 service-url: /api/user-service
+out-service:
+  asset:
+    url: http://localhost:7979
+
+logging:
+  level:
+    org:
+      hibernate:
+        SQL: debug
 
 server:
   port: 8084
