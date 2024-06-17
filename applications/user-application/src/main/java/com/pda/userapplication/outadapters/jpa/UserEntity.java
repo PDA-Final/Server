@@ -11,6 +11,7 @@ import jakarta.persistence.EntityListeners;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
@@ -82,4 +83,7 @@ public class UserEntity {
     @Column(name = "job", nullable = false)
     @Comment("유저 직업")
     private Job job;
+
+    @OneToOne(mappedBy = "user")
+    private UserDetailEntity userDetail;
 }

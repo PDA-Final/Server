@@ -47,6 +47,7 @@ public class UserEntityMapper {
             .profileImage(ImageUrl.of(user.getProfileImage()))
             .role(user.getRole())
             .createdAt(user.getCreatedAt());
+
         return builder.build();
     }
 }
