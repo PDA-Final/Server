@@ -31,4 +31,17 @@ public class MyChallenge {
         this.status = status;
     }
 
+    @Override
+    public String toString() {
+        return "MyChallenge{" +
+                "id=" + id +
+                ", challenge=" + challenge +
+                ", userId=" + userId +
+                ", startAt=" + startAt +
+                ", endAt=" + endAt +
+                ", status='" + status + '\'' +
+                '}';
+    }
+
+
 }

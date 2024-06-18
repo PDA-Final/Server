@@ -1,12 +1,16 @@
 package com.pda.challengeapplication.mychallenges.service;
 
-import com.pda.challengeapplication.challenges.repository.*;
+import com.pda.challengeapplication.challenges.repository.Challenge;
+import com.pda.challengeapplication.challenges.repository.ChallengeDetailRepository;
+import com.pda.challengeapplication.challenges.repository.ChallengeRepository;
+import com.pda.challengeapplication.challenges.repository.CorpChallengeDetailRepository;
 import com.pda.challengeapplication.mychallenges.dto.request.PostMyChallengeRequest;
 import com.pda.challengeapplication.mychallenges.dto.response.MyChallengeBadgeResponse;
 import com.pda.challengeapplication.mychallenges.dto.response.MyChallengeResponse;
 import com.pda.challengeapplication.mychallenges.repository.MyAssetChallengeRepository;
 import com.pda.challengeapplication.mychallenges.repository.MyChallenge;
 import com.pda.challengeapplication.mychallenges.repository.MyChallengeRepository;
+import com.pda.exceptionhandler.exceptions.ConflictException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -66,6 +70,7 @@ public class MyChallengeService {
                     .endAt(endAt)
                     .status(status)
                     .progress(progress)
+                    .participants(myChallengeRepository.selectAllJPQL(id))
                     .build();
 
             returnList.add(mr);
@@ -126,7 +131,7 @@ public class MyChallengeService {
 
         return returnList.stream()
                 .filter(c -> isDone(c.getEndAt()))
-                .collect(Collectors.toList());
+                .toList();
 
     }
 
@@ -160,6 +165,12 @@ public class MyChallengeService {
 
     // 챌린지 참여
     public MyChallenge participateChallenge(PostMyChallengeRequest postMyChallengeRequest) {
+
+        if(myChallengeRepository.selectAllJPQL2(postMyChallengeRequest.getChallengeId(), postMyChallengeRequest.getUserId()) != 0){
+            throw new ConflictException("이미 참여중인 챌린지입니다");
+        }
+
+
        Challenge c = challengeRepository.findById(postMyChallengeRequest.getChallengeId());
 
        LocalDate endAt;
@@ -202,4 +213,5 @@ public class MyChallengeService {
 
 
     }
+
 }

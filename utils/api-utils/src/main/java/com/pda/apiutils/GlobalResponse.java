@@ -4,11 +4,13 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 ;
 
 @Getter
 @Schema(description = "Response Wrapper")
+@NoArgsConstructor
 public class GlobalResponse<T> {
     @Schema(description = "처리 성공 여부", example="true")
     private final boolean success = true;

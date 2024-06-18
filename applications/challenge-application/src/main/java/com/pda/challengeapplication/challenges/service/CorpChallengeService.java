@@ -7,6 +7,7 @@ import com.pda.challengeapplication.challenges.repository.Challenge;
 import com.pda.challengeapplication.challenges.repository.ChallengeRepository;
 import com.pda.challengeapplication.challenges.repository.CorpChallengeDetail;
 import com.pda.challengeapplication.challenges.repository.CorpChallengeDetailRepository;
+import com.pda.challengeapplication.mychallenges.repository.MyChallengeRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,6 +22,7 @@ public class CorpChallengeService {
 
     private final ChallengeRepository challengeRepository;
     private final CorpChallengeDetailRepository corpChallengeDetailRepository;
+    private final MyChallengeRepository myChallengeRepository;
 
     //등록
     @Transactional
@@ -46,6 +48,7 @@ public class CorpChallengeService {
                         .term(challenge.getChallenge().getTerm())
                         .challengeUrl(challenge.getChallengeUrl())
                         .corpName(challenge.getCorpName())
+                        .participation(myChallengeRepository.selectAllJPQL(challenge.getChallengeId()))
                         .build())
                 .filter((challenge) -> isDone(challenge.getEndAt()))
                 .toList();
@@ -64,6 +67,7 @@ public class CorpChallengeService {
                         .term(challenge.getChallenge().getTerm())
                         .challengeUrl(challenge.getChallengeUrl())
                         .corpName(challenge.getCorpName())
+                        .participation(myChallengeRepository.selectAllJPQL(challenge.getChallengeId()))
                         .build())
                 .filter((challenge) -> isDone(challenge.getEndAt()))
                 .sorted(Comparator.comparing(ChallengeSummaryResponse::getEndAt))
@@ -85,6 +89,7 @@ public class CorpChallengeService {
                         .endAt(challenge.getChallenge().getEndAt())
                         .challengeUrl(challenge.getChallengeUrl())
                         .corpName(challenge.getCorpName())
+                        .participation(myChallengeRepository.selectAllJPQL(challenge.getChallengeId()))
                         .build())
                 .filter((challenge) -> isDone(challenge.getEndAt()))
                 .sorted(Comparator.comparing(ChallengeSummaryResponse::getEndAt))

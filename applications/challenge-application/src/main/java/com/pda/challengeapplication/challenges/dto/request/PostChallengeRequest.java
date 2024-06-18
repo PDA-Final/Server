@@ -27,14 +27,15 @@ public class PostChallengeRequest {
     @NotNull
     String detailDescription;
     String badgeName;
-    int standard;
+    Integer standard;
     String standardCg;
+    Integer reward;
 
     public Challenge convertToChallengeEntity() {
         return new Challenge(id, challengeType, name, description, logoUrl, LocalDate.parse(startAt), LocalDate.parse(endAt), term, null, null);
     }
 
     public ChallengeDetail convertToCDEntity(Challenge challenge) {
-        return new ChallengeDetail(id,detailDescription,standard,standardCg,badgeName, challenge);
+        return new ChallengeDetail(id,detailDescription,standard,standardCg,badgeName, reward, challenge);
     }
 }

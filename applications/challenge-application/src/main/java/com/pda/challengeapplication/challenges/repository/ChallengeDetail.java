@@ -15,9 +15,10 @@ public class ChallengeDetail {
     long challengeId;
     @NotNull
     String detailDescription;
-    int standardNum;
+    Integer standardNum;
     String standardCg;
     String badgeName;
+    Integer reward;
 
     @OneToOne(cascade=CascadeType.ALL)
     @JoinColumn(name = "challengeId", nullable = false, foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))

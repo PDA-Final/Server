@@ -14,10 +14,15 @@ public class MyBoardChallengeService {
 
     private final MyBoardChallengeRepository myBoardChallengeRepository;
     private final MyChallengeRepository myChallengeRepository;
+
     public MyChallenge participateBoardChallenge(PostMyBoardChallengeRequest postMyBoardChallengeRequest) {
         MyChallenge myChallenge = myChallengeRepository.findById(postMyBoardChallengeRequest.getMyChallengeId()).get();
         MyBoardChallenge myBoardChallenge = postMyBoardChallengeRequest.convertToAccountEntity(myChallenge);
-        return myBoardChallengeRepository.save(myBoardChallenge).getMyChallenge();
+        myBoardChallengeRepository.save(myBoardChallenge);
+        myChallenge.editMyChallengeStatus("성공");
+        return myChallengeRepository.save(myChallenge);
 
     }
+
+
 }

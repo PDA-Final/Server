@@ -16,4 +16,6 @@ public interface ChallengeRepository extends JpaRepository<Challenge, Integer> {
     Challenge findById(long id);
 
     List<Challenge> findByName(String name);
+
+    List<Challenge> findByNameLike(String s);
 }

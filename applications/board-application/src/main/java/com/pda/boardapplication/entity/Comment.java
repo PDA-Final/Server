@@ -24,7 +24,7 @@ public class Comment extends BaseEntity {
     @JsonBackReference
     private Board board;
 
-    private long user_id;
+    private long userId;
 
     @ManyToOne(targetEntity = Comment.class, fetch = FetchType.LAZY)
     @JoinColumn(name = "parent_id")
@@ -37,8 +37,12 @@ public class Comment extends BaseEntity {
 
     private String authorProfile;
 
-    private String authorType;
+    private int authorType;
 
     @OneToMany(mappedBy = "parentComment", fetch = FetchType.LAZY)
     private List<Comment> replies;
+
+    public void updateEntity(String content) {
+        this.content = content.isBlank() ? this.content : content;
+    }
 }

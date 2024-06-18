@@ -5,6 +5,7 @@ import com.pda.challengeapplication.challenges.dto.request.PostChallengeRequest;
 import com.pda.challengeapplication.challenges.dto.response.ChallengeDetailResponse;
 import com.pda.challengeapplication.challenges.dto.response.ChallengeSummaryResponse;
 import com.pda.challengeapplication.challenges.repository.*;
+import com.pda.challengeapplication.mychallenges.repository.MyChallengeRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,6 +22,7 @@ public class ChallengeService {
     private final ChallengeRepository challengeRepository;
     private final ChallengeDetailRepository challengeDetailRepository;
     private final CorpChallengeDetailRepository corpChallengeDetailRepository;
+    private final MyChallengeRepository myChallengeRepository;
 
     // 챌린지 등록
     @Transactional
@@ -44,7 +46,8 @@ public class ChallengeService {
                         .logoUrl(challenge.getChallenge().getLogoUrl())
                         .endAt(challenge.getChallenge().getEndAt())
                         .term(challenge.getChallenge().getTerm())
-
+                        .reward(challenge.getReward())
+                        .participation(myChallengeRepository.selectAllJPQL(challenge.getChallengeId()))
                         .build())
                 .toList();
     }
@@ -65,6 +68,8 @@ public class ChallengeService {
                .badgeName(challengeDetail.get().getBadgeName())
                .standardNum(challengeDetail.get().getStandardNum())
                .standardCg(challengeDetail.get().getStandardCg())
+               .reward(challengeDetail.get().getReward())
+               .participation(myChallengeRepository.selectAllJPQL(challengeDetail.get().getChallengeId()))
                .build();
     }
 
@@ -85,9 +90,9 @@ public class ChallengeService {
 
     }
 
-
+    // 챌린지 검색
     public List<ChallengeSummaryResponse> searchChallengeByName(String searchname) {
-        List<Challenge> challengeDetails= challengeRepository.findByName(searchname);
+        List<Challenge> challengeDetails= challengeRepository.findByNameLike("%"+searchname+"%");
         List<ChallengeSummaryResponse> returnList = new ArrayList<>();
         for(Challenge c : challengeDetails){
             long id = c.getId();
@@ -97,15 +102,17 @@ public class ChallengeService {
             String logoUrl = c.getLogoUrl();
             LocalDate endAt = c.getEndAt();
             int term = c.getTerm();
-            String challengeUrl; String corpName;
+            String challengeUrl; String corpName; Integer reward;
 
             if(challengeType ==0){
                 challengeUrl = corpChallengeDetailRepository.findByChallengeId(id).getChallengeUrl();
                 corpName = corpChallengeDetailRepository.findByChallengeId(id).getCorpName();
+                reward = null;
                 
             }else{
                 challengeUrl = null;
                 corpName = null;
+                reward = c.getChallengeDetail().getReward();
             }
 
             ChallengeSummaryResponse cr = ChallengeSummaryResponse.builder()
@@ -118,6 +125,8 @@ public class ChallengeService {
                     .term(term)
                     .challengeUrl(challengeUrl)
                     .corpName(corpName)
+                    .reward(reward)
+                    .participation(myChallengeRepository.selectAllJPQL(id))
                     .build();
 
             returnList.add(cr);

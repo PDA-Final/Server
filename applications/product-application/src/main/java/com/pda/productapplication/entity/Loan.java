@@ -2,22 +2,21 @@ package com.pda.productapplication.entity;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.experimental.SuperBuilder;
 
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-@SuperBuilder
+@Builder
 @Entity
 @Table(name = "Loan")
 @DiscriminatorValue("Loan")
-public class Loan extends Product {
+public class Loan {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
-    private Long id;
+    @Column(name = "product_id")
+    private Long productId;
 
     @Column(name = "min_interest_rate", nullable = false)
     private float minInterestRate;
@@ -25,13 +24,14 @@ public class Loan extends Product {
     @Column(name = "max_interest_rate", nullable = false)
     private float maxInterestRate;
 
-    @Column(name = "max_loan_amount", nullable = false, length = 20)
+    @Column(name = "max_loan_amount", nullable = false)
     private String maxLoanAmount;
 
-    @Column(name = "content", nullable = false)
-    private String content;
+    @Column(name = "description", nullable = false)
+    private String description;
 
-    @OneToOne
+    @MapsId
+    @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "product_id", nullable = false, foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
     private Product product;
 }

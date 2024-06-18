@@ -1,16 +1,16 @@
 package com.pda.boardapplication.controller;
 
 import com.pda.apiutils.ApiUtils;
-import com.pda.apiutils.GlobalExceptionResponse;
 import com.pda.apiutils.GlobalResponse;
 import com.pda.boardapplication.dto.BoardDto;
+import com.pda.boardapplication.dto.UserDto;
+import com.pda.boardapplication.service.BoardInteractionService;
 import com.pda.boardapplication.service.BoardService;
 import com.pda.exceptionhandler.exceptions.BadRequestException;
+import com.pda.tofinsecurity.user.AuthUser;
+import com.pda.tofinsecurity.user.AuthUserInfo;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -30,101 +30,123 @@ import java.util.Map;
 public class BoardController {
 
     private final BoardService boardService;
+    private final BoardInteractionService boardInteractionService;
 
     @PostMapping
-    @Operation(summary = "Register board item")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "Created", content = @Content(schema = @Schema(implementation = GlobalResponse.class))),
-            @ApiResponse(responseCode = "400", description = "Invalid Request body", content = @Content(schema = @Schema(implementation = GlobalExceptionResponse.class)))
-    })
-    public GlobalResponse<Object> registerBoard(@RequestBody @Valid BoardDto.RegisterReqDto registerReqDto) {
+    @Operation(summary = "Register board item", security = @SecurityRequirement(name = "bearerAuth"))
+    public GlobalResponse<BoardDto.RegisteredRespDto> registerBoard(@RequestBody @Valid BoardDto.RegisterReqDto registerReqDto, @AuthUser AuthUserInfo user) {
         log.debug("Register Board with title : {}", registerReqDto.getTitle());
-        Map<String, Object> result = new HashMap<>();
+        log.debug("Parsing jwt, got user id : {}", user.getId());
 
         try {
-            long boardId = boardService.registerBoard(registerReqDto);
+            UserDto.InfoDto userInfoDto = UserDto.InfoDto.fromAuthUserInfo(user);
+            long boardId = boardService.registerBoard(registerReqDto, userInfoDto);
             log.debug("Board Item registered with PK : {}", boardId);
-            result.put("boardId", boardId);
+
+            return ApiUtils.created("created", new BoardDto.RegisteredRespDto(boardId));
         } catch (DataIntegrityViolationException e) {
             throw new BadRequestException("Invalid category Id");
         }
 
-        return ApiUtils.created("created", result);
     }
 
     @GetMapping("/{boardId}")
     @Operation(summary = "Get board item detail")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = GlobalResponse.class))),
-            @ApiResponse(responseCode = "404", description = "Not found", content = @Content(schema = @Schema(implementation = GlobalExceptionResponse.class)))
-    })
-    public GlobalResponse<Object> getBoardDetail(@PathVariable("boardId") long boardId) {
+    public GlobalResponse<BoardDto.DetailRespDto> getBoardDetail(@PathVariable("boardId") long boardId) {
         log.debug("Retrieve board with id : {}", boardId);
-        Map<String, Object> result = new HashMap<>();
 
         BoardDto.DetailRespDto detailRespDto = boardService.getBoardDetail(boardId);
-        result.put("board", detailRespDto);
 
-        return ApiUtils.success("success", result);
+        return ApiUtils.success("success", detailRespDto);
     }
 
     @GetMapping
     @Operation(summary = "Get board list")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "OK"),
-            @ApiResponse(responseCode = "204", description = "No Content")
-    })
-    public GlobalResponse<Object> getBoardList(
+    public GlobalResponse<List<BoardDto.AbstractRespDto>> getBoardList(
             @RequestParam(required = false, defaultValue = "0", value = "pageNo") int pageNo,
             @RequestParam(required = false, defaultValue = "10", value = "size") int size,
-            BoardDto.SearchConditionDto searchConditionDto
+            @RequestParam(required = false) BoardDto.SearchConditionDto searchConditionDto
     ) {
         log.debug("Get board lists with page {}, size {}", pageNo, size);
-        Map<String, Object> result = new HashMap<>();
 
-        log.info(searchConditionDto.getCategory());
+        if(searchConditionDto != null)
+            log.info(searchConditionDto.getCategory());
 
         List<BoardDto.AbstractRespDto> boards = boardService.getBoards(pageNo, size);
-        result.put("boards", boards);
 
-        return ApiUtils.success("success", result);
+        return ApiUtils.success("success", boards);
     }
 
     @PutMapping("/{boardId}")
-    @Operation(summary = "Modify board")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "OK"),
-            @ApiResponse(responseCode = "404", description = "Not found"),
-            @ApiResponse(responseCode = "400", description = "Invalid request")
-    })
-    public GlobalResponse<Object> modifyBoard(
+    @Operation(summary = "Modify board", security = @SecurityRequirement(name = "bearerAuth"))
+    public GlobalResponse<BoardDto.UpdatedCountRespDto> modifyBoard(
             @RequestBody BoardDto.ModifyReqDto modifyReqDto,
-            @PathVariable("boardId") long boardId
+            @PathVariable("boardId") long boardId,
+            @AuthUser AuthUserInfo user
     ) {
         log.debug("Update board : {}", boardId);
-        Map<String, Object> result = new HashMap<>();
 
         if((modifyReqDto.getTitle() == null || modifyReqDto.getTitle().isBlank())
             && (modifyReqDto.getContent() == null || modifyReqDto.getContent().isBlank())) {
             throw new BadRequestException("At least one property required");
         }
 
-        int count = boardService.modifyBoard(boardId, modifyReqDto);
-        result.put("modified", count);
+        UserDto.InfoDto userInfoDto = UserDto.InfoDto.fromAuthUserInfo(user);
 
-        return ApiUtils.success("success", result);
+        int count = boardService.modifyBoard(boardId, modifyReqDto, userInfoDto);
+
+        return ApiUtils.success("success", new BoardDto.UpdatedCountRespDto(count));
     }
 
     @DeleteMapping("/{boardId}")
-    @Operation(summary = "Delete board")
-    public GlobalResponse<Object> deleteBoard(@PathVariable("boardId") long boardId) {
+    @Operation(summary = "Delete board", security = @SecurityRequirement(name = "bearerAuth"))
+    public GlobalResponse<BoardDto.UpdatedCountRespDto> deleteBoard(@PathVariable("boardId") long boardId, @AuthUser AuthUserInfo user) {
 
         log.debug("Delete board : {}", boardId);
+
+        UserDto.InfoDto userInfoDto = UserDto.InfoDto.fromAuthUserInfo(user);
+        int count = boardService.deleteBoard(boardId, userInfoDto);
+
+        return ApiUtils.success("success", new BoardDto.UpdatedCountRespDto(count));
+    }
+
+    @PostMapping("/{boardId}/like")
+    @Operation(summary = "Post like toggle event", security = @SecurityRequirement(name = "bearerAuth"))
+    public GlobalResponse<Object> toggleLike(
+            @PathVariable("boardId") long boardId,
+            @AuthUser AuthUserInfo user
+    ) {
+        log.debug("Post like to board {}", boardId);
         Map<String, Object> result = new HashMap<>();
 
-        int count = boardService.deleteBoard(boardId);
-        result.put("deleted", count);
+        UserDto.InfoDto userInfoDto = UserDto.InfoDto.fromAuthUserInfo(user);
+        int count = boardInteractionService.toggleLike(boardId, userInfoDto);
+        result.put("modifiedStatus", count > 0 ? "created" : "canceled");
 
-        return ApiUtils.success("success", result);
+        log.info("Like to board {} toggled : {}", boardId, count);
+
+        return count > 0 ?
+                ApiUtils.created("created",result) :
+                ApiUtils.success("deleted", result);
+    }
+
+    @PostMapping("/{boardId}/bookmark")
+    @Operation(summary = "Post bookmark toggle event", security = @SecurityRequirement(name = "bearerAuth"))
+    public GlobalResponse<Object> toggleBookmark(
+            @PathVariable("boardId") long boardId,
+            @AuthUser AuthUserInfo user
+    ) {
+        log.debug("Post bookmark to board {}", boardId);
+        Map<String, Object> result = new HashMap<>();
+
+        UserDto.InfoDto userInfoDto = UserDto.InfoDto.fromAuthUserInfo(user);
+        int count = boardInteractionService.toggleBookmark(boardId, userInfoDto);
+        result.put("modifiedStatus", count > 0 ? "created" : "canceled");
+
+        log.debug("Bookmark of board {} toggled {}", boardId, count);
+
+        return count > 0 ?
+                ApiUtils.created("created", result) :
+                ApiUtils.success("deleted", result);
     }
 }

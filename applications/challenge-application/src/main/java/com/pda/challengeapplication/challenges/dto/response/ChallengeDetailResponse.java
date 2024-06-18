@@ -13,7 +13,6 @@ public class ChallengeDetailResponse {
     long id;
     int challengeType;
     String name;
-    int participants;
     String description;
     String logoUrl;
     LocalDate startAt;
@@ -21,7 +20,9 @@ public class ChallengeDetailResponse {
     int term;
     String detailDescription;
     String badgeName;
-    int standardNum;
+    Integer standardNum;
     String standardCg;
+    Integer reward;
+    int participation;
 
 }

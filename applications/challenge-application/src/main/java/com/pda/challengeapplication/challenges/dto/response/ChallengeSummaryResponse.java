@@ -19,6 +19,8 @@ public class ChallengeSummaryResponse {
     LocalDate endAt;
     String challengeUrl;
     String corpName;
-    int term;
+    Integer term;
+    Integer reward;
+    int participation;
 
 }
