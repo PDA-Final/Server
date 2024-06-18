@@ -98,6 +98,8 @@ public class BoardDto {
     @Getter
     @Schema(description = "Abstract board information")
     public static class AbstractRespDto {
+        @Schema(description = "Board id", example = "2")
+        private long id;
         @Schema(description = "Board title", example = "⭐️ 내가 들었던 펀드 추천 글 ⭐")
         private String title;
         @Schema(description = "Summary of content", example = "오늘은 내가 들었던 펀드 중에 제일 좋았던 신한은행의 ...")
