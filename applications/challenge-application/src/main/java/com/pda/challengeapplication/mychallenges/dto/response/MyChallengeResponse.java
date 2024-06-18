@@ -1,17 +1,18 @@
-package com.pda.challengeapplication.mychallenges.DTO.Response;
+package com.pda.challengeapplication.mychallenges.dto.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 
-import java.sql.Timestamp;
+import java.time.LocalDate;
 
 
-@Builder
-@AllArgsConstructor
 @Getter
+@AllArgsConstructor
+@Builder
 public class MyChallengeResponse {
-    Integer id;
+    long myChallengeId;
+    long challengeId;
     int challengeType;
     String name;
     int participants;
@@ -19,9 +20,10 @@ public class MyChallengeResponse {
     String logoUrl;
     String challengeUrl;
     String corpName;
-    Timestamp endAt;
+    LocalDate endAt;
     //challenge 정보
     String status;
     Integer progress;
 
 }
+

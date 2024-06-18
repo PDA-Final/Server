@@ -1,10 +1,10 @@
-package com.pda.challengeapplication.challenges.DTO.Request;
+package com.pda.challengeapplication.challenges.dto.request;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 
-import java.sql.Timestamp;
+import java.time.LocalDate;
 
 @Getter
 public class ModifyCorpChallengeRequest {
@@ -15,9 +15,9 @@ public class ModifyCorpChallengeRequest {
     String description;
     String logoUrl;
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
-    Timestamp startAt;
+    LocalDate startAt;
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
-    Timestamp endAt;
+    LocalDate endAt;
     String challengeUrl;
 
 }

@@ -14,7 +14,7 @@ import lombok.NoArgsConstructor;
 public class Emoji {
     @Id
     @GeneratedValue(strategy= GenerationType.IDENTITY)
-    Integer id;
+    long id;
     @NotNull
     String emotion;
     @NotNull

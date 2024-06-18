@@ -1,59 +1,68 @@
 package com.pda.challengeapplication.mychallenges.service;
 
-import com.pda.challengeapplication.challenges.repository.CorpChallengeDetailRepository;
-import com.pda.challengeapplication.mychallenges.DTO.Response.MyChallengeResponse;
+import com.pda.challengeapplication.challenges.repository.*;
+import com.pda.challengeapplication.mychallenges.dto.request.PostMyChallengeRequest;
+import com.pda.challengeapplication.mychallenges.dto.response.MyChallengeBadgeResponse;
+import com.pda.challengeapplication.mychallenges.dto.response.MyChallengeResponse;
+import com.pda.challengeapplication.mychallenges.repository.MyAssetChallengeRepository;
 import com.pda.challengeapplication.mychallenges.repository.MyChallenge;
 import com.pda.challengeapplication.mychallenges.repository.MyChallengeRepository;
-import com.pda.challengeapplication.mychallenges.repository.MyEmoChallengeRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.sql.Timestamp;
+import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class MyChallengeService {
-
     private final CorpChallengeDetailRepository corpChallengeDetailRepository;
+    private final ChallengeRepository challengeRepository;
+    private final ChallengeDetailRepository challengeDetailRepository;
     private final MyChallengeRepository myChallengeRepository;
-    private final MyEmoChallengeRepository myEmoChallengeRepository;
+    private final MyAssetChallengeRepository myAssetChallengeRepository;
+
     //진행중인 유저 챌린지
     public List<MyChallengeResponse> findChallengeByUserId(Long userId) {
         List<MyChallenge> myChallenge = myChallengeRepository.findByUserId(userId);
         List<MyChallengeResponse> returnList= new ArrayList<>();
         for(MyChallenge mc: myChallenge){
-            Integer id = mc.getId();
+            long id = mc.getId();
+            long challengeId = mc.getChallenge().getId();
             int challengeType = mc.getChallenge().getChallengeType();
-            String cropName; String challengeUrl; Integer progress;
+            String corpName = ""; String challengeUrl = ""; Integer progress = 0;
             String name =  mc.getChallenge().getName();
-            int participants = mc.getChallenge().getParticipants();
             String description = mc.getChallenge().getDescription();
             String logoUrl = mc.getChallenge().getLogoUrl();
-            Timestamp endAt = mc.getEndAt();
+            LocalDate endAt = mc.getEndAt();
             String status = mc.getStatus();
 
             if(challengeType ==0){
-                cropName = corpChallengeDetailRepository.findByChallengeId(mc.getChallenge().getId()).getCorpName();
-                challengeUrl = corpChallengeDetailRepository.findByChallengeId(mc.getChallenge().getId()).getChallengeUrl();
+                corpName = mc.getChallenge().getCorpChallengeDetail().getCorpName();
+                challengeUrl = mc.getChallenge().getCorpChallengeDetail().getChallengeUrl();
                 progress =  null;
-            }else{
-                cropName = null; challengeUrl = null;
-                progress = myEmoChallengeRepository.findByMyChallengeId(mc.getId()).size();
+            }else if(challengeType ==1){
+                corpName = null; challengeUrl = null;
+                int successCnt= myAssetChallengeRepository.findByMyChallengeId(mc.getId())
+                        .stream().filter(c->c.isSuccess()).collect(Collectors.toList())
+                        .size();
+                progress =successCnt/mc.getChallenge().getTerm();
+            }else if(challengeType ==2){
+                corpName = null; challengeUrl = null;
+                progress = null;
             }
 
             MyChallengeResponse mr = MyChallengeResponse.builder()
-                    .id(id)
+                    .myChallengeId(id)
+                    .challengeId(challengeId)
                     .challengeType(challengeType)
                     .name(name)
-                    .participants(participants)
                     .description(description)
                     .logoUrl(logoUrl)
                     .challengeUrl(challengeUrl)
-                    .corpName(cropName)
+                    .corpName(corpName)
                     .endAt(endAt)
                     .status(status)
                     .progress(progress)
@@ -73,34 +82,40 @@ public class MyChallengeService {
         List<MyChallenge> myChallenge = myChallengeRepository.findByUserId(userId);
         List<MyChallengeResponse> returnList= new ArrayList<>();
         for(MyChallenge mc: myChallenge){
-            Integer id = mc.getId();
+            long id = mc.getId();
+            long challengeId = mc.getChallenge().getId();
             int challengeType = mc.getChallenge().getChallengeType();
-            String cropName; String challengeUrl; Integer progress;
+            String corpName = ""; String challengeUrl = ""; Integer progress = 0;
             String name =  mc.getChallenge().getName();
-            int participants = mc.getChallenge().getParticipants();
             String description = mc.getChallenge().getDescription();
             String logoUrl = mc.getChallenge().getLogoUrl();
-            Timestamp endAt = mc.getEndAt();
+            LocalDate endAt = mc.getEndAt();
             String status = mc.getStatus();
 
             if(challengeType ==0){
-                cropName = corpChallengeDetailRepository.findByChallengeId(mc.getChallenge().getId()).getCorpName();
-                challengeUrl = corpChallengeDetailRepository.findByChallengeId(mc.getChallenge().getId()).getChallengeUrl();
+                corpName = mc.getChallenge().getCorpChallengeDetail().getCorpName();
+                challengeUrl = mc.getChallenge().getCorpChallengeDetail().getChallengeUrl();
                 progress =  null;
-            }else{
-                cropName = null; challengeUrl = null;
-                progress = myEmoChallengeRepository.findByMyChallengeId(mc.getId()).size();
+            }else if(challengeType ==1){
+                corpName = null; challengeUrl = null;
+                int successCnt= myAssetChallengeRepository.findByMyChallengeId(mc.getId())
+                        .stream().filter(c->c.isSuccess()).collect(Collectors.toList())
+                        .size();
+                progress =successCnt/mc.getChallenge().getTerm();
+            }else if(challengeType ==2){
+                corpName = null; challengeUrl = null;
+                progress = null;
             }
 
             MyChallengeResponse mr = MyChallengeResponse.builder()
-                    .id(id)
+                    .myChallengeId(id)
+                    .challengeId(challengeId)
                     .challengeType(challengeType)
                     .name(name)
-                    .participants(participants)
                     .description(description)
                     .logoUrl(logoUrl)
                     .challengeUrl(challengeUrl)
-                    .corpName(cropName)
+                    .corpName(corpName)
                     .endAt(endAt)
                     .status(status)
                     .progress(progress)
@@ -115,12 +130,76 @@ public class MyChallengeService {
 
     }
 
-    public boolean isDone(Timestamp t){
-        Timestamp currentTime = new Timestamp(new Date().getTime());
-        if(t.after(currentTime)){
-            return false;
-        } else {
+    public boolean isDone(LocalDate t) {
+        LocalDate currentTime = LocalDate.now();
+        if (t.isBefore(currentTime)) {
             return true;
+        } else {
+            return false;
         }
+    }
+
+    // 챌린지 성공, 실패 여부 변경
+    public MyChallenge changeChallengeStatus(long mcId,String status) {
+        MyChallenge mc = myChallengeRepository.findById(mcId).get();
+        mc.editMyChallengeStatus(status);
+        myChallengeRepository.save(mc);
+
+        return myChallengeRepository.findById(mcId).get();
+    }
+
+    // 챌린지 참여 여부 조회
+    public boolean checkMyChallenge(long uid, long cid) {
+        List<MyChallenge> mc = myChallengeRepository.findByUserIdAndChallengeId(uid, cid);
+        mc.stream().filter((c) -> !isDone(c.getEndAt()));
+        if(mc.size()==0)
+            return true;
+        else
+            return false;
+    }
+
+    // 챌린지 참여
+    public MyChallenge participateChallenge(PostMyChallengeRequest postMyChallengeRequest) {
+       Challenge c = challengeRepository.findById(postMyChallengeRequest.getChallengeId());
+
+       LocalDate endAt;
+       LocalDate startAt = LocalDate.now();
+        if (c.getTerm() == null) {
+            endAt = LocalDate.of(9999, 12, 31); // 매우 먼 미래 날짜로 설정
+        } else {
+            endAt = startAt.plusDays(c.getTerm());
+        }
+
+       MyChallenge mc = new MyChallenge(postMyChallengeRequest.getId(),c , postMyChallengeRequest.getUserId(), startAt, endAt,"진행중");
+       return myChallengeRepository.save(mc);
+    }
+
+    public List<MyChallengeBadgeResponse> readAllChallengeBadge(Long id) {
+        List<MyChallenge> myChallenges = myChallengeRepository.findByUserId(id).stream().filter((c)-> c.getStatus() =="성공").collect(Collectors.toList());
+        List<MyChallengeBadgeResponse> bl = new ArrayList<>();
+        for(MyChallenge mc: myChallenges){
+            String imgUrl = mc.getChallenge().getLogoUrl();
+            String bName;
+            String cName;
+
+            if(mc.getChallenge().getChallengeType() ==0){
+                bName = null;
+                cName = corpChallengeDetailRepository.findByChallengeId(mc.getChallenge().getId()).getCorpName();
+            }else{
+                bName = challengeDetailRepository.findByChallengeId(mc.getChallenge().getId()).get().getBadgeName();
+                cName = challengeDetailRepository.findByChallengeId(mc.getChallenge().getId()).get().getChallenge().getName();
+            }
+
+            MyChallengeBadgeResponse mbr = MyChallengeBadgeResponse.builder()
+                    .imgUrl(imgUrl)
+                    .badgeName(bName)
+                    .challengeName(cName)
+                    .build();
+            bl.add(mbr);
+        }
+
+        return bl;
+
+
     }
 }

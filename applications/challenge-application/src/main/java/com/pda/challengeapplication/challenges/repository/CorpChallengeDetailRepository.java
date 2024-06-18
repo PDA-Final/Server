@@ -8,6 +8,6 @@ import java.util.List;
 public interface CorpChallengeDetailRepository extends JpaRepository<CorpChallengeDetail, Integer> {
     CorpChallengeDetail save(CorpChallengeDetail corpChallengeDetail);
     List<CorpChallengeDetail> findAll();
-    List<CorpChallengeDetail> findByCorpId(Integer id);
-    CorpChallengeDetail findByChallengeId(Integer id);
+    List<CorpChallengeDetail> findByCorpId(long id);
+    CorpChallengeDetail findByChallengeId(long id);
 }

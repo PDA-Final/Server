@@ -5,20 +5,19 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.sql.Timestamp;
+import java.time.LocalDate;
 
 @Getter
 @Entity
-@Table(name = "MyEmoChallenge")
+@Table(name = "MyAssetChallenge")
 @AllArgsConstructor
 @NoArgsConstructor
-public class MyEmoChallenge {
+public class MyAssetChallenge {
     @Id
     @GeneratedValue(strategy= GenerationType.IDENTITY)
-    Integer id;
-    Integer emojiId;
-    @ManyToOne
-    @JoinColumn(name = "myChallengeId")
-    MyChallenge myChallenge;
-    Timestamp savingAt;
+    long id;
+    long myChallengeId;
+    long emojiId;
+    LocalDate savingAt;
+    boolean isSuccess;  // 절약챌린지의 경우 5일 전부 성공해야
 }

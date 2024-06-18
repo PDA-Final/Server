@@ -6,7 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.sql.Timestamp;
+import java.time.LocalDate;
 
 @Getter
 @Entity
@@ -17,22 +17,29 @@ public class Challenge {
 
     @Id
     @GeneratedValue(strategy= GenerationType.IDENTITY)
-    private Integer id;
+    long id;
     @NotNull
-    private int challengeType;
+    int challengeType;
     @NotNull
-    private String name;
-    private int participants;
+    String name;
     @NotNull
-    private String description;
+    String description;
     @NotNull
-    private String logoUrl;
-    private Timestamp startAt;
-    private Timestamp endAt;
-    private int term;
+    String logoUrl;
+    @NotNull
+    LocalDate startAt;
+    @NotNull
+    LocalDate endAt;
+    @NotNull
+    Integer term;
 
+    @OneToOne(mappedBy = "challenge")
+    ChallengeDetail challengeDetail;
 
-    public void editChallenge(String name, String description, String logoUrl, Timestamp startAt, Timestamp endAt) {
+    @OneToOne(mappedBy = "challenge")
+    CorpChallengeDetail corpChallengeDetail;
+
+    public void editChallenge(String name, String description, String logoUrl, LocalDate startAt, LocalDate endAt) {
         this.name = name;
         this.description = description;
         this.logoUrl = logoUrl;

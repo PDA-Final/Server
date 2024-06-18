@@ -11,5 +11,5 @@ public interface EmojiRepository extends JpaRepository<Emoji, Integer> {
     Emoji findFirstByOrderByIdDesc();
     Emoji save(Emoji emoji);
     List<Emoji> findAll();
-    Optional<Emoji> findById(Integer id);
+    Optional<Emoji> findById(long id);
 }

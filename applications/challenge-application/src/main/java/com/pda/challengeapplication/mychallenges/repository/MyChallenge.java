@@ -6,7 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.sql.Timestamp;
+import java.time.LocalDate;
 
 @Getter
 @Entity
@@ -16,12 +16,19 @@ import java.sql.Timestamp;
 public class MyChallenge {
     @Id
     @GeneratedValue(strategy= GenerationType.IDENTITY)
-    Integer id;
+    long id;
     @ManyToOne
-    @JoinColumn(name = "challengeID")
+    @JoinColumn(name = "challengeId")
     Challenge challenge;
-    Long userId;
-    Timestamp startAt;
-    Timestamp EndAt;
+    long userId;
+    LocalDate startAt;
+    LocalDate endAt;
     String status;
+
+
+
+    public void editMyChallengeStatus(String status) {
+        this.status = status;
+    }
+
 }

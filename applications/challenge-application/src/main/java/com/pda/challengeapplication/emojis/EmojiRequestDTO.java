@@ -1,11 +1,12 @@
 package com.pda.challengeapplication.emojis;
 
+import jakarta.persistence.Id;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 
 @Getter
 public class EmojiRequestDTO {
-
+    @Id
     Integer id;
     @NotNull(message = "감정이 입력되지 않았습니다")
     String emotion;

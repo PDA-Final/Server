@@ -1,29 +1,24 @@
-package com.pda.challengeapplication.challenges.DTO.Response;
+package com.pda.challengeapplication.challenges.dto.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 
-import java.sql.Timestamp;
+import java.time.LocalDate;
 
 @Builder
 @AllArgsConstructor
 @Getter
 
-
 public class ChallengeSummaryResponse {
-    Integer id;
+    long id;
     int challengeType;
     String name;
-    int participants;
     String description;
     String logoUrl;
-    Timestamp endAt;
+    LocalDate endAt;
     String challengeUrl;
     String corpName;
     int term;
-    //Boolean isDone;
-
-
 
 }

@@ -11,6 +11,9 @@ public interface ChallengeRepository extends JpaRepository<Challenge, Integer> {
     Challenge save(Challenge challenge);
 
     List<Challenge> findAll();
-    List<Challenge> findAllByOrderByEndAtAsc();
+    //List<Challenge> findAllByOrderByEndAtAsc();
     Challenge findFirstByOrderByIdDesc();
+    Challenge findById(long id);
+
+    List<Challenge> findByName(String name);
 }

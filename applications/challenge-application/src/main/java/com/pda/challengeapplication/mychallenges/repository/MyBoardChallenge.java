@@ -7,14 +7,13 @@ import lombok.NoArgsConstructor;
 
 @Getter
 @Entity
-@Table(name = "MyChallengeDetail")
+@Table(name = "MyBoardChallenge")
 @AllArgsConstructor
 @NoArgsConstructor
-public class MyChallengeDetail {
+public class MyBoardChallenge {
     @Id
-    Integer myChallengeId;
-    Integer inACNT;
-    Integer outACNT;
+    long myChallengeId;
+    long boardId;
     @OneToOne(cascade= CascadeType.ALL)
     @JoinColumn(name = "myChallengeId", nullable = false, foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
     MyChallenge myChallenge;
