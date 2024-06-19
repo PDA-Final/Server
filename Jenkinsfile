@@ -174,6 +174,22 @@ pipeline {
       }
     }
   }
+  post {
+    success {
+      slackSend (
+        channel: 'C078D2K42MD',
+        color: '#00FF00',
+        message: "SUCCESS: Job ${env.JOB_NAME} [${env.BUILD_NUMBER}]"
+      )
+    }
+    failure {
+      slackSend (
+        channel: 'C078D2K42MD',
+        color: '#FF0000',
+        message: "FAIL: Job ${env.JOB_NAME} [${env.BUILD_NUMBER}]"
+      )
+    }
+  }
 }
 
 def publishOverSSH(serverName, imageName) {
