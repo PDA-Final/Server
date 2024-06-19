@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component;
 public class DepositListener {
     private final CreditService creditService;
 
-    @KafkaListener(topics = "add-credit")
+    @KafkaListener(topics = "add-credit", concurrency = "3")
     public void deposit(AddCreditDto addCreditDto) {
         creditService.deposit(SetAmountServiceRequest.builder()
                 .transactionDateTime(addCreditDto.getTransactionDateTime())
