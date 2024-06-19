@@ -123,6 +123,7 @@ pipeline {
                 echo "Publish over ssh Successful"
               } catch(Exception e) {
                 echo "Publish over ssh failed : ${e.message}"
+                currentBuild.result = 'FAILURE'
               }
             }
 
@@ -144,7 +145,7 @@ def publishOverSSH(serverName, imageName) {
     failOnError: true,
     publishers: [
       sshPublisherDesc(
-        configName: configName, // SSH server name
+        configName: serverName, // SSH server name
         verbose: true,
         transfers: [
           sshTransfer(
