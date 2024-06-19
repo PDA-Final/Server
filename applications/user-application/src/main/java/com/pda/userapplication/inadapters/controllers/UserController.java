@@ -88,7 +88,7 @@ public class UserController {
 
     @PostMapping("/public-options")
     @Operation(summary = "자산 공개 설정", description = "유저 자산 공개 옵션 설정",
-        security = @SecurityRequirement(name = "bearerAuth"))
+        security = @SecurityRequirement(name = "bearerAuth"), deprecated = true)
     @ApiResponse(responseCode = "201", description = "성공")
     public GlobalResponse<Void> setPublicOption(@AuthUser AuthUserInfo authUser, @Valid @RequestBody SetPublicOptionRequest request) {
         setPublicOptionUseCase.setPublicOption(SetPublicOptionServiceRequest.builder()
