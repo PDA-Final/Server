@@ -124,4 +124,10 @@ public class ProductDto {
     public static class LoanDetailRespDto {
         private String description;
     }
+
+    @Builder
+    @Getter
+    public static class BoardCountReqDto {
+        private int boardCount;
+    }
 }

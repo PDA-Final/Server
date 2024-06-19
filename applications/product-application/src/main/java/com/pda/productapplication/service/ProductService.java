@@ -22,6 +22,7 @@ public class ProductService {
     private final SavingRepository savingRepository;
     private final FundRepository fundRepository;
     private final LoanRepository loanRepository;
+    private final BoardCountRepository boardCountRepository;
     private final CategoryRepository categoryRepository; // TODO
 
     /**
@@ -65,7 +66,6 @@ public class ProductService {
                 .createdTime(product.getCreatedAt())
                 .build();
     }
-
 
     /**
      * Get card product summary
@@ -243,6 +243,24 @@ public class ProductService {
                         .createdTime(product.getCreatedAt())
                         .build()
         ).collect(Collectors.toList());
+    }
+
+    /**
+     * Count board associated with the product and Store
+     * @param productId product id
+     */
+    public ProductDto.BoardCountReqDto incrementBoardCount (Long productId) {
+        log.debug("Count board associated with the product. productId: {}", productId);
+
+        BoardCount boardCount =
+                boardCountRepository.findById(productId).orElseThrow(NotFoundException::new);
+
+        boardCount.incrementBoardCount();
+        boardCountRepository.save(boardCount);
+
+        return ProductDto.BoardCountReqDto.builder()
+                .boardCount(boardCount.getBoardCount())
+                .build();
     }
 
     private List<String> splitTags(String tags) {

@@ -4,9 +4,6 @@ import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
-import java.util.ArrayList;
-import java.util.List;
-
 @Entity
 @Getter
 @SuperBuilder
@@ -32,8 +29,6 @@ public class Product extends BaseEntity {
     @Column(name = "tags")
     private String tags;
 
-    // TODO : 관련 핀 작성자 수
-
     @ManyToOne
     @JoinColumn(name = "category_id", nullable = false, foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
     private Category category;
@@ -53,6 +48,9 @@ public class Product extends BaseEntity {
 
     @OneToOne(mappedBy = "product", cascade = CascadeType.ALL)
     private Loan loan;
+
+    @OneToOne(mappedBy = "product", cascade = CascadeType.ALL)
+    private BoardCount boardCount;
 
     protected Product() {
         super();
