@@ -40,16 +40,15 @@ public class AuthController {
     @Operation(
         summary = "일반 회원가입", description = "일반 유저에 대한 회원가입입니다. 아직 성향 / 자산 연결은 제공하지 않습니다.")
     @ApiResponse(responseCode = "201", description = "회원 생성(성공)")
-    public GlobalResponse signUp(@Valid @RequestBody SignUpRequest signUpRequest) {
-        signUpUseCase.signUp(SignUpServiceRequest.builder()
-                .tofinId(signUpRequest.getTofinId())
-                .userInfo(signUpRequest.getUserInfo())
-                .birth(signUpRequest.getBirth())
-                .profileImage(signUpRequest.getProfileImg())
-                .nickname(signUpRequest.getNickname())
-                .job(signUpRequest.getJob())
-            .build());
-        return ApiUtils.created("유저 회원가입 완료");
+    public GlobalResponse<TokenInfoServiceResponse> signUp(@Valid @RequestBody SignUpRequest signUpRequest) {
+        return ApiUtils.created("유저 회원가입 완료", signUpUseCase.signUp(SignUpServiceRequest.builder()
+            .tofinId(signUpRequest.getTofinId())
+            .userInfo(signUpRequest.getUserInfo())
+            .birth(signUpRequest.getBirth())
+            .profileImage(signUpRequest.getProfileImg())
+            .nickname(signUpRequest.getNickname())
+            .job(signUpRequest.getJob())
+            .build()));
     }
 
     @PostMapping("/sign-in")
@@ -65,6 +64,7 @@ public class AuthController {
     @GetMapping("/reissue")
     @Operation(summary = "토큰 재발급", description = "액세스 / 리프레쉬 토큰 재발급 (Authorization 헤더에 리프레쉬 토큰 삽입)",
         security = @SecurityRequirement(name = "bearerAuth"))
+    @ApiResponse(responseCode = "200", description = "성공")
     public GlobalResponse<TokenInfoServiceResponse> reissue(HttpServletRequest request) {
         return ApiUtils.success("토큰 재발급 완료", reissueUseCase.reissue(jwtProvider.resolveToken(request)));
     }

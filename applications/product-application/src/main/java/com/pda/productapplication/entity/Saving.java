@@ -2,22 +2,21 @@ package com.pda.productapplication.entity;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.experimental.SuperBuilder;
 
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-@SuperBuilder
+@Builder
 @Entity
 @Table(name = "Saving")
 @DiscriminatorValue("Saving")
-public class Saving extends Product {
+public class Saving {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
-    private Long id;
+    @Column(name = "product_id")
+    private Long productId;
 
     @Column(name = "interest_rate", nullable = false)
     private float interestRate;
@@ -58,10 +57,8 @@ public class Saving extends Product {
     @Column(name = "depositor_protection", nullable = false)
     private String depositorProtection;
 
-    @Column(name = "updated_at") // TODO
-    private String updatedAt;
-
-    @OneToOne
+    @MapsId
+    @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "product_id", nullable = false, foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
     private Product product;
 }
