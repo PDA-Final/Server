@@ -89,6 +89,7 @@ pipeline {
                 echo "Publish over ssh Successful"
               } catch(Exception e) {
                 echo "Publish over ssh failed : ${e.message}"
+                currentBuild.result = 'FAILURE'
               }
             }
 
@@ -151,14 +152,14 @@ def publishOverSSH(serverName, imageName) {
           sshTransfer(
             cleanRemote: false, // clean remote dir
             excludes: '',
-            execCommand: "/bin/bash /home/ubuntu/deploy.sh ${imageName}",
+            execCommand: "/bin/bash /home/ubuntu/ws/deploy.sh ${imageName}",
             execTimeout: 120000,
             makeEmptyDirs: false,
             noDefaultExcludes: false,
             remoteDirectory: '/home/ubuntu/ws/',
             remoteDirectorySDF: false,
-            removePrefix: 'workspace/builds',
-            sourceFiles: 'workspace/builds/deploy.sh'
+            removePrefix: '/var/jenkins_home/workspace/builds',
+            sourceFiles: '/var/jenkins_home/workspace/builds/deploy.sh'
           )
         ]
       )
