@@ -83,7 +83,15 @@ pipeline {
               sh 'docker push bkkmw/tofin-user-api'
             }
             echo 'publish over ssh for user app'
-            publishOverSSH('user-api', 'tofin-user-api')
+            script {
+              try {
+                publishOverSSH('user-api', 'tofin-user-api')
+                echo "Publish over ssh Successful"
+              } catch(Exception e) {
+                echo "Publish over ssh failed : ${e.message}"
+              }
+            }
+
           }
         }
 
@@ -109,7 +117,15 @@ pipeline {
               sh 'docker push bkkmw/tofin-board-api'
             }
             echo 'publish over ssh for board app'
-            publishOverSSH('board-api', 'tofin-board-api')
+            script {
+              try {
+                publishOverSSH('board-api', 'tofin-board-api')
+                echo "Publish over ssh Successful"
+              } catch(Exception e) {
+                echo "Publish over ssh failed : ${e.message}"
+              }
+            }
+
           }
         }
       }
@@ -134,7 +150,7 @@ def publishOverSSH(serverName, imageName) {
           sshTransfer(
             cleanRemote: false, // clean remote dir
             excludes: '',
-            execCommand: "/bin/bash /homw/ubuntu/deploy.sh ${imageName}",
+            execCommand: "/bin/bash /home/ubuntu/deploy.sh ${imageName}",
             execTimeout: 120000,
             makeEmptyDirs: false,
             noDefaultExcludes: false,
