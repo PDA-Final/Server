@@ -2,7 +2,6 @@ service-url: /api/board-service
 
 server:
   port: 8082
-  servletPath: ""
   shutdown: graceful
 
 spring:
@@ -42,7 +41,7 @@ springdoc:
 eureka:
   instance:
     hostname:
-    healthCheckUrlPath: ${server.servletPath}/boards
+    healthCheckUrlPath: /actuator/health
     lease-renewal-interval-in-seconds: 30
     lease-expiration-duration-in-seconds: 10
     prefer-ip-address: true
@@ -58,7 +57,9 @@ management:
   endpoint:
     shutdown:
       enabled: true
+    health:
+      enabled: true
   endpoints:
     web:
       exposure:
-        include: shutdown
+        include: shutdown, health
