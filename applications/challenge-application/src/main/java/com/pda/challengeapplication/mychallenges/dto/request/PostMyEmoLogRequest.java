@@ -12,7 +12,7 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
-public class PostMyEmoRequest {
+public class PostMyEmoLogRequest {
     @Id
     long id;
     long myChallengeId;

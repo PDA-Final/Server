@@ -11,8 +11,11 @@ import com.pda.challengeapplication.challenges.dto.response.ChallengeSummaryResp
 import com.pda.challengeapplication.challenges.repository.Challenge;
 import com.pda.challengeapplication.challenges.service.ChallengeService;
 import com.pda.challengeapplication.challenges.service.CorpChallengeService;
+import com.pda.tofinsecurity.user.AuthUser;
+import com.pda.tofinsecurity.user.AuthUserInfo;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -81,10 +84,13 @@ public class ChallengeController {
 
     // 챌린지 상세 조회 (자체 챌린지만 가능)
     @GetMapping("/{id}")
-    @Operation(summary = "챌린지 상세 조회", description = "챌린지 상세를 조회합니다")
+    @Operation(summary = "챌린지 상세 조회", description = "챌린지 상세를 조회합니다",
+            security = @SecurityRequirement(name = "bearerAuth"))
     @ApiResponse(responseCode = "200", description = "성공")
-    public GlobalResponse<ChallengeDetailResponse> findChallengeDetail(@Valid @PathVariable(value = "id") long id){
-        ChallengeDetailResponse challenge = challengeService.findChallenge(id);
+    public GlobalResponse<ChallengeDetailResponse> findChallengeDetail(
+            @Valid @PathVariable(value = "id") long id,
+            @AuthUser AuthUserInfo userInfo){
+        ChallengeDetailResponse challenge = challengeService.findChallenge(id,userInfo.getId());
         return ApiUtils.success("챌린지 상세 조회", challenge);
 
 

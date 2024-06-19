@@ -24,5 +24,6 @@ public class ChallengeDetailResponse {
     String standardCg;
     Integer reward;
     int participation;
+    String status;
 
 }

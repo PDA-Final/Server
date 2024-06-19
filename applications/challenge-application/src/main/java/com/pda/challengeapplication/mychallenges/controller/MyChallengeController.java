@@ -29,6 +29,7 @@ import java.util.List;
 public class MyChallengeController {
      private final MyChallengeService myChallengeService;
 
+
     //참여 챌린지 조회 (내 프로필 or 다른 사람 프로필 / 마감된 or 진행중인)
     @GetMapping
     @Operation(summary = "챌린지 조회", description = "유저 참여 챌린지를 조회합니다",
@@ -91,11 +92,13 @@ public class MyChallengeController {
     public GlobalResponse participateChallenge(
             @RequestBody PostMyChallengeRequest postMyChallengeRequest
     ){
+
         MyChallenge myChallenge = myChallengeService.participateChallenge(postMyChallengeRequest);
         String challengeName = myChallenge.getChallenge().getName();
         return ApiUtils.success("챌린지 참여",challengeName);
 
     }
+
 
     // 성공한 챌린지 뱃지 조회
     @GetMapping("/badge")

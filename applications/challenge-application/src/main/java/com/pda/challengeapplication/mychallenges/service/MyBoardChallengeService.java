@@ -8,6 +8,8 @@ import com.pda.challengeapplication.mychallenges.repository.MyChallengeRepositor
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+
 @Service
 @RequiredArgsConstructor
 public class MyBoardChallengeService {
@@ -20,6 +22,7 @@ public class MyBoardChallengeService {
         MyBoardChallenge myBoardChallenge = postMyBoardChallengeRequest.convertToAccountEntity(myChallenge);
         myBoardChallengeRepository.save(myBoardChallenge);
         myChallenge.editMyChallengeStatus("성공");
+        myChallenge.editMyChallengeEndAt(LocalDate.now());
         return myChallengeRepository.save(myChallenge);
 
     }

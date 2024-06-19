@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 public class MyAssetChallengeDetail {
     @Id
     long myChallengeId;
-    long inACNT;
-    long outACNT;
+    String inACNT;
+    String outACNT;
 
 }

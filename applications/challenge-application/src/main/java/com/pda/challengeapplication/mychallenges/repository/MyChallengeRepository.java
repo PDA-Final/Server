@@ -20,4 +20,7 @@ public interface MyChallengeRepository extends JpaRepository<MyChallenge, Intege
     @Query(value = "SELECT COUNT(mc) FROM MyChallenge mc WHERE mc.challenge.id = :challengeId AND mc.status = '진행중' AND mc.userId = :userId")
     int selectAllJPQL2(@Param("challengeId") long challengeId, @Param("userId") long userId);
 
+    @Query(value = "SELECT mc.status FROM MyChallenge mc WHERE mc.challenge.id = :challengeId AND mc.status = '진행중' AND mc.userId = :userId")
+    String selectstatus(@Param("challengeId") long challengeId, @Param("userId") long userId);
+
 }

@@ -2,13 +2,15 @@ package com.pda.challengeapplication.mychallenges.controller;
 
 import com.pda.apiutils.ApiUtils;
 import com.pda.apiutils.GlobalResponse;
-import com.pda.challengeapplication.mychallenges.dto.request.PostMyAccountRequest;
-import com.pda.challengeapplication.mychallenges.dto.request.PostMyEmoRequest;
+import com.pda.challengeapplication.mychallenges.dto.request.outer.PostMyEmoChallengeRequest;
+import com.pda.challengeapplication.mychallenges.dto.request.PostMyEmoLogRequest;
 import com.pda.challengeapplication.mychallenges.dto.response.MyEmoChallengeLogResponse;
-import com.pda.challengeapplication.mychallenges.repository.MyAssetChallengeDetail;
 import com.pda.challengeapplication.mychallenges.service.MyEmoChallengeService;
+import com.pda.tofinsecurity.user.AuthUser;
+import com.pda.tofinsecurity.user.AuthUserInfo;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,26 +24,19 @@ import org.springframework.web.bind.annotation.*;
 public class MyEmoChallengeController {
     private final MyEmoChallengeService myEmoChallengeService;
 
-    // 입출금 계좌 선택
-    @PostMapping("/account")
-    @Operation(summary = "입출금 계좌 선택", description = "입출금 계좌를 선택합니다")
+    // 감정 챌린지 참여
+    @PostMapping
+    @Operation(summary = "감정 챌린지 참여", description = "감정 챌린지에 참여합니다",
+            security = @SecurityRequirement(name = "bearerAuth"))
     @ApiResponse(responseCode = "201", description = "성공")
-    public GlobalResponse<MyAssetChallengeDetail> createMyEmoAsset(
-            @RequestBody PostMyAccountRequest postMyAccontRequest
+    public GlobalResponse participateEmoChallenge(
+            @AuthUser AuthUserInfo userInfo,
+            @RequestBody PostMyEmoChallengeRequest pa
     ){
-        MyAssetChallengeDetail myAssetChallengeDetail = myEmoChallengeService.createMyEmoAsset(postMyAccontRequest);
-        return ApiUtils.success("입출금 계좌 선택", myAssetChallengeDetail);
-    }
 
-    // 입출금 계좌 존재 확인
-    @GetMapping("/account")
-    @Operation(summary = "입출금 계좌 확인", description = "입출금 계좌를 확인합니다")
-    @ApiResponse(responseCode = "200", description = "성공")
-    public GlobalResponse<MyAssetChallengeDetail> checkMyEmoAsset(
-            @RequestParam(value = "myChallengeId") long myChallengeId
-    ){
-        MyAssetChallengeDetail myAssetChallengeDetail = myEmoChallengeService.checkMyEmoAsset(myChallengeId);
-        return ApiUtils.success("입출금 계좌 확인", myAssetChallengeDetail);
+        myEmoChallengeService.participateEmoChallenge(pa, userInfo.getToken(), userInfo.getId());
+        return ApiUtils.success("챌린지 참여");
+
     }
 
     // 오늘 감정 기록
@@ -49,7 +44,7 @@ public class MyEmoChallengeController {
     @Operation(summary = "오늘 감정 저축", description = "오늘의 감정을 저축합니다")
     @ApiResponse(responseCode = "201", description = "성공")
     public GlobalResponse createMyEmoLog(
-            @RequestBody PostMyEmoRequest postMyEmoRequest
+            @RequestBody PostMyEmoLogRequest postMyEmoRequest
     ){
         myEmoChallengeService.createMyEmoLog(postMyEmoRequest);
         return ApiUtils.success("오늘 감정 기록 완료");

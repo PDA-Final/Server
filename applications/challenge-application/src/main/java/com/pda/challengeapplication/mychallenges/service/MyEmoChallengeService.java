@@ -1,16 +1,29 @@
 package com.pda.challengeapplication.mychallenges.service;
 
+import com.pda.challengeapplication.challenges.repository.Challenge;
+import com.pda.challengeapplication.challenges.repository.ChallengeRepository;
 import com.pda.challengeapplication.emojis.EmojiRepository;
-import com.pda.challengeapplication.mychallenges.dto.request.PostMyAccountRequest;
-import com.pda.challengeapplication.mychallenges.dto.request.PostMyEmoRequest;
+import com.pda.challengeapplication.mychallenges.dto.request.PostMyEmoLogRequest;
+import com.pda.challengeapplication.mychallenges.dto.request.outer.PostMyEmoChallengeRequest;
 import com.pda.challengeapplication.mychallenges.dto.response.MyEmoChallengeLog;
 import com.pda.challengeapplication.mychallenges.dto.response.MyEmoChallengeLogResponse;
+import com.pda.challengeapplication.mychallenges.dto.response.outer.UserInfo;
 import com.pda.challengeapplication.mychallenges.repository.*;
+import com.pda.exceptionhandler.exceptions.ConflictException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponentsBuilder;
 
+import java.net.URI;
+import java.nio.charset.Charset;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -19,21 +32,109 @@ import java.util.List;
 @Slf4j
 public class MyEmoChallengeService {
 
+    @Value("${out-service.asset.url}")
+    private String assetUrl;
+
+    @Value("${out-service.user.url}")
+    private String userUrl;
+
+
     private final MyAssetChallengeDetailRepository myAssetChallengeDetailRepository;
     private final MyAssetChallengeRepository myAssetChallengeRepository;
     private final MyChallengeRepository myChallengeRepository;
     private final EmojiRepository emojiRepository;
+    private final ChallengeRepository challengeRepository;
 
-    public MyAssetChallengeDetail createMyEmoAsset(PostMyAccountRequest postMyAccontRequest) {
-        MyAssetChallengeDetail myAssetChallengeDetail = postMyAccontRequest.convertToAccountEntity();
-        return myAssetChallengeDetailRepository.save(myAssetChallengeDetail);
+    //챌린지 참여
+    public void participateEmoChallenge(PostMyEmoChallengeRequest pa, String token, long uid) {
+
+        if(pa.getInACNT() == pa.getOutACNT()){
+            throw new ConflictException("입금 계좌와 출금 계좌는 다른 계좌여야합니다");
+        }
+
+        Challenge c = challengeRepository.findById(pa.getChallengeId());
+
+        LocalDate startAt = LocalDate.now();
+        LocalDate endAt = startAt.plusDays(c.getTerm());
+        MyChallenge mc = pa.converToMCEntity(pa.getId(),c,uid,startAt, endAt,"진행중" );
+
+        // body : 선택한 입출금 계좌, myChallengeId
+        // req to User : user 토큰   -> res from user : 유저정보
+        URI uri = UriComponentsBuilder
+                .fromUriString(userUrl)
+                .path("")
+                .encode(Charset.defaultCharset())
+                .build()
+                .toUri();
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", "Bearer " + token);
+        HttpEntity<String> entity = new HttpEntity<>(headers);
+
+        RestTemplate restTemplate = new RestTemplate();
+
+        ResponseEntity<UserInfo> response = restTemplate.exchange(uri, HttpMethod.GET, entity, UserInfo.class);
+
+        log.info("생년월일!!!!!!!!!!!!!!!!",response.getBody().getFrontSocialId());
+        // req to Asset : 유저 정보 -> res from Asset : 계좌 리스트
+//        log.info("url!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!", assetUrl);
+//
+//        uri = UriComponentsBuilder
+//                .fromUriString(assetUrl)
+//                .path("/assets")
+//                .queryParam("targets", "ACCOUNT")
+//                .encode(Charset.defaultCharset())
+//                .build()
+//                .toUri();
+//
+//
+//        HttpHeaders assetHeaders = new HttpHeaders();
+//        assetHeaders.set("front-social-id", "000103");
+//        assetHeaders.set("back-social-id", "1234123");
+//        assetHeaders.set("user-social-contact", "01012341234");
+//
+//        HttpEntity<String> assetEntity = new HttpEntity<>(assetHeaders);
+//
+//        log.info(uri.toString());
+//
+//        RestTemplate assetRestTemplate = new RestTemplate();
+//        ResponseEntity<GlobalResponse<AssetInfoResponse>> response2
+//                = assetRestTemplate.exchange(uri, HttpMethod.GET, assetEntity,new ParameterizedTypeReference<GlobalResponse<AssetInfoResponse>>() {});
+//
+//        List<AccountResponse> ac = response2.getBody().getData().getAccounts();
+//
+//
+//        // 계좌 리스트에 body 계좌들이 있는지 확인하고 저장!
+//        int cnt =0;
+//
+//
+//        for(AccountResponse acr : ac){
+//
+//            log.info(acr.getAccountNumber());
+//
+//            if(acr.getAccountNumber().equals(pa.getInACNT())){
+//                cnt ++;
+//            }
+//            else if(acr.getAccountNumber().equals(pa.getOutACNT())){
+//                cnt ++;
+//            }
+//
+//        }
+//
+//        if(cnt !=2){
+//            throw new NotFoundException("입금 계좌 또는 출금 계좌를 찾을 수 없습니다");
+//        }
+//
+//
+//        MyChallenge mySaveChallenge = myChallengeRepository.save(mc);
+//        MyAssetChallengeDetail md = new MyAssetChallengeDetail(mySaveChallenge.getId(),pa.getInACNT(), pa.getOutACNT());
+//        myAssetChallengeDetailRepository.save(md);
+
+
+
     }
 
-    public MyAssetChallengeDetail checkMyEmoAsset(long myChallengeId) {
-        return myAssetChallengeDetailRepository.findByMyChallengeId(myChallengeId);
-    }
-
-    public void createMyEmoLog(PostMyEmoRequest postMyEmoRequest) {
+    public void createMyEmoLog(PostMyEmoLogRequest postMyEmoRequest) {
         MyAssetChallenge myAssetChallenge = postMyEmoRequest.convertToAccountEntity();
         myAssetChallengeRepository.save(myAssetChallenge);
     }
@@ -82,6 +183,9 @@ public class MyEmoChallengeService {
         }
 
     }
+
+
+
 }
 
 

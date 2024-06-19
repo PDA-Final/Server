@@ -44,4 +44,7 @@ public class MyChallenge {
     }
 
 
+    public void editMyChallengeEndAt(LocalDate now) {
+        this.endAt = now;
+    }
 }

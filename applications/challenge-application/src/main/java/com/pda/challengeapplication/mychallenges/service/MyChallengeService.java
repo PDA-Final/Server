@@ -77,7 +77,7 @@ public class MyChallengeService {
         }
 
         return returnList.stream()
-                .filter(c -> !isDone(c.getEndAt()))
+                .filter(c -> c.getStatus().equals("진행중"))
                 .collect(Collectors.toList());
 
     }
@@ -101,13 +101,7 @@ public class MyChallengeService {
                 corpName = mc.getChallenge().getCorpChallengeDetail().getCorpName();
                 challengeUrl = mc.getChallenge().getCorpChallengeDetail().getChallengeUrl();
                 progress =  null;
-            }else if(challengeType ==1){
-                corpName = null; challengeUrl = null;
-                int successCnt= myAssetChallengeRepository.findByMyChallengeId(mc.getId())
-                        .stream().filter(c->c.isSuccess()).collect(Collectors.toList())
-                        .size();
-                progress =successCnt/mc.getChallenge().getTerm();
-            }else if(challengeType ==2){
+            }else{
                 corpName = null; challengeUrl = null;
                 progress = null;
             }
@@ -130,18 +124,9 @@ public class MyChallengeService {
         }
 
         return returnList.stream()
-                .filter(c -> isDone(c.getEndAt()))
+                .filter(c -> !c.getStatus().equals("진행중"))
                 .toList();
 
-    }
-
-    public boolean isDone(LocalDate t) {
-        LocalDate currentTime = LocalDate.now();
-        if (t.isBefore(currentTime)) {
-            return true;
-        } else {
-            return false;
-        }
     }
 
     // 챌린지 성공, 실패 여부 변경
@@ -156,20 +141,21 @@ public class MyChallengeService {
     // 챌린지 참여 여부 조회
     public boolean checkMyChallenge(long uid, long cid) {
         List<MyChallenge> mc = myChallengeRepository.findByUserIdAndChallengeId(uid, cid);
-        mc.stream().filter((c) -> !isDone(c.getEndAt()));
+        mc.stream().filter((c) -> c.getStatus().equals("진행중"));
         if(mc.size()==0)
             return true;
         else
             return false;
     }
 
-    // 챌린지 참여
+
+
+    // 게시글 챌린지 참여
     public MyChallenge participateChallenge(PostMyChallengeRequest postMyChallengeRequest) {
 
         if(myChallengeRepository.selectAllJPQL2(postMyChallengeRequest.getChallengeId(), postMyChallengeRequest.getUserId()) != 0){
             throw new ConflictException("이미 참여중인 챌린지입니다");
         }
-
 
        Challenge c = challengeRepository.findById(postMyChallengeRequest.getChallengeId());
 
@@ -185,6 +171,7 @@ public class MyChallengeService {
        return myChallengeRepository.save(mc);
     }
 
+    // 뱃지 리스트
     public List<MyChallengeBadgeResponse> readAllChallengeBadge(Long id) {
         List<MyChallenge> myChallenges = myChallengeRepository.findByUserId(id).stream().filter((c)-> c.getStatus() =="성공").collect(Collectors.toList());
         List<MyChallengeBadgeResponse> bl = new ArrayList<>();
@@ -213,5 +200,6 @@ public class MyChallengeService {
 
 
     }
+
 
 }

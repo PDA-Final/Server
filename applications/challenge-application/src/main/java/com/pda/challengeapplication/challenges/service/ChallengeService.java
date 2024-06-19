@@ -6,6 +6,7 @@ import com.pda.challengeapplication.challenges.dto.response.ChallengeDetailRespo
 import com.pda.challengeapplication.challenges.dto.response.ChallengeSummaryResponse;
 import com.pda.challengeapplication.challenges.repository.*;
 import com.pda.challengeapplication.mychallenges.repository.MyChallengeRepository;
+import com.pda.exceptionhandler.exceptions.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -53,7 +54,7 @@ public class ChallengeService {
     }
 
     // 상세 조회
-    public ChallengeDetailResponse findChallenge(long id) {
+    public ChallengeDetailResponse findChallenge(long id, long uid) {
        Optional<ChallengeDetail> challengeDetail = challengeDetailRepository.findByChallengeId(id);
        return ChallengeDetailResponse.builder()
                .id(challengeDetail.get().getChallenge().getId())
@@ -70,6 +71,7 @@ public class ChallengeService {
                .standardCg(challengeDetail.get().getStandardCg())
                .reward(challengeDetail.get().getReward())
                .participation(myChallengeRepository.selectAllJPQL(challengeDetail.get().getChallengeId()))
+               .status(myChallengeRepository.selectstatus(challengeDetail.get().getChallengeId(), uid))
                .build();
     }
 
@@ -78,9 +80,12 @@ public class ChallengeService {
     public Challenge modifyChallenge(ModifyChallengeRequest modifyChallenge, long id) {
         Challenge challenge = challengeRepository.findById(id);
         ChallengeDetail challengeDetail = challengeDetailRepository.findByChallengeId(id).get();
-//        if(challenge == null){
-//            //예외처리
-//        }
+
+        if(challenge == null){
+            throw new NotFoundException("존재하지 않는 챌린지입니다");
+
+        }
+
         challenge.editChallenge(modifyChallenge.getName(),modifyChallenge.getDescription(),modifyChallenge.getLogoUrl(), modifyChallenge.getStartAt(),modifyChallenge.getEndAt());
         challengeRepository.save(challenge);
         challengeDetail.editChallengeDetail(challengeDetail.getDetailDescription(), challenge);
@@ -94,6 +99,11 @@ public class ChallengeService {
     public List<ChallengeSummaryResponse> searchChallengeByName(String searchname) {
         List<Challenge> challengeDetails= challengeRepository.findByNameLike("%"+searchname+"%");
         List<ChallengeSummaryResponse> returnList = new ArrayList<>();
+
+        if(challengeDetails == null){
+            throw new NotFoundException("해당 챌린지를 찾을 수 없습니다");
+
+        }
         for(Challenge c : challengeDetails){
             long id = c.getId();
             int challengeType = c.getChallengeType();
@@ -131,6 +141,8 @@ public class ChallengeService {
 
             returnList.add(cr);
         }
+
+
 
         return returnList;
     }
