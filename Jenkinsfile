@@ -17,8 +17,22 @@ def utils = false
 pipeline {
   agent any
   post {
-    failure { setBuildStatus("Build failed", "FAILURE") }
-    success { setBuildStatus("Build successful", "SUCCESS") }
+    failure {
+      setBuildStatus("Build failed", "FAILURE")
+      slackSend (
+        channel: 'C078D2K42MD',
+        color: '#FF0000',
+        message: "FAIL: Job ${env.JOB_NAME} [${env.BUILD_NUMBER}]"
+      )
+    }
+    success {
+      setBuildStatus("Build successful", "SUCCESS")
+      slackSend (
+        channel: 'C078D2K42MD',
+        color: '#00FF00',
+        message: "SUCCESS: Job ${env.JOB_NAME} [${env.BUILD_NUMBER}]"
+      )
+    }
   }
   stages {
     stage('init') {
@@ -172,22 +186,6 @@ pipeline {
         echo 'clean unused image'
         // sh 'docker image prune --force'
       }
-    }
-  }
-  post {
-    success {
-      slackSend (
-        channel: 'C078D2K42MD',
-        color: '#00FF00',
-        message: "SUCCESS: Job ${env.JOB_NAME} [${env.BUILD_NUMBER}]"
-      )
-    }
-    failure {
-      slackSend (
-        channel: 'C078D2K42MD',
-        color: '#FF0000',
-        message: "FAIL: Job ${env.JOB_NAME} [${env.BUILD_NUMBER}]"
-      )
     }
   }
 }
