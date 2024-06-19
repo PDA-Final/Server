@@ -41,13 +41,17 @@ import com.pda.userapplication.services.out.ReadNormalUserOutputPort;
 import com.pda.userapplication.services.out.ReadUserOutputPort;
 import com.pda.userapplication.services.out.RefreshTokenOutputPort;
 import com.pda.userapplication.services.out.SaveNormalUserOutputPort;
+import com.pda.userapplication.services.out.SendCreditOutputPort;
+import com.pda.userapplication.services.out.dto.req.SendCreditOutputRequest;
 import com.pda.userapplication.services.out.dto.res.AccountResponse;
 import com.pda.userapplication.services.out.dto.res.AssetInfoResponse;
 import com.pda.userapplication.services.out.dto.res.CardResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -67,6 +71,7 @@ public class UserService implements SignUpUseCase, ReissueUseCase,
     private final SaveNormalUserOutputPort saveNormalUserOutputPort;
     private final GetAssetsOutputPort getAssetsOutputPort;
     private final ReadNormalUserOutputPort readNormalUserOutputPort;
+    private final SendCreditOutputPort sendCreditOutputPort;
 
     @Transactional
     @Override
@@ -84,8 +89,20 @@ public class UserService implements SignUpUseCase, ReissueUseCase,
             .role(UserRole.NORMAL)
             .build());
 
+        // 회원가입시 100 크레딧 지정
+        sendCreditTo(user.getId().toLong(), 100L);
+
         return toTokenInfoServiceResponse(
             generateTokenAndSaveRefresh(user));
+    }
+
+    @Async
+    public void sendCreditTo(Long userId, Long amount) {
+        sendCreditOutputPort.addCredit(SendCreditOutputRequest.builder()
+            .userId(userId)
+            .amount(amount)
+            .transactionDateTime(LocalDateTime.now())
+            .build());
     }
 
     @Override
