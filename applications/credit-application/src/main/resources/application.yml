@@ -1,7 +1,4 @@
-service-url: /api/user-service
-out-service:
-  asset:
-    url: http://localhost:7979
+service-url: /api/credit-service
 
 logging:
   level:
@@ -10,14 +7,14 @@ logging:
         SQL: debug
 
 server:
-  port: 8084
+  port: 8085
 
 spring:
   application:
-    name: user-application
+    name: credit-application
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3310/user-db?useSSL=false&allowPublicKeyRetrieval=true&useUnicode=true&serverTimezone=Asia/Seoul
+    url: jdbc:mysql://localhost:3399/credit-db?useSSL=false&allowPublicKeyRetrieval=true&useUnicode=true&serverTimezone=Asia/Seoul
     username: root
     password: root
 
@@ -36,14 +33,10 @@ spring:
     defer-datasource-initialization: true
 
   kafka:
-    producer:
+    consumer:
+      group-id: credit-group # Group Id
+      auto-offset-reset: earliest
       bootstrap-servers: localhost:10000,localhost:10001,localhost:10002
-
-  data:
-    redis:
-      host: localhost
-      password: dkssudgktpdy
-      port: 6379
 
 springdoc:
   default-consumes-media-type: application/json;charset=UTF-8
