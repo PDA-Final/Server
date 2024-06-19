@@ -69,6 +69,8 @@ pipeline {
             }
           }
           steps {
+            echo 'copy configuration files for user app'
+            sh 'cp /var/jenkins_home/workspace/configs/server/user/application.yml ./applications/user-application/src/main/resources/application.yml'
             echo 'start gradle build for user app'
             dir('./') {
               sh 'chmod +x ./gradlew'
@@ -94,7 +96,7 @@ pipeline {
           }
           steps {
             echo 'copy configuration files for board app'
-            sh 'cp /var/jenkins_home/workspace/configs/server/board/application-keys.yml ./applications/board-application/src/main/resources/application-keys.yml'
+            sh 'cp /var/jenkins_home/workspace/configs/server/board/application.yml ./applications/board-application/src/main/resources/application.yml'
             echo 'start gradle build for board app'
             dir('./') {
               sh 'chmod +x ./gradlew'
