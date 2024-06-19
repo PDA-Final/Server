@@ -40,7 +40,6 @@ public class ProductService {
                         .corpName(product.getCorp().getName())
                         .corpImage(product.getCorp().getLogoImg())
                         .cardImage(product.getCardImg())
-                        .usefulCnt(product.getUsefulCnt())
                         .tags(splitTags(product.getTags()))
                         .createdTime(product.getCreatedAt())
                         .build()
@@ -61,7 +60,6 @@ public class ProductService {
                 .corpName(product.getCorp().getName())
                 .corpImage(product.getCorp().getLogoImg())
                 .cardImage(product.getCardImg())
-                .usefulCnt(product.getUsefulCnt())
                 .tags(splitTags(product.getTags()))
                 .createdTime(product.getCreatedAt())
                 .build();
@@ -238,7 +236,6 @@ public class ProductService {
                         .corpName(product.getCorp().getName())
                         .corpImage(product.getCorp().getLogoImg())
                         .cardImage(product.getCardImg())
-                        .usefulCnt(product.getUsefulCnt())
                         .tags(splitTags(product.getTags()))
                         .createdTime(product.getCreatedAt())
                         .build()

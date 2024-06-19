@@ -20,9 +20,6 @@ public class Product extends BaseEntity {
     @Column(name = "name", nullable = false)
     private String name;
 
-    @Column(name = "useful_cnt", nullable = false, columnDefinition = "int default 0")
-    private int usefulCnt;
-
     @Column(name = "card_image")
     private String cardImg;
 

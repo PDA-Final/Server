@@ -17,7 +17,6 @@ public class ProductDto {
         private String corpName;
         private String corpImage;
         private String cardImage;
-        private int usefulCnt;
         private List<String> tags;
         private LocalDateTime createdTime;
     }
