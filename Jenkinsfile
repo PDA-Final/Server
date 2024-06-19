@@ -130,6 +130,41 @@ pipeline {
 
           }
         }
+
+        stage('build product app') {
+          when {
+            anyOf {
+              expression { productApp }
+              expression { utils }
+            }
+          }
+          steps {
+            echo 'copy configuration files for board app'
+            sh 'cp /var/jenkins_home/workspace/configs/server/product/application.yml ./applications/product-application/src/main/resources/application.yml'
+            echo 'start gradle build for product app'
+            dir('./') {
+              sh 'chmod +x ./gradlew'
+              sh './gradlew clean'
+              sh './gradlew :applications:product-application:build'
+            }
+            echo 'start docker build for product app'
+            dir('./applications/product-application/') {
+              sh 'docker build -t bkkmw/tofin-prod-api .'
+              sh 'docker push bkkmw/tofin-prod-api'
+            }
+            echo 'publish over ssh for product app'
+            script {
+              try {
+                publishOverSSH('prod-api', 'tofin-prod-api')
+                echo "Publish over ssh Successful"
+              } catch(Exception e) {
+                echo "Publish over ssh failed : ${e.message}"
+                currentBuild.result = 'FAILURE'
+              }
+            }
+
+          }
+        }
       }
     }
     stage('clean') {
