@@ -19,6 +19,7 @@ import com.pda.userapplication.domains.vo.Nickname;
 import com.pda.userapplication.domains.vo.TofinId;
 import com.pda.userapplication.domains.vo.UserId;
 import com.pda.userapplication.services.in.ConnectAssetUseCase;
+import com.pda.userapplication.services.in.GetUserDetailInfo;
 import com.pda.userapplication.services.in.IsAvailableContact;
 import com.pda.userapplication.services.in.IsAvailableTofinIdUseCase;
 import com.pda.userapplication.services.in.ReissueUseCase;
@@ -35,6 +36,7 @@ import com.pda.userapplication.services.in.dto.res.AvailableContactServiceRespon
 import com.pda.userapplication.services.in.dto.res.AvailableTofinIdServiceResponse;
 import com.pda.userapplication.services.in.dto.res.ConnectAssetInfoResponse;
 import com.pda.userapplication.services.in.dto.res.TokenInfoServiceResponse;
+import com.pda.userapplication.services.in.dto.res.UserDetailInfoResponse;
 import com.pda.userapplication.services.out.CreateUserOutputPort;
 import com.pda.userapplication.services.out.GetAssetsOutputPort;
 import com.pda.userapplication.services.out.ReadNormalUserOutputPort;
@@ -62,7 +64,8 @@ import java.util.regex.Pattern;
 @Transactional(readOnly = true)
 public class UserService implements SignUpUseCase, ReissueUseCase,
     IsAvailableTofinIdUseCase, SignInUseCase, ConnectAssetUseCase,
-    IsAvailableContact, SetPublicOptionUseCase, SetTendencyUseCase {
+    IsAvailableContact, SetPublicOptionUseCase, SetTendencyUseCase,
+    GetUserDetailInfo {
     private final CreateUserOutputPort createUserOutputPort;
     private final ReadUserOutputPort readUserOutputPort;
     private final UserInfoEncoder userInfoEncoder;
@@ -221,6 +224,19 @@ public class UserService implements SignUpUseCase, ReissueUseCase,
         }
 
         saveNormalUserOutputPort.save(user);
+    }
+
+    @Override
+    public UserDetailInfoResponse getUserDetailInfo(Long userId) {
+        NormalUser user = readNormalUserOutputPort.findByUserId(UserId.of(userId))
+            .orElseThrow(() -> new NotFoundException("해당 유저의 세부 정보가 존재하지 않습니다."));
+
+        return UserDetailInfoResponse.builder()
+                .frontSocialId(user.getFrontSocialId())
+                .backSocialId(user.getBackSocialId())
+                .socialName(user.getSocialName())
+                .contact(user.getContact())
+            .build();
     }
 
     private boolean isDuplicateTofinId(final TofinId tofinId) {

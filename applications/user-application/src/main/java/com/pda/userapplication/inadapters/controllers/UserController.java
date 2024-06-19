@@ -9,6 +9,7 @@ import com.pda.userapplication.inadapters.controllers.dto.req.SetPublicOptionReq
 import com.pda.userapplication.inadapters.controllers.dto.req.SetTendencyRequest;
 import com.pda.userapplication.services.in.ConnectAssetUseCase;
 import com.pda.userapplication.services.in.GetJobsUseCase;
+import com.pda.userapplication.services.in.GetUserDetailInfo;
 import com.pda.userapplication.services.in.IsAvailableContact;
 import com.pda.userapplication.services.in.IsAvailableTofinIdUseCase;
 import com.pda.userapplication.services.in.SetPublicOptionUseCase;
@@ -19,6 +20,7 @@ import com.pda.userapplication.services.in.dto.req.SetTendencyServiceRequest;
 import com.pda.userapplication.services.in.dto.res.AvailableContactServiceResponse;
 import com.pda.userapplication.services.in.dto.res.AvailableTofinIdServiceResponse;
 import com.pda.userapplication.services.in.dto.res.ConnectAssetInfoResponse;
+import com.pda.userapplication.services.in.dto.res.UserDetailInfoResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -48,6 +50,7 @@ public class UserController {
     private final IsAvailableContact isAvailableContact;
     private final SetPublicOptionUseCase setPublicOptionUseCase;
     private final SetTendencyUseCase setTendencyUseCase;
+    private final GetUserDetailInfo getUserDetailInfo;
 
     @GetMapping("/jobs")
     @Operation(summary = "직업 리스트 조회", description = "모든 직업들의 리스트를 한글로 반환합니다")
@@ -114,5 +117,12 @@ public class UserController {
                 .userId(authUser.getId())
             .build());
         return ApiUtils.success("유저 성향 설정 완료");
+    }
+
+    @GetMapping("/detail-info")
+    @Operation(summary = "유저 민감 정보 조회", description = "유저의 민감 정보 조회(자산 연결 후 사용 가능) -> 클라이언트에서 절대 사용 X",
+        security = @SecurityRequirement(name = "bearerAuth"))
+    public GlobalResponse<UserDetailInfoResponse> getDetailInfo(@AuthUser AuthUserInfo userInfo) {
+        return ApiUtils.success("성공", getUserDetailInfo.getUserDetailInfo(userInfo.getId()));
     }
 }
