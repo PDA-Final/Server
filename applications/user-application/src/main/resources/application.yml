@@ -11,6 +11,7 @@ logging:
 
 server:
   port: 8084
+  shutdown: graceful
 
 spring:
   application:
@@ -49,3 +50,29 @@ springdoc:
   default-consumes-media-type: application/json;charset=UTF-8
   default-produces-media-type: application/json;charset=UTF-8
   packages-to-scan: com.pda
+
+eureka:
+  instance:
+    hostname:
+    healthCheckUrlPath: /actuator/health
+    lease-renewal-interval-in-seconds: 30
+    lease-expiration-duration-in-seconds: 10
+    prefer-ip-address: true
+  client:
+    eureka-server-port: 8761
+    register-with-eureka: true
+    fetch-registry: true
+    disable-delta: true
+    service-url:
+      defaultZone: http://192.168.2.20:8761/eureka
+
+management:
+  endpoint:
+    shutdown:
+      enabled: true
+    health:
+      enabled: true
+  endpoints:
+    web:
+      exposure:
+        include: shutdown, health

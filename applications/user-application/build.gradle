@@ -2,6 +2,10 @@ project(":applications:user-application") {
     bootJar{enabled = true}
     jar {enabled = false}
 
+    ext {
+        set('springCloudVersion', "2023.0.2")
+    }
+
     dependencies {
         implementation 'org.springframework.boot:spring-boot-starter-web'
         implementation 'org.springframework.boot:spring-boot-starter'
@@ -10,6 +14,8 @@ project(":applications:user-application") {
         implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.5.0'
         runtimeOnly 'com.mysql:mysql-connector-j'
         implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+        implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'
+        implementation 'org.springframework.boot:spring-boot-starter-actuator'
         implementation project(':utils:tofin-enums')
         implementation project(':utils:exception-handler')
         implementation project(':utils:api-utils')
@@ -20,5 +26,11 @@ project(":applications:user-application") {
         implementation project(":utils:kafka-utils")
 
         testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    }
+
+    dependencyManagement {
+        imports {
+            mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
+        }
     }
 }
