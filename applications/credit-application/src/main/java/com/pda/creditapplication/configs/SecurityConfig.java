@@ -1,4 +1,4 @@
-package com.pda.userapplication.configs.security;
+package com.pda.creditapplication.configs;
 
 import com.pda.tofinenums.user.UserRole;
 import com.pda.tofinsecurity.hooks.SecurityRequestMatcher;
@@ -9,17 +9,14 @@ import org.springframework.context.annotation.Configuration;
 import java.util.List;
 
 @Configuration
-public class CustomSecurityConfig {
+public class SecurityConfig {
     @Bean
     public SecurityRequestMatcherChain securityRequestMatcherChain() {
         SecurityRequestMatcherChain securityRequestMatcherChain = new SecurityRequestMatcherChain();
-
         securityRequestMatcherChain
-            .add(SecurityRequestMatcher.hasRoleOf(UserRole.ADMIN, "/test"));
-        securityRequestMatcherChain
-            .add(SecurityRequestMatcher.hasAnyRolesOf(List.of(UserRole.NORMAL, UserRole.FINFLUENCER),
-                "/users/assets", "/users/public-options", "/users/detail-info"));
-
+            .add(SecurityRequestMatcher.hasAnyRolesOf(
+                List.of(UserRole.NORMAL, UserRole.CORP, UserRole.FINFLUENCER),
+                "/credit/withdraw"));
         return securityRequestMatcherChain;
     }
 }
