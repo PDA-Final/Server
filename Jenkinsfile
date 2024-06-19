@@ -134,7 +134,7 @@ def publishOverSSH(serverName, imageName) {
           sshTransfer(
             cleanRemote: false, // clean remote dir
             excludes: '',
-            execCommand: "/bin/bash deploy.sh ${imageName}",
+            execCommand: "/bin/bash /homw/ubuntu/deploy.sh ${imageName}",
             execTimeout: 120000,
             makeEmptyDirs: false,
             noDefaultExcludes: false,
