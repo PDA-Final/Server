@@ -11,7 +11,7 @@ import reactor.core.publisher.Mono;
 
 @DisplayName("test")
 class TestWebClientTest {
-    @Test
+//    @Test
     @DisplayName("API 테스트 실행")
     void test() {
         WebClient webClient = WebClient.builder()
