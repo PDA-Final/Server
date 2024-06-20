@@ -3,7 +3,6 @@ project(":utils:s3-utils") {
     jar {enabled = true}
 
     dependencies {
-        implementation 'com.fasterxml.jackson.core:jackson-databind'
         implementation 'org.springframework.boot:spring-boot-starter-web'
         implementation 'io.awspring.cloud:spring-cloud-starter-aws:2.4.1'
         implementation 'javax.xml.bind:jaxb-api:2.3.1'
