@@ -197,4 +197,24 @@ public class ProductController {
 
         return ApiUtils.success("success", result);
     }
+
+    @GetMapping("/search")
+    @Operation(summary = "Search for products", description = "Search for products by name")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "OK"),
+            @ApiResponse(responseCode = "204", description = "No content")
+    })
+    public GlobalResponse<Object> searchProductByName(
+            @RequestParam("name") String name,
+            @RequestParam(required = false, defaultValue = "0", value = "pageNo") int pageNo,
+            @RequestParam(required = false, defaultValue = "10", value = "size") int size
+    ) {
+        log.debug("Get searched product list. page {}, size {}", pageNo, size);
+        Map<String, Object> result = new HashMap<>();
+
+        List<ProductDto.BasicRespDto> products = productService.searchProductByName(name, pageNo, size);
+        result.put("searched products", products);
+
+        return ApiUtils.success("success", result);
+    }
 }

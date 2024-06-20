@@ -15,4 +15,6 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     List<Product> findRandomProducts(@Param("limit") int limit);
 
     Page<Product> findByCategoryId(Long categoryId, Pageable pageable);
+
+    Page<Product> findByNameLike(String name, Pageable pageable);
 }

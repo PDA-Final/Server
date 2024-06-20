@@ -286,6 +286,34 @@ public class ProductService {
                 .build();
     }
 
+    /**
+     * Search for products by name
+     * @param name product name
+     * @param pageNo page number
+     * @param size size
+     * @return searched products
+     */
+    public List<ProductDto.BasicRespDto> searchProductByName(String name, int pageNo, int size) {
+        Pageable pageable = PageRequest.of(pageNo, size);
+        Page<Product> products;
+
+        products = productRepository.findByNameLike("%"+name+"%", pageable);
+
+        if (products.isEmpty())
+            throw new NotFoundException("No products found with name: " + name);
+
+        return products.stream().map(product ->
+                ProductDto.BasicRespDto.builder()
+                        .id(product.getId())
+                        .name(product.getName())
+                        .corpName(product.getCorp().getName())
+                        .corpImage(product.getCorp().getLogoImg())
+                        .cardImage(product.getCardImg())
+                        .tags(convertToList(product.getTags()))
+                        .createdTime(product.getCreatedAt())
+                        .build()
+        ).collect(Collectors.toList());
+    }
 
     public List<String> convertToList(String data) {
         if (data == null || data.isEmpty()) {
