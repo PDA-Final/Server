@@ -6,6 +6,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+;
+
 @Getter
 @Schema(description = "Response Wrapper")
 @NoArgsConstructor

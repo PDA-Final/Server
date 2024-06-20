@@ -22,9 +22,6 @@ spring:
     username: root
     password: root
 
-  sql:
-    init:
-      mode: always
   jpa:
     hibernate:
       ddl-auto: create-drop
