@@ -73,8 +73,8 @@ pipeline {
         echo "utils : ${utils}, user : ${userApp}, board : ${boardApp}, challenge : ${challengeApp}, product : ${productApp}"
       }
     }
-    stage('task') {
-      parallel {
+    stages('task') {
+//       parallel {
         stage('build user app') {
           when {
             anyOf {
@@ -215,7 +215,7 @@ pipeline {
           }
         }
 
-      }
+//       }
     }
     stage('clean') {
       steps {
