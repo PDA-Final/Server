@@ -1,0 +1,6 @@
+
+spring:
+  application:
+    name: alert-application
+server:
+  port: 8089
