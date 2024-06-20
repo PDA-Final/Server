@@ -13,6 +13,7 @@ def boardApp = false
 def challengeApp = false
 def productApp = false
 def utils = false
+def failureCnt = 0
 
 pipeline {
   agent any
@@ -105,6 +106,8 @@ pipeline {
           } catch(Exception e) {
             echo "Publish over ssh failed : ${e.message}"
             currentBuild.result = 'FAILURE'
+            // stop on failure
+            failFast true
           }
         }
       }
@@ -139,6 +142,8 @@ pipeline {
           } catch(Exception e) {
             echo "Publish over ssh failed : ${e.message}"
             currentBuild.result = 'FAILURE'
+            // stop on failure
+            failFast true
           }
         }
 
@@ -174,6 +179,8 @@ pipeline {
           } catch(Exception e) {
             echo "Publish over ssh failed : ${e.message}"
             currentBuild.result = 'FAILURE'
+            // stop on failure
+            failFast true
           }
         }
 
