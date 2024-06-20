@@ -1,0 +1,17 @@
+project(":applications:alert-application") {
+    bootJar{enabled = true}
+    jar {enabled = false}
+
+    dependencies {
+        implementation 'org.springframework.boot:spring-boot-starter-web'
+        implementation 'org.springframework.boot:spring-boot-starter'
+        implementation 'org.springframework.boot:spring-boot-starter-validation'
+        implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.5.0'
+        implementation project(':utils:tofin-enums')
+        implementation project(':utils:exception-handler')
+        implementation project(':utils:api-utils')
+        implementation project(':utils:tofin-security')
+
+        testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    }
+}

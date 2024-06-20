@@ -1,4 +1,4 @@
-package com.pda.userapplication.outadapters.jpa;
+package com.pda.userapplication.outadapters.jpa.entities.user;
 
 import com.pda.exceptionhandler.exceptions.BadRequestException;
 import com.pda.userapplication.domains.NormalUser;
@@ -18,7 +18,7 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
-public class NormalUserJpaAdapter implements CreateUserOutputPort, ReadUserOutputPort, SaveNormalUserOutputPort, ReadNormalUserOutputPort {
+public class UserJpaAdapter implements CreateUserOutputPort, ReadUserOutputPort, SaveNormalUserOutputPort, ReadNormalUserOutputPort {
     private final UserRepository userRepository;
     private final UserDetailRepository userDetailRepository;
     private final UserEntityMapper userMapper;

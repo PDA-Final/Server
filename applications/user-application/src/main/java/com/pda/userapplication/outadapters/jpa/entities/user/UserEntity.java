@@ -1,9 +1,10 @@
-package com.pda.userapplication.outadapters.jpa;
+package com.pda.userapplication.outadapters.jpa.entities.user;
 
 import com.pda.tofinenums.user.Job;
 import com.pda.tofinenums.user.UserRole;
 import com.pda.userapplication.outadapters.jpa.converter.JobConverter;
 import com.pda.userapplication.outadapters.jpa.converter.UserRoleConverter;
+import com.pda.userapplication.outadapters.jpa.entities.BaseTimeEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
@@ -39,7 +40,7 @@ import java.time.LocalDateTime;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor(access = AccessLevel.MODULE)
-public class UserEntity {
+public class UserEntity extends BaseTimeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", unique = true, nullable = false, updatable = false)
