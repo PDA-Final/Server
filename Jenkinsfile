@@ -74,6 +74,7 @@ pipeline {
             productApp = changedDirs.contains('product-application')
           }
         }
+        sh 'cp /var/jenkins_home/workspace/builds/deploy.sh ./scripts/deploy.sh'
         echo "utils : ${utils}, user : ${userApp}, board : ${boardApp}, challenge : ${challengeApp}, product : ${productApp}"
       }
     }
@@ -247,10 +248,10 @@ def publishOverSSH(serverName, imageName) {
             execTimeout: 120000,
             makeEmptyDirs: false,
             noDefaultExcludes: false,
-            remoteDirectory: '/home/ubuntu/ws/',
+            remoteDirectory: 'workspace',
             remoteDirectorySDF: false,
-            removePrefix: '/var/jenkins_home/workspace/builds',
-            sourceFiles: '/var/jenkins_home/workspace/builds/deploy.sh'
+            removePrefix: 'scripts',
+            sourceFiles: 'scripts/deploy.sh'
           )
         ]
       )
