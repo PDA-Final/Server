@@ -34,7 +34,7 @@ pipeline {
       )
     }
   }
-  stages {
+  stage('task') {
     stage('init') {
       steps {
         echo 'init pipeline, check changes'
