@@ -17,7 +17,6 @@ public class ProductDto {
         private String corpName;
         private String corpImage;
         private String cardImage;
-        private int usefulCnt;
         private List<String> tags;
         private LocalDateTime createdTime;
     }
@@ -47,7 +46,7 @@ public class ProductDto {
     @Getter
     public static class CardDetailRespDto {
         private String description;
-        private String terms;
+        private List<String> terms;
     }
 
     @Builder
@@ -80,7 +79,6 @@ public class ProductDto {
         private float stdPrice; // 기준가
         private float diffPrice; // 변동가
         private float drvNav; // 운용규모
-        private Date setDate; // 설정일
         private float rt3m; // 수익률(3달)
         private float ter; // 총보수
     }
@@ -102,13 +100,11 @@ public class ProductDto {
         private String category2; // 펀드유형2
         private String infoObject; // 투자목적
         private String infoStrategy; // 투자전략
-        private String refBm; // 비교전략
         private String region; // 투자지역
         private String amtGb; // 규모성장
         private String exceBm; // BM초과성과
         private String riskGb; // 위험도
         private String rtGb; // 성과지속
-        private String smallScaleYn; // 소규모 펀드
     }
 
     @Builder
@@ -123,5 +119,11 @@ public class ProductDto {
     @Getter
     public static class LoanDetailRespDto {
         private String description;
+    }
+
+    @Builder
+    @Getter
+    public static class BoardCountReqDto {
+        private int boardCount;
     }
 }

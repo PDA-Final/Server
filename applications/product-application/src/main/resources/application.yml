@@ -8,6 +8,7 @@ logging:
             sql: trace
 server:
   port: 8083
+  shutdown: graceful
 
 spring:
   application:
@@ -21,6 +22,7 @@ spring:
   sql:
     init:
       mode: always
+      data-locations: classpath:db/insert_*.sql
   jpa:
     hibernate:
       ddl-auto: create
@@ -37,4 +39,25 @@ springdoc:
   default-produces-media-type: application/json;charset=UTF-8
   packages-to-scan: com.pda
 
+eureka:
+  instance:
+    healthCheckUrlPath: /actuator/health
+    lease-renewal-interval-in-seconds: 30
+    lease-expiration-duration-in-seconds: 10
+    prefer-ip-address: true
+  client:
+    eureka-server-port: 8761
+    register-with-eureka: true
+    fetch-registry: true
+    disable-delta: true
+    service-url:
+      defaultZone: http://192.168.2.20:8761/eureka
 
+management:
+  endpoint:
+    shutdown:
+      enabled: true
+  endpoints:
+    web:
+      exposure:
+        include: shutdown, health
