@@ -23,4 +23,5 @@ public class ChallengeSummaryResponse {
     Integer reward;
     int participation;
 
+
 }

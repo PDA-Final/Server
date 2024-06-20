@@ -151,9 +151,9 @@ public class MyChallengeService {
 
 
     // 게시글 챌린지 참여
-    public MyChallenge participateChallenge(PostMyChallengeRequest postMyChallengeRequest) {
+    public MyChallenge participateChallenge(PostMyChallengeRequest postMyChallengeRequest, long uid) {
 
-        if(myChallengeRepository.selectAllJPQL2(postMyChallengeRequest.getChallengeId(), postMyChallengeRequest.getUserId()) != 0){
+        if(myChallengeRepository.selectAllJPQL2(postMyChallengeRequest.getChallengeId(), uid) != 0){
             throw new ConflictException("이미 참여중인 챌린지입니다");
         }
 
@@ -167,7 +167,7 @@ public class MyChallengeService {
             endAt = startAt.plusDays(c.getTerm());
         }
 
-       MyChallenge mc = new MyChallenge(postMyChallengeRequest.getId(),c , postMyChallengeRequest.getUserId(), startAt, endAt,"진행중");
+       MyChallenge mc = new MyChallenge(postMyChallengeRequest.getId(),c , uid, startAt, endAt,"진행중");
        return myChallengeRepository.save(mc);
     }
 

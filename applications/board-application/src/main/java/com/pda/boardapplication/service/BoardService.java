@@ -108,6 +108,7 @@ public class BoardService {
 
         return boards.stream().map((elem) ->
                 BoardDto.AbstractRespDto.builder()
+                        .id(elem.getId())
                         .title(elem.getTitle())
                         .summary(elem.getContent())
                         .createdTime(elem.getCreatedAt())

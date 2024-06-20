@@ -18,7 +18,7 @@ public class CustomSecurityConfig {
             .add(SecurityRequestMatcher.hasRoleOf(UserRole.ADMIN, "/test"));
         securityRequestMatcherChain
             .add(SecurityRequestMatcher.hasAnyRolesOf(List.of(UserRole.NORMAL, UserRole.FINFLUENCER),
-                "/users/assets", "/users/public-options"));
+                "/users/assets", "/users/public-options", "/users/detail-info"));
 
         return securityRequestMatcherChain;
     }

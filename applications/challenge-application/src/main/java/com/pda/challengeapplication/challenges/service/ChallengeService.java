@@ -29,8 +29,7 @@ public class ChallengeService {
     @Transactional
     public Challenge createChallenge(PostChallengeRequest challengeDTO) {
         Challenge savedChallenge = challengeRepository.save(challengeDTO.convertToChallengeEntity());
-        ChallengeDetail challengeDetail = challengeDTO.convertToCDEntity(savedChallenge);
-        challengeDetail.setChallengeId(savedChallenge.getId());
+        ChallengeDetail challengeDetail = challengeDTO.convertToCDEntity(savedChallenge.getId(), savedChallenge);
         challengeDetailRepository.save(challengeDetail);
         return challengeRepository.findFirstByOrderByIdDesc();
     }
@@ -38,15 +37,16 @@ public class ChallengeService {
     // 조회
     public List<ChallengeSummaryResponse> readAllChallenge() {
         List<ChallengeDetail> challengeList = challengeDetailRepository.findAll();
+
         return challengeList.stream()
                 .map((challenge) -> ChallengeSummaryResponse.builder()
-                        .id(challenge.getChallenge().getId())
-                        .challengeType(challenge.getChallenge().getChallengeType())
-                        .name(challenge.getChallenge().getName())
-                        .description(challenge.getChallenge().getDescription())
-                        .logoUrl(challenge.getChallenge().getLogoUrl())
-                        .endAt(challenge.getChallenge().getEndAt())
-                        .term(challenge.getChallenge().getTerm())
+                        .id(challenge.getChallengeId())
+                        .challengeType(challengeRepository.findById(challenge.getChallengeId()).getChallengeType())
+                        .name(challengeRepository.findById(challenge.getChallengeId()).getName())
+                        .description(challengeRepository.findById(challenge.getChallengeId()).getDescription())
+                        .logoUrl(challengeRepository.findById(challenge.getChallengeId()).getLogoUrl())
+                        .endAt(challengeRepository.findById(challenge.getChallengeId()).getEndAt())
+                        .term(challengeRepository.findById(challenge.getChallengeId()).getTerm())
                         .reward(challenge.getReward())
                         .participation(myChallengeRepository.selectAllJPQL(challenge.getChallengeId()))
                         .build())
@@ -111,7 +111,7 @@ public class ChallengeService {
             String description = c.getDescription();
             String logoUrl = c.getLogoUrl();
             LocalDate endAt = c.getEndAt();
-            int term = c.getTerm();
+            Integer term = c.getTerm();
             String challengeUrl; String corpName; Integer reward;
 
             if(challengeType ==0){

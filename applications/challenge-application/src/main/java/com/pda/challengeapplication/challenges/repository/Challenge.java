@@ -30,7 +30,6 @@ public class Challenge {
     LocalDate startAt;
     @NotNull
     LocalDate endAt;
-    @NotNull
     Integer term;
 
     @OneToOne(mappedBy = "challenge")

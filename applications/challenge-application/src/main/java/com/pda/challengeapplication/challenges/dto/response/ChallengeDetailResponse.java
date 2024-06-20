@@ -17,7 +17,7 @@ public class ChallengeDetailResponse {
     String logoUrl;
     LocalDate startAt;
     LocalDate endAt;
-    int term;
+    Integer term;
     String detailDescription;
     String badgeName;
     Integer standardNum;

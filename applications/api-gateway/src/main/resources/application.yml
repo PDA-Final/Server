@@ -35,6 +35,12 @@ spring:
             - Path= ${service-url}/board-service/**
           filters:
             - RewritePath=${service-url}/board-service/(?<path>.*),/$\{path}
+        - id: credit-service
+          uri: http://localhost:8085
+          predicates:
+            - Path= ${service-url}/credit-service/**
+          filters:
+            - RewritePath=${service-url}/credit-service/(?<path>.*),/$\{path}
 
 springdoc:
   default-consumes-media-type: application/json;charset=UTF-8

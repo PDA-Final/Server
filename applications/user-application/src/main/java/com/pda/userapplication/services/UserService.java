@@ -19,6 +19,7 @@ import com.pda.userapplication.domains.vo.Nickname;
 import com.pda.userapplication.domains.vo.TofinId;
 import com.pda.userapplication.domains.vo.UserId;
 import com.pda.userapplication.services.in.ConnectAssetUseCase;
+import com.pda.userapplication.services.in.GetUserDetailInfo;
 import com.pda.userapplication.services.in.IsAvailableContact;
 import com.pda.userapplication.services.in.IsAvailableTofinIdUseCase;
 import com.pda.userapplication.services.in.ReissueUseCase;
@@ -35,19 +36,24 @@ import com.pda.userapplication.services.in.dto.res.AvailableContactServiceRespon
 import com.pda.userapplication.services.in.dto.res.AvailableTofinIdServiceResponse;
 import com.pda.userapplication.services.in.dto.res.ConnectAssetInfoResponse;
 import com.pda.userapplication.services.in.dto.res.TokenInfoServiceResponse;
+import com.pda.userapplication.services.in.dto.res.UserDetailInfoResponse;
 import com.pda.userapplication.services.out.CreateUserOutputPort;
 import com.pda.userapplication.services.out.GetAssetsOutputPort;
 import com.pda.userapplication.services.out.ReadNormalUserOutputPort;
 import com.pda.userapplication.services.out.ReadUserOutputPort;
 import com.pda.userapplication.services.out.RefreshTokenOutputPort;
 import com.pda.userapplication.services.out.SaveNormalUserOutputPort;
+import com.pda.userapplication.services.out.SendCreditOutputPort;
+import com.pda.userapplication.services.out.dto.req.SendCreditOutputRequest;
 import com.pda.userapplication.services.out.dto.res.AccountResponse;
 import com.pda.userapplication.services.out.dto.res.AssetInfoResponse;
 import com.pda.userapplication.services.out.dto.res.CardResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -58,7 +64,8 @@ import java.util.regex.Pattern;
 @Transactional(readOnly = true)
 public class UserService implements SignUpUseCase, ReissueUseCase,
     IsAvailableTofinIdUseCase, SignInUseCase, ConnectAssetUseCase,
-    IsAvailableContact, SetPublicOptionUseCase, SetTendencyUseCase {
+    IsAvailableContact, SetPublicOptionUseCase, SetTendencyUseCase,
+    GetUserDetailInfo {
     private final CreateUserOutputPort createUserOutputPort;
     private final ReadUserOutputPort readUserOutputPort;
     private final UserInfoEncoder userInfoEncoder;
@@ -67,6 +74,7 @@ public class UserService implements SignUpUseCase, ReissueUseCase,
     private final SaveNormalUserOutputPort saveNormalUserOutputPort;
     private final GetAssetsOutputPort getAssetsOutputPort;
     private final ReadNormalUserOutputPort readNormalUserOutputPort;
+    private final SendCreditOutputPort sendCreditOutputPort;
 
     @Transactional
     @Override
@@ -84,8 +92,20 @@ public class UserService implements SignUpUseCase, ReissueUseCase,
             .role(UserRole.NORMAL)
             .build());
 
+        // 회원가입시 100 크레딧 지정
+        sendCreditTo(user.getId().toLong(), 100L);
+
         return toTokenInfoServiceResponse(
             generateTokenAndSaveRefresh(user));
+    }
+
+    @Async
+    public void sendCreditTo(Long userId, Long amount) {
+        sendCreditOutputPort.addCredit(SendCreditOutputRequest.builder()
+            .userId(userId)
+            .amount(amount)
+            .transactionDateTime(LocalDateTime.now())
+            .build());
     }
 
     @Override
@@ -204,6 +224,19 @@ public class UserService implements SignUpUseCase, ReissueUseCase,
         }
 
         saveNormalUserOutputPort.save(user);
+    }
+
+    @Override
+    public UserDetailInfoResponse getUserDetailInfo(Long userId) {
+        NormalUser user = readNormalUserOutputPort.findByUserId(UserId.of(userId))
+            .orElseThrow(() -> new NotFoundException("해당 유저의 세부 정보가 존재하지 않습니다."));
+
+        return UserDetailInfoResponse.builder()
+                .frontSocialId(user.getFrontSocialId())
+                .backSocialId(user.getBackSocialId())
+                .socialName(user.getSocialName())
+                .contact(user.getContact())
+            .build();
     }
 
     private boolean isDuplicateTofinId(final TofinId tofinId) {

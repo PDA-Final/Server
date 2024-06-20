@@ -126,10 +126,10 @@ public class ChallengeController {
     @Operation(summary = "기업 챌린지 조회", description = "기업별 챌린지를 조회합니다")
     @ApiResponse(responseCode = "200", description = "성공")
     public GlobalResponse<List<ChallengeSummaryResponse>> findCorpChallengeDetail(
-            @RequestParam(required = false, value = "EndOrNot") int EndOrNot,
+            @RequestParam(required = false, value = "isDone") int isDone,
             @Valid @PathVariable(value = "id") long id){
 
-            if(EndOrNot == 0){
+            if(isDone == 0){
                 List<ChallengeSummaryResponse> challenge =corpChallengeService.findCorpChallenge(id);
                 return ApiUtils.success("진행중인 기업 챌린지 조회", challenge);
             }else{

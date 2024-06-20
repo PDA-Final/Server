@@ -41,12 +41,14 @@ public class MyEmoChallengeController {
 
     // 오늘 감정 기록
     @PostMapping("/emoji")
-    @Operation(summary = "오늘 감정 저축", description = "오늘의 감정을 저축합니다")
+    @Operation(summary = "오늘 감정 저축", description = "오늘의 감정을 저축합니다",
+            security = @SecurityRequirement(name = "bearerAuth"))
     @ApiResponse(responseCode = "201", description = "성공")
     public GlobalResponse createMyEmoLog(
+            @AuthUser AuthUserInfo userInfo,
             @RequestBody PostMyEmoLogRequest postMyEmoRequest
     ){
-        myEmoChallengeService.createMyEmoLog(postMyEmoRequest);
+        myEmoChallengeService.createMyEmoLog(postMyEmoRequest, userInfo.getToken());
         return ApiUtils.success("오늘 감정 기록 완료");
     }
 

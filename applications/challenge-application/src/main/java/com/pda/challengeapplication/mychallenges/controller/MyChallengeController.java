@@ -30,7 +30,7 @@ public class MyChallengeController {
      private final MyChallengeService myChallengeService;
 
 
-    //참여 챌린지 조회 (내 프로필 or 다른 사람 프로필 / 마감된 or 진행중인)
+    //참여 챌린지 조회 (내 프로필 or 다른 사람 프로필 / 마감된(1) or 진행중인(0))
     @GetMapping
     @Operation(summary = "챌린지 조회", description = "유저 참여 챌린지를 조회합니다",
     security = @SecurityRequirement(name = "bearerAuth"))
@@ -90,10 +90,11 @@ public class MyChallengeController {
             security = @SecurityRequirement(name = "bearerAuth"))
     @ApiResponse(responseCode = "201", description = "성공")
     public GlobalResponse participateChallenge(
-            @RequestBody PostMyChallengeRequest postMyChallengeRequest
+            @RequestBody PostMyChallengeRequest postMyChallengeRequest,
+             @AuthUser AuthUserInfo userInfo
     ){
 
-        MyChallenge myChallenge = myChallengeService.participateChallenge(postMyChallengeRequest);
+        MyChallenge myChallenge = myChallengeService.participateChallenge(postMyChallengeRequest, userInfo.getId());
         String challengeName = myChallenge.getChallenge().getName();
         return ApiUtils.success("챌린지 참여",challengeName);
 

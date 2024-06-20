@@ -1,11 +1,10 @@
 package com.pda.challengeapplication.mychallenges.dto.request;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-
-import java.time.LocalDate;
 
 @Builder
 @AllArgsConstructor
@@ -14,10 +13,7 @@ import java.time.LocalDate;
 public class PostMyChallengeRequest {
 
     long id;
-    long userId;
+    @Schema(description = "챌린지 id)", example = "1")
     long challengeId;
-    LocalDate startAt;
-    LocalDate endAt;
-    String status;
 
 }

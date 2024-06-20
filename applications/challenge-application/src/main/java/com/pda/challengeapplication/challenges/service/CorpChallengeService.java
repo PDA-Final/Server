@@ -50,7 +50,7 @@ public class CorpChallengeService {
                         .corpName(challenge.getCorpName())
                         .participation(myChallengeRepository.selectAllJPQL(challenge.getChallengeId()))
                         .build())
-                .filter((challenge) -> isDone(challenge.getEndAt()))
+                .filter((challenge) -> !isDone(challenge.getEndAt()))
                 .toList();
     }
 
@@ -69,7 +69,7 @@ public class CorpChallengeService {
                         .corpName(challenge.getCorpName())
                         .participation(myChallengeRepository.selectAllJPQL(challenge.getChallengeId()))
                         .build())
-                .filter((challenge) -> isDone(challenge.getEndAt()))
+                .filter((challenge) -> !isDone(challenge.getEndAt()))
                 .sorted(Comparator.comparing(ChallengeSummaryResponse::getEndAt))
                 .toList();
 

@@ -3,7 +3,6 @@ service-url: /api/challenge-service
 out-service:
   asset:
     url: http://localhost:7979
-
   user:
     url: http://localhost:8080/api/user-service
 
