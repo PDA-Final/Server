@@ -73,7 +73,7 @@ pipeline {
         echo "utils : ${utils}, user : ${userApp}, board : ${boardApp}, challenge : ${challengeApp}, product : ${productApp}"
       }
     }
-    stages('task') {
+    stages {
 //       parallel {
         stage('build user app') {
           when {
