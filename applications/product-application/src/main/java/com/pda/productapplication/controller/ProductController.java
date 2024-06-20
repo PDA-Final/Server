@@ -47,7 +47,7 @@ public class ProductController {
 
         log.info(searchConditionDto.getCategory());
 
-        List<ProductDto.BasicRespDto> products = productService.getProducts(pageNo, size);
+        List<ProductDto.BasicRespDto> products = productService.getProducts(pageNo, size, searchConditionDto.getCategory());
         result.put("products", products);
 
         return ApiUtils.success("success", result);
