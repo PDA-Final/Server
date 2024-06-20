@@ -33,7 +33,7 @@ public class MyChallengeController {
     //참여 챌린지 조회 (내 프로필 or 다른 사람 프로필 / 마감된(1) or 진행중인(0))
     @GetMapping
     @Operation(summary = "챌린지 조회", description = "유저 참여 챌린지를 조회합니다",
-    security = @SecurityRequirement(name = "bearerAuth"))
+            security = @SecurityRequirement(name = "bearerAuth"))
     @ApiResponse(responseCode = "200", description = "성공")
     public GlobalResponse<List<MyChallengeResponse>> findChallengeByUserId(
             @AuthUser AuthUserInfo userInfo,
@@ -56,7 +56,7 @@ public class MyChallengeController {
 
     // 유저 챌린지 참여 여부 조회
     @GetMapping("/{id}")
-    @Operation(summary = "챌린지 조회", description = "유저 참여 챌린지를 조회합니다",
+    @Operation(summary = "챌린지 조회", description = "유저 참여 챌린지 여부를 조회합니다",
             security = @SecurityRequirement(name = "bearerAuth"))
     @ApiResponse(responseCode = "200", description = "성공")
     public GlobalResponse<Boolean> checkMyChallenge(

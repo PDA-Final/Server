@@ -11,7 +11,5 @@ public interface ChallengeDetailRepository extends JpaRepository<ChallengeDetail
     Optional<ChallengeDetail> findByChallengeId(long ChallengeId);
     ChallengeDetail save(ChallengeDetail challengeDetail);
 
-    List<ChallengeDetail> findAll();
-
-
+    List<ChallengeDetail> findALl();
 }

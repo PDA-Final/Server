@@ -36,8 +36,8 @@ public class ChallengeService {
 
     // 조회
     public List<ChallengeSummaryResponse> readAllChallenge() {
-        List<ChallengeDetail> challengeList = challengeDetailRepository.findAll();
-
+        List<ChallengeDetail> challengeList = challengeDetailRepository.findALl();
+        System.out.println(challengeList.get(0));
         return challengeList.stream()
                 .map((challenge) -> ChallengeSummaryResponse.builder()
                         .id(challenge.getChallengeId())
@@ -100,7 +100,7 @@ public class ChallengeService {
         List<Challenge> challengeDetails= challengeRepository.findByNameLike("%"+searchname+"%");
         List<ChallengeSummaryResponse> returnList = new ArrayList<>();
 
-        if(challengeDetails == null){
+        if(challengeDetails.isEmpty()){
             throw new NotFoundException("해당 챌린지를 찾을 수 없습니다");
 
         }

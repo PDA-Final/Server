@@ -36,7 +36,7 @@ public class CorpChallengeService {
 
     //조회 (등록 최신순, 마감기한순)
     public List<ChallengeSummaryResponse> readAllCorpChallengeByNew() {
-        List<CorpChallengeDetail> challengeList = corpChallengeDetailRepository.findAll();
+        List<CorpChallengeDetail> challengeList = corpChallengeDetailRepository.findALlByOrderByChallengeIdDesc();
         return challengeList.stream()
                 .map((challenge) -> ChallengeSummaryResponse.builder()
                         .id(challenge.getChallenge().getId())

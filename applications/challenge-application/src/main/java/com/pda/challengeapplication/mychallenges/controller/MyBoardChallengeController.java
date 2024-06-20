@@ -3,7 +3,6 @@ package com.pda.challengeapplication.mychallenges.controller;
 import com.pda.apiutils.ApiUtils;
 import com.pda.apiutils.GlobalResponse;
 import com.pda.challengeapplication.mychallenges.dto.request.PostMyBoardChallengeRequest;
-import com.pda.challengeapplication.mychallenges.repository.MyChallenge;
 import com.pda.challengeapplication.mychallenges.service.MyBoardChallengeService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -24,7 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class MyBoardChallengeController {
     private final MyBoardChallengeService myBoardChallengeService;
 
-    // 챌린지 참여
+    // 챌린지 게시글 참여
     @PostMapping
     @Operation(summary = "게시글 챌린지 참여", description = "게시글 챌린지에 참여합니다",
             security = @SecurityRequirement(name = "bearerAuth"))
@@ -32,10 +31,20 @@ public class MyBoardChallengeController {
     public GlobalResponse participateBoardChallenge(
             @RequestBody PostMyBoardChallengeRequest postMyBoardChallengeRequest
             ){
-        MyChallenge myChallenge = myBoardChallengeService.participateBoardChallenge(postMyBoardChallengeRequest);
-        String challengeName = myChallenge.getChallenge().getName();
-        return ApiUtils.success("챌린지 참여",challengeName);
+       myBoardChallengeService.participateBoardChallenge(postMyBoardChallengeRequest);
+        return ApiUtils.success("게시글 작성 완료");
 
     }
+
+    @PostMapping("/success")
+    @Operation(summary = "게시글 챌린지 성공 요청", description = "게시글 챌린지 성공 요청")
+    @ApiResponse(responseCode = "201", description = "성공" )
+    public GlobalResponse successBoardChallenge(
+            @RequestBody long boardId
+    ){
+        String m = myBoardChallengeService.successBoardChallenge(boardId).getChallenge().getName();
+        return ApiUtils.success("챌린지 성공", m);
+    }
+
 
 }
