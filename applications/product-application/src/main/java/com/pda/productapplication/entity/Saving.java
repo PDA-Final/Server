@@ -27,19 +27,19 @@ public class Saving {
     @Column(name = "saving_term", nullable = false)
     private String savingTerm;
 
-    @Column(name = "special_offer_summary", nullable = false)
+    @Column(name = "special_offer_summary")
     private String specialOfferSummary;
 
-    @Column(name = "special_offer_period", nullable = false)
+    @Column(name = "special_offer_period")
     private String specialOfferPeriod;
 
-    @Column(name = "join_period", nullable = false)
+    @Column(name = "join_period", nullable = false, columnDefinition = "TEXT")
     private String joinPeriod;
 
-    @Column(name = "join_amount", nullable = false)
+    @Column(name = "join_amount", nullable = false, columnDefinition = "TEXT")
     private String joinAmount;
 
-    @Column(name = "join_target", nullable = false)
+    @Column(name = "join_target", nullable = false, columnDefinition = "TEXT")
     private String joinTarget;
 
     @Column(name = "special_conditions", nullable = false)
@@ -48,10 +48,10 @@ public class Saving {
     @Column(name = "channel", nullable = false)
     private String channel;
 
-    @Column(name = "interest_payment_cycle", nullable = false)
+    @Column(name = "interest_payment_cycle", nullable = false, columnDefinition = "TEXT")
     private String interestPaymentCycle;
 
-    @Column(name = "note", nullable = false)
+    @Column(name = "note", nullable = false, columnDefinition = "TEXT")
     private String note;
 
     @Column(name = "depositor_protection", nullable = false)

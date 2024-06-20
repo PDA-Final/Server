@@ -27,7 +27,7 @@ public class Loan {
     @Column(name = "max_loan_amount", nullable = false)
     private String maxLoanAmount;
 
-    @Column(name = "description", nullable = false)
+    @Column(name = "description", nullable = false, columnDefinition = "LONGTEXT")
     private String description;
 
     @MapsId

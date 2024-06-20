@@ -29,31 +29,28 @@ public class Fund {
     @Column(name = "drv_nav", nullable = false)
     private float drvNav;
 
-    @Column(name = "set_date", nullable = false)
-    private Date setDate; // TODO
-
-    @Column(name = "rt_1m", nullable = false)
+    @Column(name = "rt_1m")
     private float rt1m;
 
-    @Column(name = "rt_3m", nullable = false)
+    @Column(name = "rt_3m")
     private float rt3m;
 
-    @Column(name = "rt_6m", nullable = false)
+    @Column(name = "rt_6m")
     private float rt6m;
 
-    @Column(name = "rt_ytd", nullable = false)
+    @Column(name = "rt_ytd")
     private float rtYtd;
 
-    @Column(name = "rt_1y", nullable = false)
+    @Column(name = "rt_1y")
     private float rt1y;
 
-    @Column(name = "rt_3y", nullable = false)
+    @Column(name = "rt_3y")
     private float rt3y;
 
-    @Column(name = "rt_5y", nullable = false)
+    @Column(name = "rt_5y")
     private float rt5y;
 
-    @Column(name = "ter", nullable = false)
+    @Column(name = "ter")
     private float ter;
 
     @Column(name = "risk_grade", nullable = false)
@@ -71,16 +68,13 @@ public class Fund {
     @Column(name = "category2", nullable = false)
     private String category2;
 
-    @Column(name = "info_object", nullable = false)
+    @Column(name = "info_object", columnDefinition = "TEXT")
     private String infoObject;
 
-    @Column(name = "info_strategy", nullable = false)
+    @Column(name = "info_strategy", columnDefinition = "TEXT")
     private String infoStrategy;
 
-    @Column(name = "ref_bm", nullable = false)
-    private String refBm;
-
-    @Column(name = "region", nullable = false)
+    @Column(name = "region")
     private String region;
 
     @Column(name = "amt_gb", nullable = false)
@@ -94,9 +88,6 @@ public class Fund {
 
     @Column(name = "rt_gb", nullable = false)
     private String rtGb;
-
-    @Column(name = "small_scale_yn", nullable = false)
-    private String smallScaleYn;
 
     @MapsId
     @OneToOne(cascade = CascadeType.ALL)
