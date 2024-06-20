@@ -13,6 +13,7 @@ import lombok.NoArgsConstructor;
 @Entity
 @Table(name = "Card")
 @DiscriminatorValue("Card")
+
 public class Card {
     @Id
     @Column(name = "product_id")
@@ -36,10 +37,10 @@ public class Card {
     @Column(name = "sub_benefit", nullable = false)
     private String subBenefit;
 
-    @Column(name = "description", nullable = false)
+    @Column(name = "description", nullable = false, columnDefinition = "LONGTEXT")
     private String description;
 
-    @Column(name = "terms", nullable = false)
+    @Column(name = "terms", nullable = false, columnDefinition = "LONGTEXT")
     private String terms;
 
     @MapsId

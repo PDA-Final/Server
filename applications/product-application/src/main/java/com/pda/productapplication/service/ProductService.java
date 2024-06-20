@@ -10,6 +10,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -22,6 +23,7 @@ public class ProductService {
     private final SavingRepository savingRepository;
     private final FundRepository fundRepository;
     private final LoanRepository loanRepository;
+    private final BoardCountRepository boardCountRepository;
     private final CategoryRepository categoryRepository; // TODO
 
     /**
@@ -39,8 +41,7 @@ public class ProductService {
                         .corpName(product.getCorp().getName())
                         .corpImage(product.getCorp().getLogoImg())
                         .cardImage(product.getCardImg())
-                        .usefulCnt(product.getUsefulCnt())
-                        .tags(splitTags(product.getTags()))
+                        .tags(convertToList(product.getTags()))
                         .createdTime(product.getCreatedAt())
                         .build()
         ).collect(Collectors.toList());
@@ -60,12 +61,10 @@ public class ProductService {
                 .corpName(product.getCorp().getName())
                 .corpImage(product.getCorp().getLogoImg())
                 .cardImage(product.getCardImg())
-                .usefulCnt(product.getUsefulCnt())
-                .tags(splitTags(product.getTags()))
+                .tags(convertToList(product.getTags()))
                 .createdTime(product.getCreatedAt())
                 .build();
     }
-
 
     /**
      * Get card product summary
@@ -97,7 +96,7 @@ public class ProductService {
 
         return ProductDto.CardDetailRespDto.builder()
                 .description(card.getDescription())
-                .terms(card.getTerms())
+                .terms(convertToList(card.getTerms()))
                 .build();
     }
 
@@ -154,7 +153,6 @@ public class ProductService {
                 .stdPrice(fund.getStdPrice())
                 .diffPrice(fund.getDiffPrice())
                 .drvNav(fund.getDrvNav())
-                .setDate(fund.getSetDate())
                 .rt3m(fund.getRt3m())
                 .ter(fund.getTer())
                 .build();
@@ -184,13 +182,11 @@ public class ProductService {
                 .category2(fund.getCategory2())
                 .infoObject(fund.getInfoObject())
                 .infoStrategy(fund.getInfoStrategy())
-                .refBm(fund.getRefBm())
                 .region(fund.getRegion())
                 .amtGb(fund.getAmtGb())
                 .exceBm(fund.getExceBm())
                 .riskGb(fund.getRiskGb())
                 .rtGb(fund.getRtGb())
-                .smallScaleYn(fund.getSmallScaleYn())
                 .build();
     }
 
@@ -238,17 +234,38 @@ public class ProductService {
                         .corpName(product.getCorp().getName())
                         .corpImage(product.getCorp().getLogoImg())
                         .cardImage(product.getCardImg())
-                        .usefulCnt(product.getUsefulCnt())
-                        .tags(splitTags(product.getTags()))
+                        .tags(convertToList(product.getTags()))
                         .createdTime(product.getCreatedAt())
                         .build()
         ).collect(Collectors.toList());
     }
 
-    private List<String> splitTags(String tags) {
-        return Arrays.stream(tags.split("[,#]"))
+    /**
+     * Count board associated with the product and Store
+     * @param productId product id
+     */
+    public ProductDto.BoardCountReqDto incrementBoardCount (Long productId) {
+        log.debug("Count board associated with the product. productId: {}", productId);
+
+        BoardCount boardCount =
+                boardCountRepository.findById(productId).orElseThrow(NotFoundException::new);
+
+        boardCount.incrementBoardCount();
+        boardCountRepository.save(boardCount);
+
+        return ProductDto.BoardCountReqDto.builder()
+                .boardCount(boardCount.getBoardCount())
+                .build();
+    }
+
+
+    public List<String> convertToList(String data) {
+        if (data == null || data.isEmpty()) {
+            return Collections.emptyList();
+        }
+        // 양쪽 괄호 제거, 공백 제거, 리스트 변환
+        return Arrays.stream(data.replace("[", "").replace("]", "").replace("'", "").split(","))
                 .map(String::trim)
-                .filter(tag -> !tag.isEmpty())
                 .collect(Collectors.toList());
     }
 }

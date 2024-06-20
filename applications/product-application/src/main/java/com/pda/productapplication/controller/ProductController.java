@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.*;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 @Tag(name = "Product", description = "Product API")
 @RestController
@@ -178,6 +177,23 @@ public class ProductController {
 
         List<ProductDto.BasicRespDto> randomProducts = productService.getRandomProducts(limit);
         result.put("randomProducts", randomProducts);
+
+        return ApiUtils.success("success", result);
+    }
+
+    @PostMapping("/{productId}/boards")
+    @Operation(summary = "Increase board count", description = "Count the board associated with the product.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "OK"),
+            @ApiResponse(responseCode = "404", description = "Not found")
+    })
+    public GlobalResponse<Object> notifyBoardCreation(@PathVariable("productId") Long productId) {
+        log.debug("Product id: {}", productId);
+        Map<String, Object> result = new HashMap<>();
+
+        ProductDto.BoardCountReqDto boardCountReqDto
+                = productService.incrementBoardCount(productId);
+        result.put("board count", boardCountReqDto);
 
         return ApiUtils.success("success", result);
     }

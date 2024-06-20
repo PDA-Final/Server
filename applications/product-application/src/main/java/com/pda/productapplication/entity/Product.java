@@ -4,16 +4,13 @@ import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
-import java.util.ArrayList;
-import java.util.List;
-
 @Entity
 @Getter
 @SuperBuilder
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "Product")
 @Inheritance(strategy = InheritanceType.JOINED)
-@DiscriminatorColumn(name = "DTYPE")
+//@DiscriminatorColumn(name = "DTYPE")
 public class Product extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -23,16 +20,11 @@ public class Product extends BaseEntity {
     @Column(name = "name", nullable = false)
     private String name;
 
-    @Column(name = "useful_cnt", nullable = false, columnDefinition = "int default 0")
-    private int usefulCnt;
-
     @Column(name = "card_image")
     private String cardImg;
 
     @Column(name = "tags")
     private String tags;
-
-    // TODO : 관련 핀 작성자 수
 
     @ManyToOne
     @JoinColumn(name = "category_id", nullable = false, foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
@@ -53,6 +45,9 @@ public class Product extends BaseEntity {
 
     @OneToOne(mappedBy = "product", cascade = CascadeType.ALL)
     private Loan loan;
+
+    @OneToOne(mappedBy = "product", cascade = CascadeType.ALL)
+    private BoardCount boardCount;
 
     protected Product() {
         super();
