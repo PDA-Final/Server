@@ -10,4 +10,6 @@ public interface CorpChallengeDetailRepository extends JpaRepository<CorpChallen
     List<CorpChallengeDetail> findAll();
     List<CorpChallengeDetail> findByCorpId(long id);
     CorpChallengeDetail findByChallengeId(long id);
+
+    List<CorpChallengeDetail> findALlByOrderByChallengeIdDesc();
 }

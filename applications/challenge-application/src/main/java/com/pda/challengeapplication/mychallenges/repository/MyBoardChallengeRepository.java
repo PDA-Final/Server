@@ -6,4 +6,6 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface MyBoardChallengeRepository extends JpaRepository<MyBoardChallenge, Long> {
     MyBoardChallenge findById(long id);
+
+    MyBoardChallenge findByBoardId(long boardId);
 }
