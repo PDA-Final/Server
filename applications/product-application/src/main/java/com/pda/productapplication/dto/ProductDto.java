@@ -1,5 +1,6 @@
 package com.pda.productapplication.dto;
 
+import com.pda.productapplication.entity.BoardCount;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -19,6 +20,7 @@ public class ProductDto {
         private String corpImage;
         private String cardImage;
         private List<String> tags;
+        private int boardCount;
         private LocalDateTime createdTime;
     }
 
@@ -28,8 +30,6 @@ public class ProductDto {
     public static class SearchConditionDto {
         private String category;
         private String sort;
-
-        // TODO : 관련 게시글 작성자 수
     }
 
     @Builder

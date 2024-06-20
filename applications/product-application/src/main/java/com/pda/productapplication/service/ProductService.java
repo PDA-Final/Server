@@ -9,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
@@ -33,19 +34,33 @@ public class ProductService {
      * Get product list by page
      * @param pageNo page num
      * @param size page size
-     * @param categoryName category name
+     * @param searchConditionDto search conditions
      */
-    public List<ProductDto.BasicRespDto> getProducts(int pageNo, int size, String categoryName) {
+    public List<ProductDto.BasicRespDto> getProducts(int pageNo, int size, ProductDto.SearchConditionDto searchConditionDto) {
         Pageable pageable = PageRequest.of(pageNo, size);
         Page<Product> products;
 
-        if (categoryName == null || categoryName.isEmpty()) { // 카테고리 X : 모든 상품 조회
+        String categoryName = searchConditionDto.getCategory(); // "카드"
+        String sortType = searchConditionDto.getSort(); // "인기순"
+
+        if (categoryName == null || categoryName.isEmpty()) {
+            // 카테고리 X : 모든 상품 조회
             products = productRepository.findAll(pageable);
-        } else { // 카테고리 O : 해당 카테고리의 상품 조회
+        } else {
+            // 카테고리 O : 해당 카테고리의 상품 조회
             Optional<Category> categoryOptional = categoryRepository.findByName(categoryName);
             if (categoryOptional.isPresent()) {
                 Category category = categoryOptional.get();
-                products = productRepository.findByCategoryId(category.getId(), pageable);
+                Long categoryId = category.getId();
+
+                if ("최신순".equals(sortType)) {
+                    products = productRepository.findByCategoryIdOrderByCreatedAt(categoryId, pageable);
+                } else if ("인기순".equals(sortType)) {
+                    products = productRepository.findByCategoryIdOrderByBoardCount(categoryId, pageable);
+                    log.debug(products.toString());
+                } else {
+                    products = productRepository.findByCategoryId(categoryId, pageable);
+                }
             } else {
                 return List.of();
             }
@@ -59,6 +74,7 @@ public class ProductService {
                         .corpImage(product.getCorp().getLogoImg())
                         .cardImage(product.getCardImg())
                         .tags(convertToList(product.getTags()))
+                        .boardCount(product.getBoardCount().getBoardCount())
                         .createdTime(product.getCreatedAt())
                         .build()
         ).collect(Collectors.toList());
@@ -80,6 +96,7 @@ public class ProductService {
                 .corpImage(product.getCorp().getLogoImg())
                 .cardImage(product.getCardImg())
                 .tags(convertToList(product.getTags()))
+                .boardCount(product.getBoardCount().getBoardCount())
                 .createdTime(product.getCreatedAt())
                 .build();
     }
@@ -91,7 +108,8 @@ public class ProductService {
     public ProductDto.CardSummaryRespDto getCardSummary(Long productId) {
         log.debug("Get summary of card: {}", productId);
 
-        Card card = cardRepository.findById(productId).orElseThrow(NotFoundException::new);
+        Card card = cardRepository.findById(productId)
+                .orElseThrow(() -> new NotFoundException("Product not found with id: " + productId));
 
         return ProductDto.CardSummaryRespDto.builder()
                 .productId(card.getProductId())
@@ -111,7 +129,8 @@ public class ProductService {
     public ProductDto.CardDetailRespDto getCardDetail(Long productId) {
         log.debug("Get detail of card: {}", productId);
 
-        Card card = cardRepository.findById(productId).orElseThrow(NotFoundException::new);
+        Card card = cardRepository.findById(productId)
+                .orElseThrow(() -> new NotFoundException("Product not found with id: " + productId));
 
         return ProductDto.CardDetailRespDto.builder()
                 .productId(card.getProductId())
@@ -127,7 +146,8 @@ public class ProductService {
     public ProductDto.SavingSummaryRespDto getSavingSummary(Long productId) {
         log.debug("Get summary of saving: {}", productId);
 
-        Saving saving = savingRepository.findById(productId).orElseThrow(NotFoundException::new);
+        Saving saving = savingRepository.findById(productId)
+                .orElseThrow(() -> new NotFoundException("Product not found with id: " + productId));
 
         return ProductDto.SavingSummaryRespDto.builder()
                 .productId(saving.getProductId())
@@ -146,7 +166,8 @@ public class ProductService {
     public ProductDto.SavingDetailRespDto getSavingDetail(Long productId) {
         log.debug("Get detail of saving: {}", productId);
 
-        Saving saving = savingRepository.findById(productId).orElseThrow(NotFoundException::new);
+        Saving saving = savingRepository.findById(productId)
+                .orElseThrow(() -> new NotFoundException("Product not found with id: " + productId));
 
         return ProductDto.SavingDetailRespDto.builder()
                 .productId(saving.getProductId())
@@ -168,7 +189,8 @@ public class ProductService {
     public ProductDto.FundSummaryRespDto getFundSummary(Long productId) {
         log.debug("Get summary of fund: {}", productId);
 
-        Fund fund = fundRepository.findById(productId).orElseThrow(NotFoundException::new);
+        Fund fund = fundRepository.findById(productId)
+                .orElseThrow(() -> new NotFoundException("Product not found with id: " + productId));
 
         return ProductDto.FundSummaryRespDto.builder()
                 .productId(fund.getProductId())
@@ -188,7 +210,8 @@ public class ProductService {
     public ProductDto.FundDetailRespDto getFundDetail(Long productId) {
         log.debug("Get detail of fund: {}", productId);
 
-        Fund fund = fundRepository.findById(productId).orElseThrow(NotFoundException::new);
+        Fund fund = fundRepository.findById(productId)
+                .orElseThrow(() -> new NotFoundException("Product not found with id: " + productId));
 
         return ProductDto.FundDetailRespDto.builder()
                 .productId(fund.getProductId())
@@ -221,7 +244,8 @@ public class ProductService {
     public ProductDto.LoanSummaryRespDto getLoanSummary(Long productId) {
         log.debug("Get summary of loan: {}", productId);
 
-        Loan loan = loanRepository.findById(productId).orElseThrow(NotFoundException::new);
+        Loan loan = loanRepository.findById(productId)
+                .orElseThrow(() -> new NotFoundException("Product not found with id: " + productId));
 
         return ProductDto.LoanSummaryRespDto.builder()
                 .productId(loan.getProductId())
@@ -238,7 +262,8 @@ public class ProductService {
     public ProductDto.LoanDetailRespDto getLoanDetail(Long productId) {
         log.debug("Get detail of loan: {}", productId);
 
-        Loan loan = loanRepository.findById(productId).orElseThrow(NotFoundException::new);
+        Loan loan = loanRepository.findById(productId)
+                .orElseThrow(() -> new NotFoundException("Product not found with id: " + productId));
 
         return ProductDto.LoanDetailRespDto.builder()
                 .productId(loan.getProductId())
@@ -262,6 +287,7 @@ public class ProductService {
                         .corpImage(product.getCorp().getLogoImg())
                         .cardImage(product.getCardImg())
                         .tags(convertToList(product.getTags()))
+                        .boardCount(product.getBoardCount().getBoardCount())
                         .createdTime(product.getCreatedAt())
                         .build()
         ).collect(Collectors.toList());
@@ -310,6 +336,7 @@ public class ProductService {
                         .corpImage(product.getCorp().getLogoImg())
                         .cardImage(product.getCardImg())
                         .tags(convertToList(product.getTags()))
+                        .boardCount(product.getBoardCount().getBoardCount())
                         .createdTime(product.getCreatedAt())
                         .build()
         ).collect(Collectors.toList());
