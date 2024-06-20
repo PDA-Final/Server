@@ -7,7 +7,7 @@ logging:
   level:
     org:
       hibernate:
-        SQL: debug
+        SQL: DEBUG
 
 server:
   port: 8084
@@ -24,6 +24,7 @@ spring:
   sql:
     init:
       mode: always
+      data-locations: classpath:db/insert_*.sql
   jpa:
     hibernate:
       ddl-auto: create-drop

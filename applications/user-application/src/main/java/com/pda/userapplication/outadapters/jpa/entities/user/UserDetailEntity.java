@@ -1,4 +1,4 @@
-package com.pda.userapplication.outadapters.jpa;
+package com.pda.userapplication.outadapters.jpa.entities.user;
 
 import com.pda.tofinenums.user.ServicePurpose;
 import jakarta.persistence.Column;

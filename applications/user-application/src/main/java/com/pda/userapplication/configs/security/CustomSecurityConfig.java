@@ -19,6 +19,8 @@ public class CustomSecurityConfig {
         securityRequestMatcherChain
             .add(SecurityRequestMatcher.hasAnyRolesOf(List.of(UserRole.NORMAL, UserRole.FINFLUENCER),
                 "/users/assets", "/users/public-options", "/users/detail-info"));
+        securityRequestMatcherChain
+            .add(SecurityRequestMatcher.authenticatedOf("/users/{id:[0-9]+}/follow"));
 
         return securityRequestMatcherChain;
     }

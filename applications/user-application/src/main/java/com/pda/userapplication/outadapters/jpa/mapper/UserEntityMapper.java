@@ -6,7 +6,7 @@ import com.pda.userapplication.domains.vo.ImageUrl;
 import com.pda.userapplication.domains.vo.Nickname;
 import com.pda.userapplication.domains.vo.TofinId;
 import com.pda.userapplication.domains.vo.UserId;
-import com.pda.userapplication.outadapters.jpa.UserEntity;
+import com.pda.userapplication.outadapters.jpa.entities.user.UserEntity;
 import org.springframework.stereotype.Component;
 
 @Component

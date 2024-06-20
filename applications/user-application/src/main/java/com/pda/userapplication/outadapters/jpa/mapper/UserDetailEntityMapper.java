@@ -1,7 +1,7 @@
 package com.pda.userapplication.outadapters.jpa.mapper;
 
 import com.pda.userapplication.domains.NormalUser;
-import com.pda.userapplication.outadapters.jpa.UserDetailEntity;
+import com.pda.userapplication.outadapters.jpa.entities.user.UserDetailEntity;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
