@@ -72,8 +72,8 @@ pipeline {
         }
         echo "utils : ${utils}, user : ${userApp}, board : ${boardApp}, challenge : ${challengeApp}, product : ${productApp}"
       }
-    }
-    stages {
+//     }
+//     stage {
 //       parallel {
         stage('build user app') {
           when {
@@ -216,7 +216,7 @@ pipeline {
         }
 
 //       }
-    }
+//     }
     stage('clean') {
       steps {
         echo 'clean unused image'
