@@ -71,6 +71,7 @@ pipeline {
             productApp = changedDirs.contains('product-application')
           }
         }
+        userApp = false // skip user app until constructing kafka
         echo "utils : ${utils}, user : ${userApp}, board : ${boardApp}, challenge : ${challengeApp}, product : ${productApp}"
       }
     }
