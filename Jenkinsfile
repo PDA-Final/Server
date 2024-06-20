@@ -179,6 +179,42 @@ pipeline {
 
           }
         }
+
+        stage('build challenge app') {
+          when {
+            anyOf {
+              expression { challengeApp }
+              expression { utils }
+            }
+          }
+          steps {
+            echo 'copy configuration files for challenge app'
+            sh 'cp /var/jenkins_home/workspace/configs/server/challenge/application.yml ./applications/challenge-application/src/main/resources/application.yml'
+            echo 'start gradle build for challenge app'
+            dir('./') {
+              sh 'chmod +x ./gradlew'
+              sh './gradlew clean'
+              sh './gradlew :applications:challenge-application:build'
+            }
+            echo 'start docker build for challenge app'
+            dir('./applications/challenge-application/') {
+              sh 'docker build -t bkkmw/tofin-challenge-api .'
+              sh 'docker push bkkmw/tofin-challenge-api'
+            }
+            echo 'publish over ssh for challenge app'
+            script {
+              try {
+                publishOverSSH('challenge-api', 'tofin-challenge-api')
+                echo "Publish over ssh Successful"
+              } catch(Exception e) {
+                echo "Publish over ssh failed : ${e.message}"
+                currentBuild.result = 'FAILURE'
+              }
+            }
+
+          }
+        }
+
       }
     }
     stage('clean') {
