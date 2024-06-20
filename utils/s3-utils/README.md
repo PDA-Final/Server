@@ -52,6 +52,8 @@ public class BoardService {
 
 `s3Service.upload()` 등 필요한 method를 호출하여 사용합니다.
 
+- `upload()` 시 `dirName`은 S3 bucket에 생성될 디렉토리 이름입니다. `image(img)`, `assets` 등 같은 자원을 나타내는 이름이나 `board`, `user`, `profile` 등 도메인을 나타내는 이름을 사용해주세요 
+
 ### 유의 사항
 
 - `upload()`는 `List<MultipartFile>` 을 지원하지 않습니다. `MultipartFile[]` 을 사용해 주세요
