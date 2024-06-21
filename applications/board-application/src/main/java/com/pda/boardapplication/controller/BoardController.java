@@ -10,6 +10,7 @@ import com.pda.exceptionhandler.exceptions.BadRequestException;
 import com.pda.tofinsecurity.user.AuthUser;
 import com.pda.tofinsecurity.user.AuthUserInfo;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -65,14 +66,14 @@ public class BoardController {
     public GlobalResponse<List<BoardDto.AbstractRespDto>> getBoardList(
             @RequestParam(required = false, defaultValue = "0", value = "pageNo") int pageNo,
             @RequestParam(required = false, defaultValue = "10", value = "size") int size,
-            @RequestParam(required = false) BoardDto.SearchConditionDto searchConditionDto
+            @Parameter BoardDto.SearchConditionDto searchConditionDto
     ) {
         log.debug("Get board lists with page {}, size {}", pageNo, size);
 
         if(searchConditionDto != null)
             log.info(searchConditionDto.getCategory());
 
-        List<BoardDto.AbstractRespDto> boards = boardService.getBoards(pageNo, size);
+        List<BoardDto.AbstractRespDto> boards = boardService.getBoards(pageNo, size, searchConditionDto);
 
         return ApiUtils.success("success", boards);
     }

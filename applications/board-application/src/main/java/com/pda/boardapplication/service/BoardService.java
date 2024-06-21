@@ -13,6 +13,8 @@ import com.pda.exceptionhandler.exceptions.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.PathVariable;
 
@@ -102,9 +104,16 @@ public class BoardService {
      * @param size page size
      * @return
      */
-    public List<BoardDto.AbstractRespDto> getBoards(int pageNo, int size) {
+    public List<BoardDto.AbstractRespDto> getBoards(
+            int pageNo, int size,
+            BoardDto.SearchConditionDto searchConditionDto
+    ) {
+        List<Board> boards;
+        log.info("search dto : {}", searchConditionDto);
+        Sort sort = getSortBySearchCondition(searchConditionDto);
+        Pageable pageable = PageRequest.of(pageNo, size, sort);
 
-        List<Board> boards = boardRepository.findAll(PageRequest.of(pageNo, size)).getContent();
+        boards = boardRepository.findAll(pageable).getContent();
 
         return boards.stream().map((elem) ->
                 BoardDto.AbstractRespDto.builder()
@@ -148,5 +157,22 @@ public class BoardService {
 
         boardRepository.delete(board);
         return 1;
+    }
+
+    /**
+     * Return Sort object by given search condition
+     * @param searchConditionDto search conditions from client
+     * @return Sort object
+     */
+    private Sort getSortBySearchCondition(BoardDto.SearchConditionDto searchConditionDto) {
+        if(searchConditionDto != null) {
+            log.info(searchConditionDto.getSort());
+            return "인기순".equals(searchConditionDto.getSort()) ?
+                Sort.by(Sort.Direction.DESC, "boardCount.likeCnt")
+                : Sort.by(Sort.Direction.DESC, "createdAt");
+
+        }
+
+        return Sort.by(Sort.Direction.DESC, "createdAt");
     }
 }

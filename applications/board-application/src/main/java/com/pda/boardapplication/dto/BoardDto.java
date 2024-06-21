@@ -128,8 +128,9 @@ public class BoardDto {
                 requiredMode = Schema.RequiredMode.NOT_REQUIRED)
         @Parameter(required = false)
         private String category;
-        @Schema(description = "Sorting condition", example = "popular", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
-        @Parameter
+        @Schema(description = "Sorting condition", example = "인기순",
+                allowableValues = {"인기순", "최신순"},
+                requiredMode = Schema.RequiredMode.NOT_REQUIRED)
         private String sort;
         @Schema(description = "Author's id", example = "1", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
         @Parameter
