@@ -45,6 +45,10 @@ public class Board extends BaseEntity {
 
     @OneToMany(mappedBy = "board")
     @JsonBackReference
+    private List<Bookmark> bookmarks;
+
+    @OneToMany(mappedBy = "board")
+    @JsonBackReference
     private List<View> views;
 
     @OneToMany(mappedBy = "boardChallengeTagPK.board")

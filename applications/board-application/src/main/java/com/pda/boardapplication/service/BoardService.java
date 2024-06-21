@@ -65,7 +65,7 @@ public class BoardService {
      * @return
      * @throws com.pda.exceptionhandler.exceptions.NotFoundException - target does not exists
      */
-    public BoardDto.DetailRespDto getBoardDetail(long boardId) {
+    public BoardDto.DetailRespDto getBoardDetail(long boardId, UserDto.InfoDto userInfoDto) {
         log.debug("Get detail of board : {}", boardId);
 
         Board board = boardRepository.findById(boardId).orElseThrow(NotFoundException::new);
@@ -103,6 +103,12 @@ public class BoardService {
                 .authorId(board.getUserId())
                 .authorNickname(board.getAuthorNickname())
                 .authorProfile(board.getAuthorProfile())
+                .liked(userInfoDto != null &&
+                        board.getLikes().stream().anyMatch(elem ->
+                        elem.getUserId() == userInfoDto.getId()))
+                .bookmarked(userInfoDto != null &&
+                        board.getBookmarks().stream().anyMatch(elem ->
+                        elem.getUserId() == userInfoDto.getId()))
                 .build();
     }
 

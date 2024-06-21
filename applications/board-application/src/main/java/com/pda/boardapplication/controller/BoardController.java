@@ -52,11 +52,13 @@ public class BoardController {
     }
 
     @GetMapping("/{boardId}")
-    @Operation(summary = "Get board item detail")
-    public GlobalResponse<BoardDto.DetailRespDto> getBoardDetail(@PathVariable("boardId") long boardId) {
+    @Operation(summary = "Get board item detail", security = @SecurityRequirement(name = "bearerAuth"))
+    public GlobalResponse<BoardDto.DetailRespDto> getBoardDetail(@PathVariable("boardId") long boardId, @AuthUser AuthUserInfo user) {
         log.debug("Retrieve board with id : {}", boardId);
+        UserDto.InfoDto userInfoDto = user != null ?
+                UserDto.InfoDto.fromAuthUserInfo(user) : null;
 
-        BoardDto.DetailRespDto detailRespDto = boardService.getBoardDetail(boardId);
+        BoardDto.DetailRespDto detailRespDto = boardService.getBoardDetail(boardId, userInfoDto);
 
         return ApiUtils.success("success", detailRespDto);
     }

@@ -90,6 +90,10 @@ public class BoardDto {
         private String authorNickname;
         @Schema(description = "Img url of author's profile image", example = "https://picsum.photos/seed/picsum/200/200")
         private String authorProfile;
+        @Schema(description = "Whether current user liked board", example = "false")
+        private boolean liked;
+        @Schema(description = "Whether current user bookmarked board", example = "true")
+        private boolean bookmarked;
 
         // TODO : tagged product/challenges
     }
