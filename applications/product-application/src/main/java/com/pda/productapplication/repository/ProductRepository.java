@@ -19,6 +19,8 @@ public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpec
 
     Page<Product> findByCategoryId(Long categoryId, Pageable pageable);
 
+    Page<Product> findByCorpId(Long corpId, Pageable pageable);
+
     // 최신순 정렬
     @Query(value = "SELECT * FROM product p WHERE p.category_id = :categoryId ORDER BY p.created_at DESC", nativeQuery = true)
     Page<Product> findByCategoryIdOrderByCreatedAt(@Param("categoryId") Long categoryId, Pageable pageable);
@@ -26,11 +28,4 @@ public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpec
     // 인기순 정렬
     @Query("SELECT p FROM Product p JOIN p.boardCount b WHERE p.category.id = :categoryId ORDER BY b.boardCount DESC")
     Page<Product> findByCategoryIdOrderByBoardCount(@Param("categoryId") Long categoryId, Pageable pageable);
-
-    // 보유상품 반환
-
-
-//    Page<Product> findByNameAndCorpName(String name, String corpName);
-//    @Query("SELECT p FROM Product p WHERE p.name IN :names AND p.corp.name IN :corpNames")
-//    Page<Product> findByNameInAndCorpNameIn(@Param("names") List<String> names, @Param("corpNames") List<String> corpNames, Pageable pageable);
 }
