@@ -60,6 +60,7 @@ if [ "$ACTIVATED" = false ]; then
   echo 'health check failed'
   docker stop ${IMAGE_NAME}-$NEXT
   docker rm ${IMAGE_NAME}-$NEXT
+  docker image prune --force
   exit 1
 fi
 
@@ -72,5 +73,6 @@ echo 'stop running container'
 
 docker stop ${IMAGE_NAME}-$CURRENT
 docker rm ${IMAGE_NAME}-$CURRENT
+docker image prune --force
 
 exit 0
