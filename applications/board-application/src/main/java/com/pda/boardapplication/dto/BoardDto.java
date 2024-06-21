@@ -134,6 +134,6 @@ public class BoardDto {
         private String sort;
         @Schema(description = "Author's id", example = "1", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
         @Parameter
-        private int userId;
+        private long userId;
     }
 }
