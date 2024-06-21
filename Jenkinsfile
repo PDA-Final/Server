@@ -72,7 +72,6 @@ pipeline {
             productApp = changedDirs.contains('product-application')
           }
         }
-        sh 'cp /var/jenkins_home/workspace/builds/deploy.sh ./scripts/deploy.sh'
         echo "utils : ${utils}, user : ${userApp}, board : ${boardApp}, challenge : ${challengeApp}, product : ${productApp}"
       }
     }
