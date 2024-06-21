@@ -1,6 +1,7 @@
 package com.pda.productapplication.dto;
 
 import com.pda.productapplication.entity.BoardCount;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -13,14 +14,23 @@ import java.util.List;
 public class ProductDto {
     @Builder
     @Getter
+    @Schema(description = "Basic board information")
     public static class BasicRespDto {
+        @Schema(description = "Product id", example = "5")
         private Long id;
+        @Schema(description = "Product name", example = "신한카드 Mr.Life")
         private String name;
+        @Schema(description = "Corporation name", example = "신한카드")
         private String corpName;
+        @Schema(description = "Corporation logo image", example = "https://financial.pstatic.net/pie/common-bi/1.0.0/images/CD_SHINHAN_Profile.png")
         private String corpImage;
+        @Schema(description = "Card image (nullable)", example = "https://vertical.pstatic.net/vertical-cardad/creatives/SH/1408/SH_1408_20230213-143750_ver.png")
         private String cardImage;
+        @Schema(description = "Product tags", example = "['연회비지원', '관리비', '주유', '통신', '대형마트']")
         private List<String> tags;
+        @Schema(description = "Number of connected boards", example = "2")
         private int boardCount;
+        @Schema(description = "Created time", example = "2024-06-20 16:23:47.000000")
         private LocalDateTime createdTime;
     }
 
@@ -28,7 +38,9 @@ public class ProductDto {
     @Getter
     @Setter
     public static class SearchConditionDto {
+        @Schema(description = "Category name", example = "카드")
         private String category;
+        @Schema(description = "Sort type", example = "최신순")
         private String sort;
     }
 
