@@ -70,6 +70,7 @@ public class BoardController {
     ) {
         log.debug("Get board lists with page {}, size {}", pageNo, size);
 
+        log.info("{}", searchConditionDto);
         if(searchConditionDto != null)
             log.info(searchConditionDto.getCategory());
 

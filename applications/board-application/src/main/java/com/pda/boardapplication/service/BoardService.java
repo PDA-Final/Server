@@ -113,7 +113,16 @@ public class BoardService {
         Sort sort = getSortBySearchCondition(searchConditionDto);
         Pageable pageable = PageRequest.of(pageNo, size, sort);
 
-        boards = boardRepository.findAll(pageable).getContent();
+        if(searchConditionDto.getCategory() != null) {
+            log.info("Search by category : {}", searchConditionDto.getCategory());
+            boards = boardRepository.findByCategoryId(pageable, Integer.parseInt(searchConditionDto.getCategory())).getContent();
+        } else if(searchConditionDto.getUserId() > 0) {
+            log.info("Search by user id : {}", searchConditionDto.getUserId());
+            boards = boardRepository.findByUserId(pageable, searchConditionDto.getUserId()).getContent();
+        } else {
+            log.info("No adequate search conditions found");
+            boards = boardRepository.findAll(pageable).getContent();
+        }
 
         return boards.stream().map((elem) ->
                 BoardDto.AbstractRespDto.builder()
