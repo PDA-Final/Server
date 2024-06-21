@@ -2,6 +2,8 @@ package com.pda.productapplication.controller;
 
 import com.pda.apiutils.ApiUtils;
 import com.pda.apiutils.GlobalResponse;
+import com.pda.exceptionhandler.exceptions.BadRequestException;
+import com.pda.exceptionhandler.exceptions.NotFoundException;
 import com.pda.productapplication.dto.ProductDto;
 import com.pda.productapplication.service.ProductService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -16,7 +18,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@Tag(name = "Product", description = "Product API")
+@Tag(name = "[Product]", description = "Product API")
 @RestController
 @RequiredArgsConstructor
 @Slf4j
@@ -220,6 +222,48 @@ public class ProductController {
 
         List<ProductDto.BasicRespDto> products = productService.searchProductByName(name, pageNo, size);
         result.put("searched products", products);
+
+        return ApiUtils.success("success", result);
+    }
+
+    @PostMapping("/owned/normal")
+    @Operation(summary = "Get Products owned by normal user", description = "Return product information that normal user own.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "OK"),
+            @ApiResponse(responseCode = "204", description = "No content")
+    })
+    public GlobalResponse<Object> getProductsOwnedByNormalUser(
+            @RequestBody Map<String, String> productsReqMap,
+            @RequestParam(required = false, defaultValue = "0", value = "pageNo") int pageNo,
+            @RequestParam(required = false, defaultValue = "10", value = "size") int size
+    ) {
+        log.debug("Get products owned by normal user. productsReq: {}", productsReqMap);
+        log.debug("pageNum: {}, size: {}", pageNo, size);
+        Map<String, Object> result = new HashMap<>();
+
+        List<ProductDto.BasicRespDto> products = productService.getProductsByNames(productsReqMap, pageNo, size);
+        result.put("products", products);
+
+        return ApiUtils.success("success", result);
+    }
+
+    @PostMapping("/owned/corp")
+    @Operation(summary = "Get Products owned by corp user", description = "Return product information that corp user own.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "OK"),
+            @ApiResponse(responseCode = "204", description = "No content")
+    })
+    public GlobalResponse<Object> getProductsOwnedByCorpUser(
+            @RequestParam(value = "corpId") Long corpId,
+            @RequestParam(required = false, defaultValue = "0", value = "pageNo") int pageNo,
+            @RequestParam(required = false, defaultValue = "10", value = "size") int size
+    ) {
+        log.debug("Get products owned by corp user. corpId: {}", corpId);
+        log.debug("pageNum: {}, size: {}", pageNo, size);
+        Map<String, Object> result = new HashMap<>();
+
+        List<ProductDto.BasicRespDto> products = productService.getProductsByCorpId(corpId, pageNo, size);
+        result.put("products", products);
 
         return ApiUtils.success("success", result);
     }

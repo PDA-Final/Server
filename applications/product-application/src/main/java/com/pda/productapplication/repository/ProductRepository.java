@@ -5,18 +5,21 @@ import com.pda.productapplication.entity.Product;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
-public interface ProductRepository extends JpaRepository<Product, Long> {
+public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpecificationExecutor<Product> {
     @Query(value = "SELECT * FROM product p ORDER BY RAND() LIMIT :limit", nativeQuery = true)
     List<Product> findRandomProducts(@Param("limit") int limit);
 
     Page<Product> findByNameLike(String name, Pageable pageable);
 
     Page<Product> findByCategoryId(Long categoryId, Pageable pageable);
+
+    Page<Product> findByCorpId(Long corpId, Pageable pageable);
 
     // 최신순 정렬
     @Query(value = "SELECT * FROM product p WHERE p.category_id = :categoryId ORDER BY p.created_at DESC", nativeQuery = true)

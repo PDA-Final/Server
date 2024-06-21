@@ -1,5 +1,6 @@
 package com.pda.productapplication.service;
 
+import com.pda.exceptionhandler.exceptions.BadRequestException;
 import com.pda.exceptionhandler.exceptions.NotFoundException;
 import com.pda.productapplication.dto.ProductDto;
 import com.pda.productapplication.entity.*;
@@ -10,12 +11,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -29,6 +28,7 @@ public class ProductService {
     private final LoanRepository loanRepository;
     private final BoardCountRepository boardCountRepository;
     private final CategoryRepository categoryRepository;
+    private final CorpRepository corpRepository;
 
     /**
      * Get product list by page
@@ -87,7 +87,8 @@ public class ProductService {
     public ProductDto.BasicRespDto getProduct(Long productId) {
         log.debug("Get product: {}", productId);
 
-        Product product = productRepository.findById(productId).orElseThrow(NotFoundException::new);
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new NotFoundException("Product not found with id: " + productId));
 
         return ProductDto.BasicRespDto.builder()
                 .id(product.getId())
@@ -300,8 +301,8 @@ public class ProductService {
     public ProductDto.BoardCountReqDto incrementBoardCount (Long productId) {
         log.debug("Count board associated with the product. productId: {}", productId);
 
-        BoardCount boardCount =
-                boardCountRepository.findById(productId).orElseThrow(NotFoundException::new);
+        BoardCount boardCount = boardCountRepository.findById(productId)
+                .orElseThrow(() -> new NotFoundException("BoardCount not found with product id: " + productId));
 
         boardCount.incrementBoardCount();
         boardCountRepository.save(boardCount);
@@ -341,6 +342,70 @@ public class ProductService {
                         .build()
         ).collect(Collectors.toList());
     }
+
+    /**
+     * Get products by names : normal-user-owned products
+     * @param productsReqMap requested products (product name, corp name)
+     * @param pageNo page num
+     * @param size size
+     */
+    public List<ProductDto.BasicRespDto> getProductsByNames(Map<String, String> productsReqMap, int pageNo, int size) {
+        Pageable pageable = PageRequest.of(pageNo, size);
+        List<ProductDto.BasicRespDto> productDtoList = new ArrayList<>();
+
+        productsReqMap.forEach((name, corpName) -> {
+            Specification<Product> spec = Specification.where(ProductSpecification.equalProductName(name))
+                    .and(ProductSpecification.equalCorpName(corpName));
+            List<Product> products = productRepository.findAll(spec, pageable).getContent(); // 필터링된 상품
+
+            log.debug("Filtered product: {}", products);
+
+            productDtoList.addAll(products.stream().map(product -> ProductDto.BasicRespDto.builder()
+                    .id(product.getId())
+                    .name(product.getName())
+                    .corpName(product.getCorp().getName())
+                    .corpImage(product.getCorp().getLogoImg())
+                    .cardImage(product.getCardImg())
+                    .tags(convertToList(product.getTags()))
+                    .boardCount(product.getBoardCount().getBoardCount())
+                    .createdTime(product.getCreatedAt())
+                    .build()).toList());
+        });
+        return productDtoList;
+    }
+
+
+    /**
+     * Get products by corpId : corp-user-owned products
+     * @param corpId corporation id
+     * @param pageNo page num
+     * @param size size
+     */
+    public List<ProductDto.BasicRespDto> getProductsByCorpId(Long corpId, int pageNo, int size) {
+        Pageable pageable = PageRequest.of(pageNo, size);
+
+        Corp corp = corpRepository.findById(corpId)
+                .orElseThrow(() -> new NotFoundException("Not found corpId: " + corpId));
+
+        Page<Product> products = productRepository.findByCorpId(corpId, pageable);
+
+        if (products.isEmpty())
+            throw new NotFoundException("The products found with corpId does not exist: " + corpId);
+
+        return products.stream().map(product ->
+                ProductDto.BasicRespDto.builder()
+                        .id(product.getId())
+                        .name(product.getName())
+                        .corpName(product.getCorp().getName())
+                        .corpImage(product.getCorp().getLogoImg())
+                        .cardImage(product.getCardImg())
+                        .tags(convertToList(product.getTags()))
+                        .boardCount(product.getBoardCount().getBoardCount())
+                        .createdTime(product.getCreatedAt())
+                        .build()
+        ).collect(Collectors.toList());
+    }
+
 
     public List<String> convertToList(String data) {
         if (data == null || data.isEmpty()) {
