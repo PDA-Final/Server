@@ -15,6 +15,7 @@ import lombok.NoArgsConstructor;
 @DiscriminatorValue("BoardCount")
 public class BoardCount {
     @Id
+    @Column(name = "product_id")
     private Long productId;
 
     @Column(name = "board_count", nullable = false, columnDefinition = "int default 0")

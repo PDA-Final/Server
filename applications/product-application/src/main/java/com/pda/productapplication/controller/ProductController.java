@@ -46,8 +46,10 @@ public class ProductController {
         Map<String, Object> result = new HashMap<>();
 
         log.info(searchConditionDto.getCategory());
+        log.info(searchConditionDto.getSort());
 
-        List<ProductDto.BasicRespDto> products = productService.getProducts(pageNo, size);
+        List<ProductDto.BasicRespDto> products =
+                productService.getProducts(pageNo, size, searchConditionDto);
         result.put("products", products);
 
         return ApiUtils.success("success", result);
@@ -91,23 +93,25 @@ public class ProductController {
         log.info(searchConditionDto.getCategory());
         String categoryName = searchConditionDto.getCategory();
 
+        // TODO : category validation
+
         switch (categoryName.toLowerCase()) {
-            case "card":
+            case "카드":
                 ProductDto.CardSummaryRespDto cardSummaryRespDto
                         = productService.getCardSummary(productId);
                 result.put("card product summary", cardSummaryRespDto);
                 break;
-            case "saving":
+            case "예적금":
                 ProductDto.SavingSummaryRespDto savingSummaryRespDto
                         = productService.getSavingSummary(productId);
                 result.put("saving product summary", savingSummaryRespDto);
                 break;
-            case "fund":
+            case "펀드":
                 ProductDto.FundSummaryRespDto fundSummaryRespDto
                         = productService.getFundSummary(productId);
                 result.put("fund product summary", fundSummaryRespDto);
                 break;
-            case "loan":
+            case "대출":
                 ProductDto.LoanSummaryRespDto loanSummaryRespDto
                         = productService.getLoanSummary(productId);
                 result.put("loan product summary", loanSummaryRespDto);
@@ -135,23 +139,25 @@ public class ProductController {
         log.info(searchConditionDto.getCategory());
         String categoryName = searchConditionDto.getCategory();
 
+        // TODO : category validation
+
         switch (categoryName.toLowerCase()) {
-            case "card":
+            case "카드":
                 ProductDto.CardDetailRespDto cardDetailRespDto
                         = productService.getCardDetail(productId);
                 result.put("card product detail", cardDetailRespDto);
                 break;
-            case "saving":
+            case "예적금":
                 ProductDto.SavingDetailRespDto savingDetailRespDto
                         = productService.getSavingDetail(productId);
                 result.put("saving product detail", savingDetailRespDto);
                 break;
-            case "fund":
+            case "펀드":
                 ProductDto.FundDetailRespDto fundDetailRespDto
                         = productService.getFundDetail(productId);
                 result.put("fund product detail", fundDetailRespDto);
                 break;
-            case "loan":
+            case "대출":
                 ProductDto.LoanDetailRespDto loanDetailRespDto
                         = productService.getLoanDetail(productId);
                 result.put("loan product detail", loanDetailRespDto);
@@ -194,6 +200,26 @@ public class ProductController {
         ProductDto.BoardCountReqDto boardCountReqDto
                 = productService.incrementBoardCount(productId);
         result.put("board count", boardCountReqDto);
+
+        return ApiUtils.success("success", result);
+    }
+
+    @GetMapping("/search")
+    @Operation(summary = "Search for products", description = "Search for products by name")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "OK"),
+            @ApiResponse(responseCode = "204", description = "No content")
+    })
+    public GlobalResponse<Object> searchProductByName(
+            @RequestParam("name") String name,
+            @RequestParam(required = false, defaultValue = "0", value = "pageNo") int pageNo,
+            @RequestParam(required = false, defaultValue = "10", value = "size") int size
+    ) {
+        log.debug("Get searched product list. page {}, size {}", pageNo, size);
+        Map<String, Object> result = new HashMap<>();
+
+        List<ProductDto.BasicRespDto> products = productService.searchProductByName(name, pageNo, size);
+        result.put("searched products", products);
 
         return ApiUtils.success("success", result);
     }
