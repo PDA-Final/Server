@@ -46,7 +46,7 @@ pipeline {
           if (!buildCause.isEmpty()) {
             echo "triggered by user"
             userApp = true
-            userApp = false // skip user app until constructing kafka
+            userApp = true
             boardApp = true
             challengeApp = true
             productApp = true
@@ -68,7 +68,7 @@ pipeline {
               }
             }
             userApp = changedDirs.contains('user-application')
-            userApp = false // skip user app until constructing kafka
+            userApp = true
             boardApp = changedDirs.contains('board-application')
             challengeApp = changedDirs.contains('challenge-application')
             productApp = changedDirs.contains('product-application')
