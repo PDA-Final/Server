@@ -46,7 +46,6 @@ pipeline {
           if (!buildCause.isEmpty()) {
             echo "triggered by user"
             userApp = true
-            userApp = true
             boardApp = true
             challengeApp = true
             productApp = true
@@ -68,7 +67,6 @@ pipeline {
               }
             }
             userApp = changedDirs.contains('user-application')
-            userApp = true
             boardApp = changedDirs.contains('board-application')
             challengeApp = changedDirs.contains('challenge-application')
             productApp = changedDirs.contains('product-application')
