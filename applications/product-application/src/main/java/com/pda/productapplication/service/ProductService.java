@@ -325,7 +325,7 @@ public class ProductService {
         Page<Product> products;
 
         products = productRepository.findByNameLike("%"+name+"%", pageable);
-        
+
         return products.stream().map(product ->
                 ProductDto.BasicRespDto.builder()
                         .id(product.getId())
