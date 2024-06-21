@@ -23,7 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class MyBoardChallengeController {
     private final MyBoardChallengeService myBoardChallengeService;
 
-    // 챌린지 게시글 참여
+    // 챌린지 참여
     @PostMapping
     @Operation(summary = "게시글 챌린지 참여", description = "게시글 챌린지에 참여합니다",
             security = @SecurityRequirement(name = "bearerAuth"))
@@ -35,4 +35,5 @@ public class MyBoardChallengeController {
         return ApiUtils.success("게시글 작성 완료");
 
     }
+
 }
