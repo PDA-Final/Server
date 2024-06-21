@@ -10,12 +10,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -341,6 +339,38 @@ public class ProductService {
                         .build()
         ).collect(Collectors.toList());
     }
+
+    /**
+     * Get user-owned products
+     * @param productsReqMap requested products (product name, corp name)
+     * @param pageNo page num
+     * @param size size
+     */
+    public List<ProductDto.BasicRespDto> getUserOwnedProducts(Map<String, String> productsReqMap, int pageNo, int size) {
+        Pageable pageable = PageRequest.of(pageNo, size);
+        List<ProductDto.BasicRespDto> productDtoList = new ArrayList<>();
+
+        productsReqMap.forEach((name, corpName) -> {
+            Specification<Product> spec = Specification.where(ProductSpecification.equalProductName(name))
+                    .and(ProductSpecification.equalCorpName(corpName));
+            List<Product> products = productRepository.findAll(spec, pageable).getContent(); // 필터링된 상품
+
+            log.debug("Filtered product: {}", products);
+
+            productDtoList.addAll(products.stream().map(product -> ProductDto.BasicRespDto.builder()
+                    .id(product.getId())
+                    .name(product.getName())
+                    .corpName(product.getCorp().getName())
+                    .corpImage(product.getCorp().getLogoImg())
+                    .cardImage(product.getCardImg())
+                    .tags(convertToList(product.getTags()))
+                    .boardCount(product.getBoardCount().getBoardCount())
+                    .createdTime(product.getCreatedAt())
+                    .build()).toList());
+        });
+        return productDtoList;
+    }
+
 
     public List<String> convertToList(String data) {
         if (data == null || data.isEmpty()) {

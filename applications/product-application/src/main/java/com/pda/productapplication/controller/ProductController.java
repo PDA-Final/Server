@@ -223,4 +223,25 @@ public class ProductController {
 
         return ApiUtils.success("success", result);
     }
+
+    @PostMapping("/owned")
+    @Operation(summary = "Get Products owned by user", description = "Return product information that user own.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "OK"),
+            @ApiResponse(responseCode = "204", description = "No content")
+    })
+    public GlobalResponse<Object> getUserOwnedProducts(
+            @RequestBody Map<String, String> productsReqMap,
+            @RequestParam(required = false, defaultValue = "0", value = "pageNo") int pageNo,
+            @RequestParam(required = false, defaultValue = "10", value = "size") int size
+    ) {
+        log.debug("Get products owned by user. productsReq: {}", productsReqMap);
+        log.debug("pageNum: {}, size: {}", pageNo, size);
+        Map<String, Object> result = new HashMap<>();
+
+        List<ProductDto.BasicRespDto> products = productService.getUserOwnedProducts(productsReqMap, pageNo, size);
+        result.put("products", products);
+
+        return ApiUtils.success("success", result);
+    }
 }
