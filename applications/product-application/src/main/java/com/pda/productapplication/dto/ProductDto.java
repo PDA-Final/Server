@@ -30,7 +30,7 @@ public class ProductDto {
         private List<String> tags;
         @Schema(description = "Number of connected boards", example = "2")
         private int boardCount;
-        @Schema(description = "Created time", example = "2024-06-20 16:23:47.000000")
+        @Schema(description = "Created time", example = "2024-06-20T16:23:47")
         private LocalDateTime createdTime;
     }
 
