@@ -36,7 +36,7 @@ public class ChallengeService {
 
     // 조회
     public List<ChallengeSummaryResponse> readAllChallenge() {
-        List<ChallengeDetail> challengeList = challengeDetailRepository.findALl();
+        List<ChallengeDetail> challengeList = challengeDetailRepository.findAll();
         System.out.println(challengeList.get(0));
         return challengeList.stream()
                 .map((challenge) -> ChallengeSummaryResponse.builder()

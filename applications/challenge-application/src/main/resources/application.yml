@@ -19,6 +19,14 @@ spring:
     username: root
     password: root
 
+  kafka:
+    producer:
+      bootstrap-servers: localhost:10000,localhost:10001,localhost:10002
+    consumer:
+      group-id: challenge-group
+      auto-offset-reset: earliest
+      bootstrap-servers: localhost:10000,localhost:10001,localhost:10002
+
   sql:
     init:
       mode: always

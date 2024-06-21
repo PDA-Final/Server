@@ -35,16 +35,4 @@ public class MyBoardChallengeController {
         return ApiUtils.success("게시글 작성 완료");
 
     }
-
-    @PostMapping("/success")
-    @Operation(summary = "게시글 챌린지 성공 요청", description = "게시글 챌린지 성공 요청")
-    @ApiResponse(responseCode = "201", description = "성공" )
-    public GlobalResponse successBoardChallenge(
-            @RequestBody long boardId
-    ){
-        String m = myBoardChallengeService.successBoardChallenge(boardId).getChallenge().getName();
-        return ApiUtils.success("챌린지 성공", m);
-    }
-
-
 }

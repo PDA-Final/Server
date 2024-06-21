@@ -216,6 +216,7 @@ public class MyChallengeService {
         for(MyChallenge mc : c){
             if(mc.getEndAt().isBefore(LocalDate.now()) ){
                 mc.editMyChallengeStatus("실패");
+                // TODO 자산저축챌린지가 아닌 경우 실패 알림
             }
             myChallengeRepository.save(mc);
         }

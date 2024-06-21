@@ -13,13 +13,17 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Getter
 public class PostMyBoardChallengeRequest {
-    @Schema(description = "나의 챌린지 id (챌린지 id랑 다름!!)", example = "1")
-    long myChallengeId;
+    @Schema(description ="챌린지 id", example = "1")
+    long challengeId;
+
+    @Schema(description ="유저 id", example = "1")
+    long usesrId;
+
     @Schema(description = "나의 게시글 id ", example = "1")
     long boardId;
 
     public MyBoardChallenge convertToAccountEntity(MyChallenge mc) {
-        MyBoardChallenge myBoardChallenge = new MyBoardChallenge(myChallengeId, boardId,mc);
+        MyBoardChallenge myBoardChallenge = new MyBoardChallenge(mc.getId(), boardId,mc);
         return myBoardChallenge;
     }
 }
