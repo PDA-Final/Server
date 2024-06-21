@@ -226,7 +226,7 @@ public class ProductController {
         return ApiUtils.success("success", result);
     }
 
-    @PostMapping("/owned/normalUser")
+    @PostMapping("/owned/normal")
     @Operation(summary = "Get Products owned by normal user", description = "Return product information that normal user own.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK"),
@@ -247,7 +247,7 @@ public class ProductController {
         return ApiUtils.success("success", result);
     }
 
-    @PostMapping("/owned/corpUser")
+    @PostMapping("/owned/corp")
     @Operation(summary = "Get Products owned by corp user", description = "Return product information that corp user own.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK"),
