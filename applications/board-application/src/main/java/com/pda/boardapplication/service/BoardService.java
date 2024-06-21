@@ -4,12 +4,14 @@ import com.pda.boardapplication.dto.BoardDto;
 import com.pda.boardapplication.dto.CommentDto;
 import com.pda.boardapplication.dto.UserDto;
 import com.pda.boardapplication.entity.Board;
+import com.pda.boardapplication.entity.BoardCount;
 import com.pda.boardapplication.repository.BoardRepository;
 import com.pda.boardapplication.repository.CategoryRepository;
 import com.pda.boardapplication.utils.UserUtils;
 import com.pda.exceptionhandler.exceptions.BadRequestException;
 import com.pda.exceptionhandler.exceptions.ForbiddenException;
 import com.pda.exceptionhandler.exceptions.NotFoundException;
+import com.pda.s3utils.service.S3Service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
@@ -28,6 +30,8 @@ public class BoardService {
     private final BoardRepository boardRepository;
 
     private final CategoryRepository categoryRepository;
+
+    private final BoardCountRepository boardCountRepository;
 
     /**
      * Register Board
@@ -48,7 +52,11 @@ public class BoardService {
                 .authorProfile(authorInfoDto.getProfile())
                 .build();
 
-        return boardRepository.save(board).getId();
+        long boardId = boardRepository.save(board).getId();
+
+        boardCountRepository.save(BoardCount.builder()
+                        .board(board).likeCnt(0).viewCnt(0).build());
+        return boardId;
     }
 
     /**
