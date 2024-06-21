@@ -225,7 +225,7 @@ pipeline {
     stage('clean') {
       steps {
         echo 'clean unused image'
-        // sh 'docker image prune --force'
+        sh 'docker image prune --force'
       }
     }
   }
@@ -240,13 +240,13 @@ def publishOverSSH(serverName, imageName) {
         verbose: true,
         transfers: [
           sshTransfer(
-            cleanRemote: false, // clean remote dir
+            cleanRemote: true, // clean remote dir
             excludes: '',
-            execCommand: "/bin/bash /home/ubuntu/ws/deploy.sh ${imageName}",
-            execTimeout: 120000,
-            makeEmptyDirs: false,
+            execCommand: "/bin/bash /home/ubuntu/depl/deploy.sh ${imageName}",
+            execTimeout: 200000,
+            makeEmptyDirs: true,
             noDefaultExcludes: false,
-            remoteDirectory: 'workspace',
+            remoteDirectory: 'depl',
             remoteDirectorySDF: false,
             removePrefix: 'scripts',
             sourceFiles: 'scripts/deploy.sh'
