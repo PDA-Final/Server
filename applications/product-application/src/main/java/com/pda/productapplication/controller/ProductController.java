@@ -18,7 +18,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@Tag(name = "Product", description = "Product API")
+@Tag(name = "[Product]", description = "Product API")
 @RestController
 @RequiredArgsConstructor
 @Slf4j
