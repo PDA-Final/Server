@@ -1,5 +1,6 @@
 package com.pda.boardapplication.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -24,4 +25,9 @@ public class BoardCount extends BaseEntity {
     private int likeCnt;
 
     private int viewCnt;
+
+    public void updateOnLike(int increment) {
+        if(this.likeCnt + increment >= 0)
+            this.likeCnt += increment;
+    }
 }
