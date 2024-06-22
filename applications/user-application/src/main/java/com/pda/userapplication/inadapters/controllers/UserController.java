@@ -12,18 +12,21 @@ import com.pda.userapplication.inadapters.controllers.dto.req.UpdateProfileReque
 import com.pda.userapplication.services.in.ConnectAssetUseCase;
 import com.pda.userapplication.services.in.GetJobsUseCase;
 import com.pda.userapplication.services.in.GetUserDetailInfo;
+import com.pda.userapplication.services.in.GetUserUseCase;
 import com.pda.userapplication.services.in.IsAvailableContact;
 import com.pda.userapplication.services.in.IsAvailableTofinIdUseCase;
 import com.pda.userapplication.services.in.SetPublicOptionUseCase;
 import com.pda.userapplication.services.in.SetTendencyUseCase;
 import com.pda.userapplication.services.in.UpdateUserUseCase;
 import com.pda.userapplication.services.in.dto.req.ConnectAssetsServiceRequest;
+import com.pda.userapplication.services.in.dto.req.SearchUserServiceRequest;
 import com.pda.userapplication.services.in.dto.req.SetPublicOptionServiceRequest;
 import com.pda.userapplication.services.in.dto.req.SetTendencyServiceRequest;
 import com.pda.userapplication.services.in.dto.req.UpdateProfileServiceRequest;
 import com.pda.userapplication.services.in.dto.res.AvailableContactServiceResponse;
 import com.pda.userapplication.services.in.dto.res.AvailableTofinIdServiceResponse;
 import com.pda.userapplication.services.in.dto.res.ConnectAssetInfoResponse;
+import com.pda.userapplication.services.in.dto.res.GetUserPagingResponse;
 import com.pda.userapplication.services.in.dto.res.UserDetailInfoResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -35,6 +38,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -60,6 +64,7 @@ public class UserController {
     private final SetTendencyUseCase setTendencyUseCase;
     private final GetUserDetailInfo getUserDetailInfo;
     private final UpdateUserUseCase updateUserUseCase;
+    private final GetUserUseCase getUserUseCase;
 
     @GetMapping("/jobs")
     @Operation(summary = "직업 리스트 조회", description = "모든 직업들의 리스트를 한글로 반환합니다")
@@ -158,5 +163,27 @@ public class UserController {
 
         updateUserUseCase.updateProfile(builder.build());
         return ApiUtils.success("유저 프로필 수정");
+    }
+
+    @GetMapping("/{id}")
+    @Operation(summary = "유저 조회", description = "유저의 기본 정보 조회 -> 인증 필수 아님",
+        security = @SecurityRequirement(name = "bearerAuth"))
+    @ApiResponse(responseCode = "200", description = "성공")
+    public GlobalResponse<Void> getUser(@AuthUser AuthUserInfo authUser, @PathVariable(name = "id") Long id) {
+        return ApiUtils.success("유저 조회 성공");
+    }
+
+    @GetMapping("/search")
+    @Operation(summary = "유저 검색", description = "유저 닉네임으로 검색")
+    @ApiResponse(responseCode = "200", description = "성공")
+    public GlobalResponse<GetUserPagingResponse> searchByNickname(
+          @Parameter(name = "nickname", required = true, example = "동원참치") @RequestParam(name = "nickname") String nickname,
+          @Parameter(name = "limit", description = "가져올 갯수(디폴트 20)", example = "20") @RequestParam(name = "limit", defaultValue = "20", required = false) Long limit,
+          @Parameter(name = "last", description = "마지막으로 조회한 팔로우 id", example = "203") @RequestParam(name = "last", required = false) Long last) {
+        return ApiUtils.success("유저 검색 성공", getUserUseCase.searchUserByNickname(SearchUserServiceRequest.builder()
+                .lastIndex(last)
+                .limit(limit)
+                .nickname(nickname)
+            .build()));
     }
 }

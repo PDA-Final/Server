@@ -9,6 +9,7 @@ import jakarta.persistence.ForeignKey;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
@@ -23,7 +24,10 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Entity
-@Table(name = "Follow")
+@Table(name = "Follow", indexes = {
+    @Index(name = "from_user_index", columnList = "from_user_id"),
+    @Index(name = "to_user_index", columnList = "to_user_id"),
+})
 public class FollowEntity extends BaseTimeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
