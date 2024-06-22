@@ -105,7 +105,7 @@ public class UserService implements SignUpUseCase, ReissueUseCase,
         sendCreditTo(user.getId().toLong(), 100L);
 
         return toTokenInfoServiceResponse(
-            generateTokenAndSaveRefresh(user));
+            generateTokenAndSaveRefresh(user), user);
     }
 
     @Async
@@ -147,7 +147,7 @@ public class UserService implements SignUpUseCase, ReissueUseCase,
             throw new UnAuthorizedException("아이디 혹은 비밀번호가 틀렸습니다.");
 
         return toTokenInfoServiceResponse(
-            generateTokenAndSaveRefresh(user));
+            generateTokenAndSaveRefresh(user), user);
     }
 
     @Transactional
@@ -159,7 +159,7 @@ public class UserService implements SignUpUseCase, ReissueUseCase,
             .orElseThrow(() -> new UnAuthorizedException("해당 리프레쉬 토큰은 사용할 수 없음"));
 
         return toTokenInfoServiceResponse(
-            generateTokenAndSaveRefresh(user));
+            generateTokenAndSaveRefresh(user), user);
     }
 
     @Override
@@ -325,8 +325,9 @@ public class UserService implements SignUpUseCase, ReissueUseCase,
             "https://tofin-bucket.s3.ap-northeast-2.amazonaws.com/users/profile/default/user-icon4.svg");
     }
 
-    private TokenInfoServiceResponse toTokenInfoServiceResponse(final TokenInfo tokenInfo) {
+    private TokenInfoServiceResponse toTokenInfoServiceResponse(final TokenInfo tokenInfo, User user) {
         return TokenInfoServiceResponse.builder()
+            .id(user.getId().toLong())
             .accessToken(tokenInfo.getAccessToken())
             .refreshToken(tokenInfo.getRefreshToken())
             .grantType(tokenInfo.getGrantType())

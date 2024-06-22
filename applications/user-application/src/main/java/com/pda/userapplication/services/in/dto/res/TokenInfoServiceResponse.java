@@ -13,6 +13,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Schema(description = "토큰 Response")
 public class TokenInfoServiceResponse {
+    @Schema(description = "유저 아이디(PK)", example = "65")
+    private Long id;
     @Schema(description = "인증 타입", example = "Bearer")
     private String grantType;
     @Schema(description = "액세스 토큰(15분)", example = "adfjkladfjkaldfjkladfjkladfjakl")
