@@ -64,13 +64,10 @@ public class ProductController {
             @ApiResponse(responseCode = "404", description = "Not found")
     })
     public GlobalResponse<Object> getProductBasic(
-            @PathVariable("productId") Long productId,
-            ProductDto.SearchConditionDto searchConditionDto
+            @PathVariable("productId") Long productId
     ) {
         log.debug("Product id: {}", productId);
         Map<String, Object> result = new HashMap<>();
-
-        log.info(searchConditionDto.getCategory());
 
         ProductDto.BasicRespDto basicRespDto
                 = productService.getProduct(productId);

@@ -326,9 +326,6 @@ public class ProductService {
 
         products = productRepository.findByNameLike("%"+name+"%", pageable);
 
-        if (products.isEmpty())
-            throw new NotFoundException("No products found with name: " + name);
-
         return products.stream().map(product ->
                 ProductDto.BasicRespDto.builder()
                         .id(product.getId())
