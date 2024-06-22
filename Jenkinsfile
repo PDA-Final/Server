@@ -12,6 +12,7 @@ def userApp = false
 def boardApp = false
 def challengeApp = false
 def productApp = false
+def creditApp = false
 def utils = false
 def failureCnt = 0
 
@@ -49,6 +50,7 @@ pipeline {
             boardApp = true
             challengeApp = true
             productApp = true
+            creditApp = true
           } else {
             def changedFiles = sh(returnStdout: true, script: 'git diff --name-only --diff-filter=ACMRT HEAD^ HEAD').trim().split('\n')
             def changedDirs = new HashSet()
@@ -70,9 +72,10 @@ pipeline {
             boardApp = changedDirs.contains('board-application')
             challengeApp = changedDirs.contains('challenge-application')
             productApp = changedDirs.contains('product-application')
+            creditApp = changedDirs.contains('credit-application')
           }
         }
-        echo "utils : ${utils}, user : ${userApp}, board : ${boardApp}, challenge : ${challengeApp}, product : ${productApp}"
+        echo "utils : ${utils}, user : ${userApp}, board : ${boardApp}, challenge : ${challengeApp}, product : ${productApp}, credit : ${creditApp}"
       }
     }
 
@@ -211,6 +214,41 @@ pipeline {
         script {
           try {
             publishOverSSH('challenge-api', 'tofin-challenge-api')
+            echo "Publish over ssh Successful"
+          } catch(Exception e) {
+            echo "Publish over ssh failed : ${e.message}"
+            currentBuild.result = 'FAILURE'
+          }
+        }
+
+      }
+    }
+
+    stage('build credit app') {
+      when {
+        anyOf {
+          expression { creditApp }
+          expression { utils }
+        }
+      }
+      steps {
+        echo 'copy configuration files for credit app'
+        sh 'cp /var/jenkins_home/workspace/configs/server/credit/application.yml ./applications/credit-application/src/main/resources/application.yml'
+        echo 'start gradle build for credit app'
+        dir('./') {
+          sh 'chmod +x ./gradlew'
+          sh './gradlew clean'
+          sh './gradlew :applications:credit-application:build'
+        }
+        echo 'start docker build for credit app'
+        dir('./applications/credit-application/') {
+          sh 'docker build -t bkkmw/tofin-credit-api .'
+          sh 'docker push bkkmw/tofin-credit-api'
+        }
+        echo 'publish over ssh for credit app'
+        script {
+          try {
+            publishOverSSH('credit-api', 'tofin-credit-api')
             echo "Publish over ssh Successful"
           } catch(Exception e) {
             echo "Publish over ssh failed : ${e.message}"
