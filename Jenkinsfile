@@ -75,6 +75,7 @@ pipeline {
             creditApp = changedDirs.contains('credit-application')
           }
         }
+        sh 'cp /var/jenkins_home/workspace/configs/server/s3-keys.properties ./utils/s3-utils/src/main/resources/application-keys.properties'
         echo "utils : ${utils}, user : ${userApp}, board : ${boardApp}, challenge : ${challengeApp}, product : ${productApp}, credit : ${creditApp}"
       }
     }
