@@ -21,6 +21,7 @@ import com.pda.userapplication.domains.vo.TofinId;
 import com.pda.userapplication.domains.vo.UserId;
 import com.pda.userapplication.services.in.ConnectAssetUseCase;
 import com.pda.userapplication.services.in.GetUserDetailInfo;
+import com.pda.userapplication.services.in.GetUserUseCase;
 import com.pda.userapplication.services.in.IsAvailableContact;
 import com.pda.userapplication.services.in.IsAvailableTofinIdUseCase;
 import com.pda.userapplication.services.in.ReissueUseCase;
@@ -30,6 +31,7 @@ import com.pda.userapplication.services.in.SignInUseCase;
 import com.pda.userapplication.services.in.SignUpUseCase;
 import com.pda.userapplication.services.in.UpdateUserUseCase;
 import com.pda.userapplication.services.in.dto.req.ConnectAssetsServiceRequest;
+import com.pda.userapplication.services.in.dto.req.SearchUserServiceRequest;
 import com.pda.userapplication.services.in.dto.req.SetPublicOptionServiceRequest;
 import com.pda.userapplication.services.in.dto.req.SetTendencyServiceRequest;
 import com.pda.userapplication.services.in.dto.req.SignInServiceRequest;
@@ -38,6 +40,8 @@ import com.pda.userapplication.services.in.dto.req.UpdateProfileServiceRequest;
 import com.pda.userapplication.services.in.dto.res.AvailableContactServiceResponse;
 import com.pda.userapplication.services.in.dto.res.AvailableTofinIdServiceResponse;
 import com.pda.userapplication.services.in.dto.res.ConnectAssetInfoResponse;
+import com.pda.userapplication.services.in.dto.res.GetUserPagingResponse;
+import com.pda.userapplication.services.in.dto.res.GetUserSummaryResponse;
 import com.pda.userapplication.services.in.dto.res.TokenInfoServiceResponse;
 import com.pda.userapplication.services.in.dto.res.UserDetailInfoResponse;
 import com.pda.userapplication.services.out.GetAssetsOutputPort;
@@ -48,11 +52,13 @@ import com.pda.userapplication.services.out.SaveNormalUserOutputPort;
 import com.pda.userapplication.services.out.SaveUserOutputPort;
 import com.pda.userapplication.services.out.SendCreditOutputPort;
 import com.pda.userapplication.services.out.SendUpdateUserOutputPort;
+import com.pda.userapplication.services.out.dto.req.SearchUserOutputRequest;
 import com.pda.userapplication.services.out.dto.req.SendCreditOutputRequest;
 import com.pda.userapplication.services.out.dto.req.UserUpdateOutputRequest;
 import com.pda.userapplication.services.out.dto.res.AccountResponse;
 import com.pda.userapplication.services.out.dto.res.AssetInfoResponse;
 import com.pda.userapplication.services.out.dto.res.CardResponse;
+import com.pda.userapplication.services.out.dto.res.SearchUserPagingOutputResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -72,7 +78,7 @@ import java.util.regex.Pattern;
 public class UserService implements SignUpUseCase, ReissueUseCase,
     IsAvailableTofinIdUseCase, SignInUseCase, ConnectAssetUseCase,
     IsAvailableContact, SetPublicOptionUseCase, SetTendencyUseCase,
-    GetUserDetailInfo, UpdateUserUseCase {
+    GetUserDetailInfo, UpdateUserUseCase, GetUserUseCase {
     private final SaveUserOutputPort saveUserOutputPort;
     private final ReadUserOutputPort readUserOutputPort;
     private final UserInfoEncoder userInfoEncoder;
@@ -279,9 +285,31 @@ public class UserService implements SignUpUseCase, ReissueUseCase,
         saveUserOutputPort.save(user);
     }
 
+    @Override
+    public GetUserPagingResponse searchUserByNickname(final SearchUserServiceRequest request) {
+        SearchUserPagingOutputResponse response = readUserOutputPort.searchByNickname(SearchUserOutputRequest.builder()
+                .limit(request.getLimit())
+                .lastIndex(request.getLastIndex())
+                .nickname(request.getNickname())
+                .build());
+
+        return GetUserPagingResponse.builder()
+            .users(response.getUsers().stream().map(user -> GetUserSummaryResponse.builder()
+                .role(user.getRole())
+                .userId(user.getId().toLong())
+                .tofinId(user.getToFinId().toString())
+                .profileImage(user.getProfileImage().toString())
+                .nickname(user.getNickname().toString())
+                .build()).toList())
+            .totalCount(response.getTotalCount())
+            .isLast(response.isLast())
+            .lastIndex(response.getLastIndex())
+            .build();
+    }
+
     private String uploadImage(MultipartFile file, UserId id) {
         try {
-            return s3Service.upload(file,String.format("/users/profile/%d",id.toLong()));
+            return s3Service.upload(file,String.format("users/profile/%d",id.toLong()));
         } catch (IOException e) {
             throw new BadRequestException("이미지 업로드에 실패하였습니다.");
         }
