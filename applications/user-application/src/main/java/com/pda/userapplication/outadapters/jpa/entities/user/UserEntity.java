@@ -59,8 +59,8 @@ public class UserEntity extends BaseTimeEntity {
     @Comment("유저의 닉네임")
     private String nickname;
 
-    @Column(name = "profile_img", nullable = false)
-    @ColumnDefault("'http://이미지 주소'") // FIXME: URL 지정해주어야함
+    @Column(name = "profile_img", length = 512, nullable = false)
+    @ColumnDefault("'https://tofin-bucket.s3.ap-northeast-2.amazonaws.com/users/profile/default/user-icon1.svg'")
     @Comment("프로필 이미지")
     private String profileImage;
 

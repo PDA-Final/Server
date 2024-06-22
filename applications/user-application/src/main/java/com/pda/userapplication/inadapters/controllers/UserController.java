@@ -2,11 +2,13 @@ package com.pda.userapplication.inadapters.controllers;
 
 import com.pda.apiutils.ApiUtils;
 import com.pda.apiutils.GlobalResponse;
+import com.pda.exceptionhandler.exceptions.BadRequestException;
 import com.pda.tofinsecurity.user.AuthUser;
 import com.pda.tofinsecurity.user.AuthUserInfo;
 import com.pda.userapplication.inadapters.controllers.dto.req.ConnectAssetsRequest;
 import com.pda.userapplication.inadapters.controllers.dto.req.SetPublicOptionRequest;
 import com.pda.userapplication.inadapters.controllers.dto.req.SetTendencyRequest;
+import com.pda.userapplication.inadapters.controllers.dto.req.UpdateProfileRequest;
 import com.pda.userapplication.services.in.ConnectAssetUseCase;
 import com.pda.userapplication.services.in.GetJobsUseCase;
 import com.pda.userapplication.services.in.GetUserDetailInfo;
@@ -14,9 +16,11 @@ import com.pda.userapplication.services.in.IsAvailableContact;
 import com.pda.userapplication.services.in.IsAvailableTofinIdUseCase;
 import com.pda.userapplication.services.in.SetPublicOptionUseCase;
 import com.pda.userapplication.services.in.SetTendencyUseCase;
+import com.pda.userapplication.services.in.UpdateUserUseCase;
 import com.pda.userapplication.services.in.dto.req.ConnectAssetsServiceRequest;
 import com.pda.userapplication.services.in.dto.req.SetPublicOptionServiceRequest;
 import com.pda.userapplication.services.in.dto.req.SetTendencyServiceRequest;
+import com.pda.userapplication.services.in.dto.req.UpdateProfileServiceRequest;
 import com.pda.userapplication.services.in.dto.res.AvailableContactServiceResponse;
 import com.pda.userapplication.services.in.dto.res.AvailableTofinIdServiceResponse;
 import com.pda.userapplication.services.in.dto.res.ConnectAssetInfoResponse;
@@ -29,12 +33,16 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -51,6 +59,7 @@ public class UserController {
     private final SetPublicOptionUseCase setPublicOptionUseCase;
     private final SetTendencyUseCase setTendencyUseCase;
     private final GetUserDetailInfo getUserDetailInfo;
+    private final UpdateUserUseCase updateUserUseCase;
 
     @GetMapping("/jobs")
     @Operation(summary = "직업 리스트 조회", description = "모든 직업들의 리스트를 한글로 반환합니다")
@@ -122,7 +131,32 @@ public class UserController {
     @GetMapping("/detail-info")
     @Operation(summary = "유저 민감 정보 조회", description = "유저의 민감 정보 조회(자산 연결 후 사용 가능) -> 클라이언트에서 절대 사용 X",
         security = @SecurityRequirement(name = "bearerAuth"))
+    @ApiResponse(responseCode = "200", description = "성공")
     public GlobalResponse<UserDetailInfoResponse> getDetailInfo(@AuthUser AuthUserInfo userInfo) {
-        return ApiUtils.success("성공", getUserDetailInfo.getUserDetailInfo(userInfo.getId()));
+        return ApiUtils.success("민감 정보 조회 성공", getUserDetailInfo.getUserDetailInfo(userInfo.getId()));
+    }
+
+    @PutMapping(path = "/profile", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @Operation(summary = "유저 프로필 수정", description = "유저 프로필 설정",
+        security = @SecurityRequirement(name = "bearerAuth"))
+    @ApiResponse(responseCode = "200", description = "성공")
+    public GlobalResponse<Void> updateProfile(@AuthUser AuthUserInfo authUser,
+                                              @RequestPart(name = "image", required = false) MultipartFile multipartFile,
+                                              @Parameter(name = "request") @RequestPart(name = "request", required = false) UpdateProfileRequest request) {
+        if (multipartFile == null && request == null)
+            throw new BadRequestException("변경사항이 없습니다.");
+
+        UpdateProfileServiceRequest.UpdateProfileServiceRequestBuilder builder = UpdateProfileServiceRequest.builder()
+            .userId(authUser.getId())
+            .profileImage(multipartFile);
+
+        if (request != null) {
+            builder
+                .job(request.getJob())
+                .nickname(request.getNickname());
+        }
+
+        updateUserUseCase.updateProfile(builder.build());
+        return ApiUtils.success("유저 프로필 수정");
     }
 }

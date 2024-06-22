@@ -12,6 +12,7 @@ def userApp = false
 def boardApp = false
 def challengeApp = false
 def productApp = false
+def creditApp = false
 def utils = false
 def failureCnt = 0
 
@@ -46,10 +47,10 @@ pipeline {
           if (!buildCause.isEmpty()) {
             echo "triggered by user"
             userApp = true
-            userApp = false // skip user app until constructing kafka
             boardApp = true
             challengeApp = true
             productApp = true
+            creditApp = true
           } else {
             def changedFiles = sh(returnStdout: true, script: 'git diff --name-only --diff-filter=ACMRT HEAD^ HEAD').trim().split('\n')
             def changedDirs = new HashSet()
@@ -68,14 +69,14 @@ pipeline {
               }
             }
             userApp = changedDirs.contains('user-application')
-            userApp = false // skip user app until constructing kafka
             boardApp = changedDirs.contains('board-application')
             challengeApp = changedDirs.contains('challenge-application')
             productApp = changedDirs.contains('product-application')
+            creditApp = changedDirs.contains('credit-application')
           }
         }
-        sh 'cp /var/jenkins_home/workspace/builds/deploy.sh ./scripts/deploy.sh'
-        echo "utils : ${utils}, user : ${userApp}, board : ${boardApp}, challenge : ${challengeApp}, product : ${productApp}"
+        sh 'cp /var/jenkins_home/workspace/configs/server/s3-keys.properties ./utils/s3-utils/src/main/resources/application-keys.properties'
+        echo "utils : ${utils}, user : ${userApp}, board : ${boardApp}, challenge : ${challengeApp}, product : ${productApp}, credit : ${creditApp}"
       }
     }
 
@@ -224,10 +225,45 @@ pipeline {
       }
     }
 
+    stage('build credit app') {
+      when {
+        anyOf {
+          expression { creditApp }
+          expression { utils }
+        }
+      }
+      steps {
+        echo 'copy configuration files for credit app'
+        sh 'cp /var/jenkins_home/workspace/configs/server/credit/application.yml ./applications/credit-application/src/main/resources/application.yml'
+        echo 'start gradle build for credit app'
+        dir('./') {
+          sh 'chmod +x ./gradlew'
+          sh './gradlew clean'
+          sh './gradlew :applications:credit-application:build'
+        }
+        echo 'start docker build for credit app'
+        dir('./applications/credit-application/') {
+          sh 'docker build -t bkkmw/tofin-credit-api .'
+          sh 'docker push bkkmw/tofin-credit-api'
+        }
+        echo 'publish over ssh for credit app'
+        script {
+          try {
+            publishOverSSH('credit-api', 'tofin-credit-api')
+            echo "Publish over ssh Successful"
+          } catch(Exception e) {
+            echo "Publish over ssh failed : ${e.message}"
+            currentBuild.result = 'FAILURE'
+          }
+        }
+
+      }
+    }
+
     stage('clean') {
       steps {
         echo 'clean unused image'
-        // sh 'docker image prune --force'
+        sh 'docker image prune --force'
       }
     }
   }
@@ -242,13 +278,13 @@ def publishOverSSH(serverName, imageName) {
         verbose: true,
         transfers: [
           sshTransfer(
-            cleanRemote: false, // clean remote dir
+            cleanRemote: true, // clean remote dir
             excludes: '',
-            execCommand: "/bin/bash /home/ubuntu/ws/deploy.sh ${imageName}",
-            execTimeout: 120000,
-            makeEmptyDirs: false,
+            execCommand: "/bin/bash /home/ubuntu/depl/deploy.sh ${imageName}",
+            execTimeout: 200000,
+            makeEmptyDirs: true,
             noDefaultExcludes: false,
-            remoteDirectory: 'workspace',
+            remoteDirectory: 'depl',
             remoteDirectorySDF: false,
             removePrefix: 'scripts',
             sourceFiles: 'scripts/deploy.sh'

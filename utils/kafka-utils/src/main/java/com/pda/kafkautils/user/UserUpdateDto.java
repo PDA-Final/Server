@@ -3,6 +3,7 @@ package com.pda.kafkautils.user;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.pda.kafkautils.KafkaJson;
+import com.pda.tofinenums.user.Job;
 import com.pda.tofinenums.user.UserRole;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -22,4 +23,5 @@ public class UserUpdateDto implements KafkaJson {
     private String profileImage;
     private String nickname;
     private UserRole role;
+    private Job job;
 }
