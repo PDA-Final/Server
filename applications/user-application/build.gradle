@@ -24,6 +24,7 @@ project(":applications:user-application") {
         implementation 'io.netty:netty-resolver-dns-native-macos:4.1.68.Final:osx-aarch_64' // arm 계열 macos
         implementation 'org.springframework.kafka:spring-kafka'
         implementation project(":utils:kafka-utils")
+        implementation project(":utils:s3-utils")
 
         testImplementation 'org.springframework.boot:spring-boot-starter-test'
     }
