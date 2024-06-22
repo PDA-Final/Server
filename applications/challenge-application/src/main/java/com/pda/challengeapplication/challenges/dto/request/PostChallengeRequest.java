@@ -11,7 +11,6 @@ import java.time.LocalDate;
 
 @Getter
 public class PostChallengeRequest {
-    long id;
     @Schema(description = "챌린지 타입(자산: 1, 게시글: 2)", example = "1")
     @NotNull(message = "챌린지 타입이 입력되지 않았습니다")
     int challengeType;
@@ -45,7 +44,7 @@ public class PostChallengeRequest {
     Integer reward;
 
     public Challenge convertToChallengeEntity() {
-        return new Challenge(id, challengeType, name, description, logoUrl, LocalDate.parse(startAt), LocalDate.parse(endAt), term, null, null);
+        return new Challenge(null, challengeType, name, description, logoUrl, LocalDate.parse(startAt), LocalDate.parse(endAt), term, null, null);
     }
 
     public ChallengeDetail convertToCDEntity(long cid, Challenge challenge) {

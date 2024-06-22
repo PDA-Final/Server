@@ -174,7 +174,7 @@ public class MyChallengeService {
             endAt = startAt.plusDays(c.getTerm());
         }
 
-       MyChallenge mc = new MyChallenge(postMyChallengeRequest.getId(),c , uid, startAt, endAt,"진행중");
+       MyChallenge mc = new MyChallenge(null,c , uid, startAt, endAt,"진행중");
        return myChallengeRepository.save(mc);
     }
 

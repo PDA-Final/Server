@@ -7,6 +7,7 @@ import com.pda.challengeapplication.mychallenges.dto.response.MyChallengeBadgeRe
 import com.pda.challengeapplication.mychallenges.dto.response.MyChallengeResponse;
 import com.pda.challengeapplication.mychallenges.repository.MyChallenge;
 import com.pda.challengeapplication.mychallenges.service.MyChallengeService;
+import com.pda.exceptionhandler.exceptions.ForbiddenException;
 import com.pda.tofinsecurity.user.AuthUser;
 import com.pda.tofinsecurity.user.AuthUserInfo;
 import io.swagger.v3.oas.annotations.Operation;
@@ -18,7 +19,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Tag(name="MyChallenge", description = "투핀 챌린지 API")
@@ -32,14 +32,14 @@ public class MyChallengeController {
 
     //참여 챌린지 조회 (내 프로필 or 다른 사람 프로필 / 마감된(1) or 진행중인(0))
     @GetMapping
-    @Operation(summary = "챌린지 조회", description = "유저 참여 챌린지를 조회합니다")
+    @Operation(summary = "유저 참여 챌린지 조회", description = "유저 참여 챌린지를 조회합니다")
     @ApiResponse(responseCode = "200", description = "성공")
     public GlobalResponse<List<MyChallengeResponse>> findChallengeByUserId(
             @RequestParam(value = "isDone") int isDone,
-            @RequestParam (required = false, value = "userId") Long userId
+            @RequestParam (value = "userId") Long userId
     ) {
 
-        List<MyChallengeResponse> myChallengeList = new ArrayList<>();
+        List<MyChallengeResponse> myChallengeList;
         if(isDone == 0){
             myChallengeList = myChallengeService.findChallengeByUserId(userId);
         }else{
@@ -52,7 +52,7 @@ public class MyChallengeController {
 
     // 유저 챌린지 참여 여부 조회
     @GetMapping("/{id}")
-    @Operation(summary = "챌린지 조회", description = "유저 참여 챌린지 여부를 조회합니다",
+    @Operation(summary = "유저 챌린지 참여 여부 조회", description = "유저가 챌린지에 참여했는지 조회합니다",
             security = @SecurityRequirement(name = "bearerAuth"))
     @ApiResponse(responseCode = "200", description = "성공")
     public GlobalResponse<Boolean> checkMyChallenge(
@@ -82,7 +82,7 @@ public class MyChallengeController {
 
     // 챌린지 참여
     @PostMapping
-    @Operation (summary = "자체 챌린지 참여", description = "자체 챌린지에 참여합니다",
+    @Operation (summary = "자체 챌린지 참여", description = "자체 챌린지에 참여합니다(감정저축 챌린지는 따로 신청)",
             security = @SecurityRequirement(name = "bearerAuth"))
     @ApiResponse(responseCode = "201", description = "성공")
     public GlobalResponse participateChallenge(
@@ -90,6 +90,9 @@ public class MyChallengeController {
              @AuthUser AuthUserInfo userInfo
     ){
 
+        if(postMyChallengeRequest.getChallengeId() ==1){
+            throw new ForbiddenException("감정저축챌린지는 다른 endpoint");
+        }
         MyChallenge myChallenge = myChallengeService.participateChallenge(postMyChallengeRequest, userInfo.getId());
         String challengeName = myChallenge.getChallenge().getName();
         return ApiUtils.success("챌린지 참여",challengeName);
@@ -99,13 +102,12 @@ public class MyChallengeController {
 
     // 성공한 챌린지 뱃지 조회
     @GetMapping("/badge")
-    @Operation (summary = "성공한 챌린지 뱃지 조회", description = "성공한 챌린지 뱃지들을 조회합니다",
-            security = @SecurityRequirement(name = "bearerAuth"))
+    @Operation (summary = "성공한 챌린지 뱃지 조회", description = "성공한 챌린지 뱃지들을 조회합니다")
     @ApiResponse(responseCode = "200", description = "성공")
     public GlobalResponse<List<MyChallengeBadgeResponse>> readAllChallengeBadge(
-            @AuthUser AuthUserInfo userInfo
+            @RequestParam (value = "userId") Long userId
     ){
-        List<MyChallengeBadgeResponse> badgeList = myChallengeService.readAllChallengeBadge(userInfo.getId());
+        List<MyChallengeBadgeResponse> badgeList = myChallengeService.readAllChallengeBadge(userId);
         return ApiUtils.success("달성 뱃지 조회", badgeList);
     }
 

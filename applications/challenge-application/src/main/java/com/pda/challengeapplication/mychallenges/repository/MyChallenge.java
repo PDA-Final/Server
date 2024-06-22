@@ -16,7 +16,7 @@ import java.time.LocalDate;
 public class MyChallenge {
     @Id
     @GeneratedValue(strategy= GenerationType.IDENTITY)
-    long id;
+    Long id;
     @ManyToOne
     @JoinColumn(name = "challengeId")
     Challenge challenge;

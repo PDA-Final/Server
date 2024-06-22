@@ -15,8 +15,8 @@ import java.time.LocalDate;
 public class MyAssetChallenge {
     @Id
     @GeneratedValue(strategy= GenerationType.IDENTITY)
-    long id;
-    long myChallengeId;
+    Long id;
+    Long myChallengeId;
     long emojiId;
     LocalDate savingAt;
     boolean isSuccess;  // 절약챌린지의 경우 5일 전부 성공해야

@@ -19,7 +19,7 @@ public class BoardChallengeListener {
     public void listenBoardPost(BoardPostSuccessDto boardPost) {
         System.out.println("fuck kafka");
         log.info("consume: board-post at challenge service");
-        myBoardChallengeService.participateBoardChallenge(PostMyBoardChallengeRequest.builder()
+        myBoardChallengeService.writeBoardChallenge(PostMyBoardChallengeRequest.builder()
                         .boardId(boardPost.getBoardId())
                         .usesrId(boardPost.getUserId())
                         .challengeId(boardPost.getChallengeId())

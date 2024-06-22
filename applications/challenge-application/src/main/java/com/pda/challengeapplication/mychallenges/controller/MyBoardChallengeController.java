@@ -23,17 +23,18 @@ import org.springframework.web.bind.annotation.RestController;
 public class MyBoardChallengeController {
     private final MyBoardChallengeService myBoardChallengeService;
 
-    // 챌린지 참여
+     //챌린지 참여
     @PostMapping
-    @Operation(summary = "게시글 챌린지 참여", description = "게시글 챌린지에 참여합니다",
+    @Operation(summary = "게시글 ", description = "게시글 챌린지에 참여합니다",
             security = @SecurityRequirement(name = "bearerAuth"))
     @ApiResponse(responseCode = "201", description = "성공")
     public GlobalResponse participateBoardChallenge(
             @RequestBody PostMyBoardChallengeRequest postMyBoardChallengeRequest
             ){
-       myBoardChallengeService.participateBoardChallenge(postMyBoardChallengeRequest);
+       myBoardChallengeService.writeBoardChallenge(postMyBoardChallengeRequest);
         return ApiUtils.success("게시글 작성 완료");
 
     }
+
 
 }

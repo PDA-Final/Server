@@ -1,7 +1,6 @@
 package com.pda.challengeapplication.challenges.repository;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -17,18 +16,18 @@ public class Challenge {
 
     @Id
     @GeneratedValue(strategy= GenerationType.IDENTITY)
-    long id;
-    @NotNull
-    int challengeType;
-    @NotNull
+    Long id;
+    @Column(nullable = false)
+    Integer challengeType;
+    @Column(nullable = false)
     String name;
-    @NotNull
+    @Column(nullable = false)
     String description;
-    @NotNull
+    @Column(nullable = false)
     String logoUrl;
-    @NotNull
+    @Column(nullable = false)
     LocalDate startAt;
-    @NotNull
+    @Column(nullable = false)
     LocalDate endAt;
     Integer term;
 

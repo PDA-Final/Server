@@ -61,7 +61,7 @@ public class MyEmoChallengeService {
         Challenge c = challengeRepository.findById(pa.getChallengeId());
         LocalDate startAt = LocalDate.now();
         LocalDate endAt = startAt.plusDays(c.getTerm());
-        MyChallenge mc = pa.converToMCEntity(pa.getId(),c,uid,startAt, endAt,"진행중" );
+        MyChallenge mc = pa.converToMCEntity(c,uid,startAt, endAt,"진행중" );
 
         // body : 선택한 입출금 계좌, myChallengeId
         // req to User : user 토큰   -> res from user : 유저정보

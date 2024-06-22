@@ -14,7 +14,6 @@ import java.time.LocalDate;
 @Getter
 public class PostMyEmoLogRequest {
 
-    long id;
     @Schema(description = "나의 챌린지 기록ID (챌린지 ID랑 다름!!)", example = "1")
     long myChallengeId;
     @Schema(description = "선택한 이모지ID", example = "1")
@@ -22,7 +21,7 @@ public class PostMyEmoLogRequest {
 
 
     public MyAssetChallenge convertToAccountEntity() {
-        MyAssetChallenge myAssetChallenge = new MyAssetChallenge(id, myChallengeId, emojiId, LocalDate.now(), true);
+        MyAssetChallenge myAssetChallenge = new MyAssetChallenge(null, myChallengeId, emojiId, LocalDate.now(), true);
         return myAssetChallenge;
     }
 }
