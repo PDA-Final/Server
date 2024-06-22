@@ -30,7 +30,7 @@ public class CreditService {
             CreditStore creditStore = optionalCreditStore.get();
             creditStore.deposit(request.getAmount());
             storeRepository.save(creditStore);
-            creditLogging(creditStore, -request.getAmount(), request.getTransactionDateTime());
+            creditLogging(creditStore, request.getAmount(), request.getTransactionDateTime());
             return;
         }
 

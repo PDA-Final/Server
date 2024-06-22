@@ -83,6 +83,8 @@ springdoc:
         name: Product Service
       - url: ${service-url}/board-service/v3/api-docs
         name: Board Service
+      - url: ${service-url}/credit-service/v3/api-docs
+        name: Credit Service
 
 #eureka:
 #  client:
