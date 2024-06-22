@@ -28,6 +28,7 @@ import com.pda.userapplication.services.in.dto.res.AvailableTofinIdServiceRespon
 import com.pda.userapplication.services.in.dto.res.ConnectAssetInfoResponse;
 import com.pda.userapplication.services.in.dto.res.GetUserPagingResponse;
 import com.pda.userapplication.services.in.dto.res.UserDetailInfoResponse;
+import com.pda.userapplication.services.in.dto.res.UserServiceResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -166,11 +167,12 @@ public class UserController {
     }
 
     @GetMapping("/{id}")
-    @Operation(summary = "유저 조회", description = "유저의 기본 정보 조회 -> 인증 필수 아님",
+    @Operation(summary = "유저 상세 조회", description = "유저의 기본 정보 조회 -> 인증 필수 아님",
         security = @SecurityRequirement(name = "bearerAuth"))
     @ApiResponse(responseCode = "200", description = "성공")
-    public GlobalResponse<Void> getUser(@AuthUser AuthUserInfo authUser, @PathVariable(name = "id") Long id) {
-        return ApiUtils.success("유저 조회 성공");
+    public GlobalResponse<UserServiceResponse> getUser(@AuthUser AuthUserInfo authUser, @PathVariable(name = "id") Long id) {
+        return ApiUtils.success("유저 조회 성공", getUserUseCase.findById(
+            id, authUser==null?null:authUser.getId()));
     }
 
     @GetMapping("/search")
