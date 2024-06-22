@@ -19,12 +19,12 @@ public class UserEntityMapper {
 
         builder
             .id(user.getId()!=null?user.getId().toLong():null)
-            .tofinId(user.getToFinId().toString())
+            .tofinId(user.getToFinId()!=null?user.getToFinId().toString():null)
             .userInfo(user.getUserInfo())
-            .profileImage(user.getProfileImage().toString())
-            .birth(user.getBirth().toLocalDate())
+            .profileImage(user.getProfileImage()!=null?user.getProfileImage().toString():null)
+            .birth(user.getBirth()!=null?user.getBirth().toLocalDate():null)
             .createdAt(user.getCreatedAt())
-            .nickname(user.getNickname().toString())
+            .nickname(user.getNickname()!=null?user.getNickname().toString():null)
             .job(user.getJob())
             .role(user.getRole());
 

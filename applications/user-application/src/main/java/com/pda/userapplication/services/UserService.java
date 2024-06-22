@@ -4,6 +4,7 @@ import com.pda.exceptionhandler.exceptions.BadRequestException;
 import com.pda.exceptionhandler.exceptions.ConflictException;
 import com.pda.exceptionhandler.exceptions.NotFoundException;
 import com.pda.exceptionhandler.exceptions.UnAuthorizedException;
+import com.pda.s3utils.service.S3Service;
 import com.pda.tofinenums.user.Job;
 import com.pda.tofinenums.user.ServicePurpose;
 import com.pda.tofinenums.user.UserRole;
@@ -20,6 +21,7 @@ import com.pda.userapplication.domains.vo.TofinId;
 import com.pda.userapplication.domains.vo.UserId;
 import com.pda.userapplication.services.in.ConnectAssetUseCase;
 import com.pda.userapplication.services.in.GetUserDetailInfo;
+import com.pda.userapplication.services.in.GetUserUseCase;
 import com.pda.userapplication.services.in.IsAvailableContact;
 import com.pda.userapplication.services.in.IsAvailableTofinIdUseCase;
 import com.pda.userapplication.services.in.ReissueUseCase;
@@ -27,32 +29,46 @@ import com.pda.userapplication.services.in.SetPublicOptionUseCase;
 import com.pda.userapplication.services.in.SetTendencyUseCase;
 import com.pda.userapplication.services.in.SignInUseCase;
 import com.pda.userapplication.services.in.SignUpUseCase;
+import com.pda.userapplication.services.in.UpdateUserUseCase;
 import com.pda.userapplication.services.in.dto.req.ConnectAssetsServiceRequest;
+import com.pda.userapplication.services.in.dto.req.SearchUserServiceRequest;
 import com.pda.userapplication.services.in.dto.req.SetPublicOptionServiceRequest;
 import com.pda.userapplication.services.in.dto.req.SetTendencyServiceRequest;
 import com.pda.userapplication.services.in.dto.req.SignInServiceRequest;
 import com.pda.userapplication.services.in.dto.req.SignUpServiceRequest;
+import com.pda.userapplication.services.in.dto.req.UpdateProfileServiceRequest;
 import com.pda.userapplication.services.in.dto.res.AvailableContactServiceResponse;
 import com.pda.userapplication.services.in.dto.res.AvailableTofinIdServiceResponse;
 import com.pda.userapplication.services.in.dto.res.ConnectAssetInfoResponse;
+import com.pda.userapplication.services.in.dto.res.GetUserPagingResponse;
+import com.pda.userapplication.services.in.dto.res.GetUserSummaryResponse;
 import com.pda.userapplication.services.in.dto.res.TokenInfoServiceResponse;
 import com.pda.userapplication.services.in.dto.res.UserDetailInfoResponse;
-import com.pda.userapplication.services.out.CreateUserOutputPort;
+import com.pda.userapplication.services.in.dto.res.UserServiceResponse;
 import com.pda.userapplication.services.out.GetAssetsOutputPort;
+import com.pda.userapplication.services.out.ReadFollowOutputPort;
 import com.pda.userapplication.services.out.ReadNormalUserOutputPort;
 import com.pda.userapplication.services.out.ReadUserOutputPort;
 import com.pda.userapplication.services.out.RefreshTokenOutputPort;
 import com.pda.userapplication.services.out.SaveNormalUserOutputPort;
+import com.pda.userapplication.services.out.SaveUserOutputPort;
 import com.pda.userapplication.services.out.SendCreditOutputPort;
+import com.pda.userapplication.services.out.SendUpdateUserOutputPort;
+import com.pda.userapplication.services.out.dto.req.SearchUserOutputRequest;
 import com.pda.userapplication.services.out.dto.req.SendCreditOutputRequest;
+import com.pda.userapplication.services.out.dto.req.UserUpdateOutputRequest;
 import com.pda.userapplication.services.out.dto.res.AccountResponse;
 import com.pda.userapplication.services.out.dto.res.AssetInfoResponse;
 import com.pda.userapplication.services.out.dto.res.CardResponse;
+import com.pda.userapplication.services.out.dto.res.FollowInfoResponse;
+import com.pda.userapplication.services.out.dto.res.SearchUserPagingOutputResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -65,8 +81,8 @@ import java.util.regex.Pattern;
 public class UserService implements SignUpUseCase, ReissueUseCase,
     IsAvailableTofinIdUseCase, SignInUseCase, ConnectAssetUseCase,
     IsAvailableContact, SetPublicOptionUseCase, SetTendencyUseCase,
-    GetUserDetailInfo {
-    private final CreateUserOutputPort createUserOutputPort;
+    GetUserDetailInfo, UpdateUserUseCase, GetUserUseCase {
+    private final SaveUserOutputPort saveUserOutputPort;
     private final ReadUserOutputPort readUserOutputPort;
     private final UserInfoEncoder userInfoEncoder;
     private final JwtProvider jwtProvider;
@@ -75,6 +91,9 @@ public class UserService implements SignUpUseCase, ReissueUseCase,
     private final GetAssetsOutputPort getAssetsOutputPort;
     private final ReadNormalUserOutputPort readNormalUserOutputPort;
     private final SendCreditOutputPort sendCreditOutputPort;
+    private final S3Service s3Service;
+    private final SendUpdateUserOutputPort sendUpdateUserOutputPort;
+    private final ReadFollowOutputPort readFollowOutputPort;
 
     @Transactional
     @Override
@@ -82,7 +101,7 @@ public class UserService implements SignUpUseCase, ReissueUseCase,
         if (isDuplicateTofinId(TofinId.of(request.getTofinId())))
             throw new ConflictException("해당 아이디는 이미 존재합니다.");
 
-        User user = createUserOutputPort.create(NormalUser.builder()
+        User user = saveUserOutputPort.save(NormalUser.builder()
             .toFinId(TofinId.of(request.getTofinId()))
             .userInfo(userInfoEncoder.hashed(request.getUserInfo()))
             .birth(Birth.of(request.getBirth()))
@@ -96,7 +115,7 @@ public class UserService implements SignUpUseCase, ReissueUseCase,
         sendCreditTo(user.getId().toLong(), 100L);
 
         return toTokenInfoServiceResponse(
-            generateTokenAndSaveRefresh(user));
+            generateTokenAndSaveRefresh(user), user);
     }
 
     @Async
@@ -138,7 +157,7 @@ public class UserService implements SignUpUseCase, ReissueUseCase,
             throw new UnAuthorizedException("아이디 혹은 비밀번호가 틀렸습니다.");
 
         return toTokenInfoServiceResponse(
-            generateTokenAndSaveRefresh(user));
+            generateTokenAndSaveRefresh(user), user);
     }
 
     @Transactional
@@ -150,7 +169,7 @@ public class UserService implements SignUpUseCase, ReissueUseCase,
             .orElseThrow(() -> new UnAuthorizedException("해당 리프레쉬 토큰은 사용할 수 없음"));
 
         return toTokenInfoServiceResponse(
-            generateTokenAndSaveRefresh(user));
+            generateTokenAndSaveRefresh(user), user);
     }
 
     @Override
@@ -239,6 +258,87 @@ public class UserService implements SignUpUseCase, ReissueUseCase,
             .build();
     }
 
+    @Transactional
+    @Override
+    public void updateProfile(final UpdateProfileServiceRequest request) {
+        User user = readUserOutputPort.getByUserId(UserId.of(request.getUserId()));
+        UserUpdateOutputRequest.UserUpdateOutputRequestBuilder builder = UserUpdateOutputRequest.builder();
+
+        if (request.getJob() != null) {
+            user.setJob(toJobFrom(request.getJob()));
+            builder.job(toJobFrom(request.getJob()));
+        }
+
+        if (request.getNickname() != null) {
+            user.setNickname(Nickname.of(request.getNickname()));
+            builder.nickname(request.getNickname());
+        }
+
+
+        if (request.getProfileImage() != null) {
+            if (!isDefaultProfileImage(user.getProfileImage().toString()))
+                s3Service.delete(user.getProfileImage().toString());
+
+            String imageUrl = uploadImage(request.getProfileImage(), user.getId());
+            user.setProfileImage(
+                ImageUrl.of(imageUrl));
+            builder.profileImage(imageUrl);
+        }
+
+        sendUpdateUserOutputPort.sendUserOutput(builder.build());
+        saveUserOutputPort.save(user);
+    }
+
+    @Override
+    public UserServiceResponse findById(final Long id, final Long myId) {
+        User user = readUserOutputPort.getByUserId(UserId.of(id));
+        FollowInfoResponse followInfo = readFollowOutputPort
+            .getFollowInfo(user.getId(), Optional.ofNullable(myId==null?null:UserId.of(myId)));
+
+        return UserServiceResponse.builder()
+            .id(user.getId().toLong())
+            .nickname(user.getNickname().toString())
+            .job(user.getRole().equals(UserRole.CORP)?null:user.getJob().toKorean())
+            .profileImage(user.getProfileImage().toString())
+            .role(user.getRole())
+            .tofinId(user.getToFinId().toString())
+            .followers(followInfo.getNumOfFollowers())
+            .followings(followInfo.getNumOfFollowings())
+            .follow(followInfo.isFollow())
+            .ageRange(user.getRole().equals(UserRole.CORP)?null:user.getBirth().getAgeRange())
+            .build();
+    }
+
+    @Override
+    public GetUserPagingResponse searchUserByNickname(final SearchUserServiceRequest request) {
+        SearchUserPagingOutputResponse response = readUserOutputPort.searchByNickname(SearchUserOutputRequest.builder()
+                .limit(request.getLimit())
+                .lastIndex(request.getLastIndex())
+                .nickname(request.getNickname())
+                .build());
+
+        return GetUserPagingResponse.builder()
+            .users(response.getUsers().stream().map(user -> GetUserSummaryResponse.builder()
+                .role(user.getRole())
+                .userId(user.getId().toLong())
+                .tofinId(user.getToFinId().toString())
+                .profileImage(user.getProfileImage().toString())
+                .nickname(user.getNickname().toString())
+                .build()).toList())
+            .totalCount(response.getTotalCount())
+            .isLast(response.isLast())
+            .lastIndex(response.getLastIndex())
+            .build();
+    }
+
+    private String uploadImage(MultipartFile file, UserId id) {
+        try {
+            return s3Service.upload(file,String.format("users/profile/%d",id.toLong()));
+        } catch (IOException e) {
+            throw new BadRequestException("이미지 업로드에 실패하였습니다.");
+        }
+    }
+
     private boolean isDuplicateTofinId(final TofinId tofinId) {
         return readUserOutputPort.isExistsByTofinId(tofinId);
     }
@@ -266,8 +366,20 @@ public class UserService implements SignUpUseCase, ReissueUseCase,
         }
     }
 
-    private TokenInfoServiceResponse toTokenInfoServiceResponse(final TokenInfo tokenInfo) {
+    private boolean isDefaultProfileImage(final String profileImage) {
+        return getDefaultProfileImages().contains(profileImage);
+    }
+
+    private List<String> getDefaultProfileImages() {
+        return List.of("https://tofin-bucket.s3.ap-northeast-2.amazonaws.com/users/profile/default/user-icon1.svg",
+            "https://tofin-bucket.s3.ap-northeast-2.amazonaws.com/users/profile/default/user-icon2.svg",
+            "https://tofin-bucket.s3.ap-northeast-2.amazonaws.com/users/profile/default/user-icon3.svg",
+            "https://tofin-bucket.s3.ap-northeast-2.amazonaws.com/users/profile/default/user-icon4.svg");
+    }
+
+    private TokenInfoServiceResponse toTokenInfoServiceResponse(final TokenInfo tokenInfo, User user) {
         return TokenInfoServiceResponse.builder()
+            .id(user.getId().toLong())
             .accessToken(tokenInfo.getAccessToken())
             .refreshToken(tokenInfo.getRefreshToken())
             .grantType(tokenInfo.getGrantType())

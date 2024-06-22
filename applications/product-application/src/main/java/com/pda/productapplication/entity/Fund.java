@@ -30,28 +30,28 @@ public class Fund {
     private float drvNav;
 
     @Column(name = "rt_1m")
-    private float rt1m;
+    private Double rt1m;
 
     @Column(name = "rt_3m")
-    private float rt3m;
+    private Double rt3m;
 
     @Column(name = "rt_6m")
-    private float rt6m;
+    private Double rt6m;
 
     @Column(name = "rt_ytd")
-    private float rtYtd;
+    private Double rtYtd;
 
     @Column(name = "rt_1y")
-    private float rt1y;
+    private Double rt1y;
 
     @Column(name = "rt_3y")
-    private float rt3y;
+    private Double rt3y;
 
     @Column(name = "rt_5y")
-    private float rt5y;
+    private Double rt5y;
 
     @Column(name = "ter")
-    private float ter;
+    private Double ter;
 
     @Column(name = "risk_grade", nullable = false)
     private int riskGrade;
