@@ -7,7 +7,7 @@ import com.pda.userapplication.domains.vo.TofinId;
 import com.pda.userapplication.domains.vo.UserId;
 import com.pda.userapplication.outadapters.jpa.mapper.UserDetailEntityMapper;
 import com.pda.userapplication.outadapters.jpa.mapper.UserEntityMapper;
-import com.pda.userapplication.services.out.CreateUserOutputPort;
+import com.pda.userapplication.services.out.SaveUserOutputPort;
 import com.pda.userapplication.services.out.ReadNormalUserOutputPort;
 import com.pda.userapplication.services.out.ReadUserOutputPort;
 import com.pda.userapplication.services.out.SaveNormalUserOutputPort;
@@ -18,14 +18,14 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
-public class UserJpaAdapter implements CreateUserOutputPort, ReadUserOutputPort, SaveNormalUserOutputPort, ReadNormalUserOutputPort {
+public class UserJpaAdapter implements SaveUserOutputPort, ReadUserOutputPort, SaveNormalUserOutputPort, ReadNormalUserOutputPort {
     private final UserRepository userRepository;
     private final UserDetailRepository userDetailRepository;
     private final UserEntityMapper userMapper;
     private final UserDetailEntityMapper userDetailMapper;
 
     @Override
-    public User create(final User user) {
+    public User save(final User user) {
         return userMapper.toUser(
             userRepository.save(userMapper.toUserEntity(user)));
     }
