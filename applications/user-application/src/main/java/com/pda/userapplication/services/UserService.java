@@ -44,7 +44,9 @@ import com.pda.userapplication.services.in.dto.res.GetUserPagingResponse;
 import com.pda.userapplication.services.in.dto.res.GetUserSummaryResponse;
 import com.pda.userapplication.services.in.dto.res.TokenInfoServiceResponse;
 import com.pda.userapplication.services.in.dto.res.UserDetailInfoResponse;
+import com.pda.userapplication.services.in.dto.res.UserServiceResponse;
 import com.pda.userapplication.services.out.GetAssetsOutputPort;
+import com.pda.userapplication.services.out.ReadFollowOutputPort;
 import com.pda.userapplication.services.out.ReadNormalUserOutputPort;
 import com.pda.userapplication.services.out.ReadUserOutputPort;
 import com.pda.userapplication.services.out.RefreshTokenOutputPort;
@@ -58,6 +60,7 @@ import com.pda.userapplication.services.out.dto.req.UserUpdateOutputRequest;
 import com.pda.userapplication.services.out.dto.res.AccountResponse;
 import com.pda.userapplication.services.out.dto.res.AssetInfoResponse;
 import com.pda.userapplication.services.out.dto.res.CardResponse;
+import com.pda.userapplication.services.out.dto.res.FollowInfoResponse;
 import com.pda.userapplication.services.out.dto.res.SearchUserPagingOutputResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Async;
@@ -90,6 +93,7 @@ public class UserService implements SignUpUseCase, ReissueUseCase,
     private final SendCreditOutputPort sendCreditOutputPort;
     private final S3Service s3Service;
     private final SendUpdateUserOutputPort sendUpdateUserOutputPort;
+    private final ReadFollowOutputPort readFollowOutputPort;
 
     @Transactional
     @Override
@@ -283,6 +287,26 @@ public class UserService implements SignUpUseCase, ReissueUseCase,
 
         sendUpdateUserOutputPort.sendUserOutput(builder.build());
         saveUserOutputPort.save(user);
+    }
+
+    @Override
+    public UserServiceResponse findById(final Long id, final Long myId) {
+        User user = readUserOutputPort.getByUserId(UserId.of(id));
+        FollowInfoResponse followInfo = readFollowOutputPort
+            .getFollowInfo(user.getId(), Optional.ofNullable(myId==null?null:UserId.of(myId)));
+
+        return UserServiceResponse.builder()
+            .id(user.getId().toLong())
+            .nickname(user.getNickname().toString())
+            .job(user.getRole().equals(UserRole.CORP)?null:user.getJob().toKorean())
+            .profileImage(user.getProfileImage().toString())
+            .role(user.getRole())
+            .tofinId(user.getToFinId().toString())
+            .followers(followInfo.getNumOfFollowers())
+            .followings(followInfo.getNumOfFollowings())
+            .follow(followInfo.isFollow())
+            .ageRange(user.getRole().equals(UserRole.CORP)?null:user.getBirth().getAgeRange())
+            .build();
     }
 
     @Override

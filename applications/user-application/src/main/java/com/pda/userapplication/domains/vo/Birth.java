@@ -21,7 +21,13 @@ public class Birth {
     }
 
     public int getAge() {
-        return LocalDate.now().getYear() - birth.getYear();
+        return LocalDate.now().getYear() - birth.getYear() + 1;
+    }
+
+    public int getAgeRange() {
+        int age = getAge();
+
+        return (age/10) * 10;
     }
 
     public LocalDate toLocalDate() {
