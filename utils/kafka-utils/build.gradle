@@ -1,9 +1,0 @@
-project(":utils:kafka-utils") {
-    bootJar{enabled = false}
-    jar {enabled = true}
-
-    dependencies {
-        implementation project(':utils:tofin-enums')
-        implementation 'com.fasterxml.jackson.core:jackson-databind'
-    }
-}

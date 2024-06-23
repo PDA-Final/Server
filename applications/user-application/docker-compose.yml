@@ -14,12 +14,3 @@ services:
       - --collation-server=utf8mb4_unicode_ci
     stdin_open: true # `-i`
     tty: true # `-t`
-
-  redis:
-    image: redis:latest
-    container_name: refresh-redis
-    ports:
-      - "6379:6379"
-    command: redis-server /usr/local/conf/redis.conf
-    volumes:
-      - ./conf/redis.conf:/usr/local/conf/redis.conf

@@ -1,4 +1,4 @@
 package com.pda.userapplication.domains;
 
-public class User {
+public class CorpUser {
 }
