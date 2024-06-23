@@ -21,11 +21,12 @@ public class BoardDto {
                 example = "⭐️ 내가 들었던 펀드 추천 글 ⭐",
                 requiredMode = Schema.RequiredMode.REQUIRED)
         private String title;
-        @NotBlank
-        @Schema(description = "board content - soon about to be modified",
-                example = "오늘은 내가 들었던 펀드 중에 제일 좋았던 신한은행의 펀드를 이야기해볼게!",
-                requiredMode = Schema.RequiredMode.REQUIRED)
-        private String content;
+//        @NotBlank
+//        @Schema(description = "board content - soon about to be modified",
+//                example = "오늘은 내가 들었던 펀드 중에 제일 좋았던 신한은행의 펀드를 이야기해볼게!",
+//                requiredMode = Schema.RequiredMode.REQUIRED)
+        // TODO add schema description
+        private BoardContentDto.OutputDataDto content;
         @DecimalMax(value = "5", inclusive = true)
         @Schema(description = "category id : 1(기업), 2(꿀팁), 3(소비), 4(절약), 5(투자)",
                 allowableValues = {"1","2","3","4","5"},
