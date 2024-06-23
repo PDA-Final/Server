@@ -5,6 +5,7 @@ import com.pda.boardapplication.entity.BoardCount;
 import com.pda.boardapplication.entity.Bookmark;
 import com.pda.boardapplication.entity.Like;
 import com.pda.boardapplication.entity.LikePK;
+import com.pda.boardapplication.repository.BoardCountRepository;
 import com.pda.boardapplication.repository.BoardRepository;
 import com.pda.boardapplication.repository.BookmarkRepository;
 import com.pda.boardapplication.repository.LikeRepository;

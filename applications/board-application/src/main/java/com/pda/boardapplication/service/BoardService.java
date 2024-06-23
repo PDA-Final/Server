@@ -8,6 +8,7 @@ import com.pda.boardapplication.dto.CommentDto;
 import com.pda.boardapplication.dto.UserDto;
 import com.pda.boardapplication.entity.Board;
 import com.pda.boardapplication.entity.BoardCount;
+import com.pda.boardapplication.repository.BoardCountRepository;
 import com.pda.boardapplication.repository.BoardRepository;
 import com.pda.boardapplication.repository.CategoryRepository;
 import com.pda.boardapplication.utils.UserUtils;
@@ -21,9 +22,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.PathVariable;
 
-import java.util.Iterator;
 import java.util.List;
 
 @Service
