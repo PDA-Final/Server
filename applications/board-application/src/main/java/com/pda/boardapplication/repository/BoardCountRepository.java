@@ -1,4 +1,4 @@
-package com.pda.boardapplication.service;
+package com.pda.boardapplication.repository;
 
 import com.pda.boardapplication.entity.BoardCount;
 import org.springframework.data.jpa.repository.JpaRepository;
