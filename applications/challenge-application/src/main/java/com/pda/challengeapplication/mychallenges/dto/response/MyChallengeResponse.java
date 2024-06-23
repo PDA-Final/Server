@@ -24,6 +24,7 @@ public class MyChallengeResponse {
     //challenge 정보
     String status;
     Integer progress;
+    Integer term;
 
 }
 

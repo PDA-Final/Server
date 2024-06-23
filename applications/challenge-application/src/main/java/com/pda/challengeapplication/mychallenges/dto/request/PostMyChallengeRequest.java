@@ -12,7 +12,6 @@ import lombok.NoArgsConstructor;
 @Getter
 public class PostMyChallengeRequest {
 
-    long id;
     @Schema(description = "챌린지 id)", example = "1")
     long challengeId;
 

@@ -12,6 +12,7 @@ import com.pda.challengeapplication.mychallenges.repository.MyChallenge;
 import com.pda.challengeapplication.mychallenges.repository.MyChallengeRepository;
 import com.pda.exceptionhandler.exceptions.ConflictException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -42,6 +43,7 @@ public class MyChallengeService {
             String logoUrl = mc.getChallenge().getLogoUrl();
             LocalDate endAt = mc.getEndAt();
             String status = mc.getStatus();
+            Integer term = mc.getChallenge().getTerm();
 
             if(challengeType ==0){
                 corpName = mc.getChallenge().getCorpChallengeDetail().getCorpName();
@@ -50,9 +52,13 @@ public class MyChallengeService {
             }else if(challengeType ==1){
                 corpName = null; challengeUrl = null;
                 int successCnt= myAssetChallengeRepository.findByMyChallengeId(mc.getId())
-                        .stream().filter(c->c.isSuccess()).collect(Collectors.toList())
-                        .size();
-                progress =successCnt/mc.getChallenge().getTerm();
+                        .stream().filter(c->c.isSuccess()).toList().size();
+                System.out.println(successCnt);
+                System.out.println(mc.getChallenge().getTerm());
+                int challenge1term = mc.getChallenge().getTerm();
+                progress = (int)Math.round((double)successCnt / challenge1term * 100);
+                System.out.println(progress);
+
             }else if(challengeType ==2){
                 corpName = null; challengeUrl = null;
                 progress = null;
@@ -71,6 +77,7 @@ public class MyChallengeService {
                     .status(status)
                     .progress(progress)
                     .participants(myChallengeRepository.selectAllJPQL(id))
+                    .term(term)
                     .build();
 
             returnList.add(mr);
@@ -131,11 +138,11 @@ public class MyChallengeService {
 
     // 챌린지 성공, 실패 여부 변경
     public MyChallenge changeChallengeStatus(long mcId,String status) {
-        MyChallenge mc = myChallengeRepository.findById(mcId).get();
+        MyChallenge mc = myChallengeRepository.findById(mcId);
         mc.editMyChallengeStatus(status);
         myChallengeRepository.save(mc);
 
-        return myChallengeRepository.findById(mcId).get();
+        return myChallengeRepository.findById(mcId);
     }
 
     // 챌린지 참여 여부 조회
@@ -167,7 +174,7 @@ public class MyChallengeService {
             endAt = startAt.plusDays(c.getTerm());
         }
 
-       MyChallenge mc = new MyChallenge(postMyChallengeRequest.getId(),c , uid, startAt, endAt,"진행중");
+       MyChallenge mc = new MyChallenge(null,c , uid, startAt, endAt,"진행중");
        return myChallengeRepository.save(mc);
     }
 
@@ -199,6 +206,20 @@ public class MyChallengeService {
         return bl;
 
 
+    }
+
+    @Scheduled(cron = "0 0 * * * *")
+    public void checkChallengeStatus(){
+
+        List<MyChallenge> c = myChallengeRepository.selectAllChallenge();
+
+        for(MyChallenge mc : c){
+            if(mc.getEndAt().isBefore(LocalDate.now()) ){
+                mc.editMyChallengeStatus("실패");
+                // TODO 자산저축챌린지가 아닌 경우 실패 알림
+            }
+            myChallengeRepository.save(mc);
+        }
     }
 
 

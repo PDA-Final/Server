@@ -11,7 +11,7 @@ import com.pda.challengeapplication.mychallenges.dto.response.MyEmoChallengeLog;
 import com.pda.challengeapplication.mychallenges.dto.response.MyEmoChallengeLogResponse;
 import com.pda.challengeapplication.mychallenges.dto.response.outer.AccountResponse;
 import com.pda.challengeapplication.mychallenges.dto.response.outer.AssetInfoResponse;
-import com.pda.challengeapplication.mychallenges.dto.response.outer.UserInfo;
+import com.pda.challengeapplication.mychallenges.dto.response.outer.UserDetailInfoResponse;
 import com.pda.challengeapplication.mychallenges.repository.*;
 import com.pda.exceptionhandler.exceptions.ConflictException;
 import com.pda.exceptionhandler.exceptions.NotFoundException;
@@ -61,7 +61,7 @@ public class MyEmoChallengeService {
         Challenge c = challengeRepository.findById(pa.getChallengeId());
         LocalDate startAt = LocalDate.now();
         LocalDate endAt = startAt.plusDays(c.getTerm());
-        MyChallenge mc = pa.converToMCEntity(pa.getId(),c,uid,startAt, endAt,"진행중" );
+        MyChallenge mc = pa.converToMCEntity(c,uid,startAt, endAt,"진행중" );
 
         // body : 선택한 입출금 계좌, myChallengeId
         // req to User : user 토큰   -> res from user : 유저정보
@@ -78,9 +78,9 @@ public class MyEmoChallengeService {
 
         RestTemplate restTemplate = new RestTemplate();
 
-        ResponseEntity<UserInfo> response = restTemplate.exchange(uri, HttpMethod.GET, entity, UserInfo.class);
-
-        log.info("생년월일!!!!!!!!!!!!!!!!",response.getBody().getFrontSocialId());
+        ResponseEntity<GlobalResponse<UserDetailInfoResponse>> response = restTemplate.exchange(uri, HttpMethod.GET, entity, new ParameterizedTypeReference<GlobalResponse<UserDetailInfoResponse>>() {});
+        System.out.println("토큰!!!!!!!!!" + token);
+        System.out.println("개인정보!!!!!" + response.getBody().getData().getBackSocialId());
 //         req to Asset : 유저 정보 -> res from Asset : 계좌 리스트
 
         uri = UriComponentsBuilder
@@ -93,13 +93,14 @@ public class MyEmoChallengeService {
 
 
         HttpHeaders assetHeaders = new HttpHeaders();
-        assetHeaders.set("front-social-id", response.getBody().getFrontSocialId());
-        assetHeaders.set("back-social-id", response.getBody().getBackSocialId());
-        assetHeaders.set("user-social-contact", response.getBody().getUsersocialcontact());
+        assetHeaders.set("front-social-id", response.getBody().getData().getFrontSocialId());
+        assetHeaders.set("back-social-id", response.getBody().getData().getBackSocialId());
+        assetHeaders.set("user-social-contact", response.getBody().getData().getContact());
 
         HttpEntity<String> assetEntity = new HttpEntity<>(assetHeaders);
 
         log.info(uri.toString());
+
 
         RestTemplate assetRestTemplate = new RestTemplate();
         ResponseEntity<GlobalResponse<AssetInfoResponse>> response2
@@ -140,8 +141,10 @@ public class MyEmoChallengeService {
 
     // 감정 저축하기
 
-    public void createMyEmoLog(PostMyEmoLogRequest postMyEmoRequest, String token) {
-        MyAssetChallengeDetail md = myAssetChallengeDetailRepository.findByMyChallengeId(postMyEmoRequest.getMyChallengeId());
+    public void createMyEmoLog(PostMyEmoLogRequest postMyEmoRequest, String token, Long uid) {
+        long mid = myChallengeRepository.selectMyChallenge(1,uid ).getId();
+        MyAssetChallengeDetail md = myAssetChallengeDetailRepository.findByMyChallengeId(mid);
+        MyChallenge mc = myChallengeRepository.findById(mid);
         long price = emojiRepository.findById(postMyEmoRequest.getEmojiId()).get().getPrice();
 
         // req to User : 토큰 , res from User: 유저 개인 정보
@@ -157,8 +160,7 @@ public class MyEmoChallengeService {
         HttpEntity<String> entity = new HttpEntity<>(headers);
 
         RestTemplate restTemplate = new RestTemplate();
-        ResponseEntity<UserInfo> response = restTemplate.exchange(uri, HttpMethod.GET, entity, UserInfo.class);
-
+        ResponseEntity<GlobalResponse<UserDetailInfoResponse>> response = restTemplate.exchange(uri, HttpMethod.GET, entity, new ParameterizedTypeReference<GlobalResponse<UserDetailInfoResponse>>() {});
 
         // req to Asset: 계좌번호, 송금금액  , void
         uri = UriComponentsBuilder
@@ -171,9 +173,9 @@ public class MyEmoChallengeService {
         // body랑 header 설정
         HttpHeaders assetHeaders = new HttpHeaders();
         TransferRequest body = new TransferRequest(md.getOutACNT(), md.getInACNT(), price);
-        assetHeaders.set("front-social-id", response.getBody().getFrontSocialId());
-        assetHeaders.set("back-social-id", response.getBody().getBackSocialId());
-        assetHeaders.set("user-social-contact", response.getBody().getUsersocialcontact());
+        assetHeaders.set("front-social-id", response.getBody().getData().getFrontSocialId());
+        assetHeaders.set("back-social-id", response.getBody().getData().getBackSocialId());
+        assetHeaders.set("user-social-contact", response.getBody().getData().getContact());
 
 
         HttpEntity<?> assetEntity = new HttpEntity<>(body, assetHeaders);
@@ -183,11 +185,19 @@ public class MyEmoChallengeService {
         HttpEntity<Void> transferResponse = restTemplate.postForEntity(uri,assetEntity,null );
 
 
-        MyAssetChallenge myAssetChallenge = postMyEmoRequest.convertToAccountEntity();
+        MyAssetChallenge myAssetChallenge = postMyEmoRequest.convertToAccountEntity(mid);
         myAssetChallengeRepository.save(myAssetChallenge);
+
+        if(mc.getEndAt() == LocalDate.now()){
+            mc.editMyChallengeStatus("성공");
+            myChallengeRepository.save(mc);
+            // TODO 저축 챌린지 성공 알림
+
+        }
     }
 
-    public MyEmoChallengeLogResponse readAllEmoChallengeLog(long mId) {
+    public MyEmoChallengeLogResponse readAllEmoChallengeLog(long uId) {
+        long mId = myChallengeRepository.selectMyChallenge(1,uId).getId();
         List<MyAssetChallenge> echallenges = myAssetChallengeRepository.findByMyChallengeId(mId);
         int totalprice =0;
         List<MyEmoChallengeLog> mcl = echallenges.stream()
@@ -222,10 +232,8 @@ public class MyEmoChallengeService {
             if(myAssetChallengeRepository.findByMyChallengeIdAndSavingAt(s.getId(),LocalDate.now()) == null){
                 // 그날 감정 저축한 기록이 없으면 해당 myChallengeId는 실패로
                 isSuccess = "실패";
-            }else if(s.getEndAt() == LocalDate.now().plusDays(1) ){
-                isSuccess = "성공";
+                //TODO 저축 알림 실패했을 경우 알람
             }
-
             s.editMyChallengeStatus(isSuccess);
             myChallengeRepository.save(s);
         }

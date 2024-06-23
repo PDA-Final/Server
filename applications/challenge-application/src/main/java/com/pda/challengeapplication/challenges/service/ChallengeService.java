@@ -14,7 +14,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -38,41 +37,55 @@ public class ChallengeService {
     public List<ChallengeSummaryResponse> readAllChallenge() {
         List<ChallengeDetail> challengeList = challengeDetailRepository.findAll();
 
+        System.out.println(challengeList.get(0));
         return challengeList.stream()
-                .map((challenge) -> ChallengeSummaryResponse.builder()
-                        .id(challenge.getChallengeId())
-                        .challengeType(challengeRepository.findById(challenge.getChallengeId()).getChallengeType())
-                        .name(challengeRepository.findById(challenge.getChallengeId()).getName())
-                        .description(challengeRepository.findById(challenge.getChallengeId()).getDescription())
-                        .logoUrl(challengeRepository.findById(challenge.getChallengeId()).getLogoUrl())
-                        .endAt(challengeRepository.findById(challenge.getChallengeId()).getEndAt())
-                        .term(challengeRepository.findById(challenge.getChallengeId()).getTerm())
-                        .reward(challenge.getReward())
-                        .participation(myChallengeRepository.selectAllJPQL(challenge.getChallengeId()))
-                        .build())
+                .map((challengeDetail) -> {
+                    
+                    return ChallengeSummaryResponse.builder()
+                        .id(challengeDetail.getChallengeId())
+                        .challengeType(challengeDetail.getChallenge().getChallengeType())
+                        .name(challengeDetail.getChallenge().getName())
+                        .description(challengeDetail.getChallenge().getDescription())
+                        .logoUrl(challengeDetail.getChallenge().getLogoUrl())
+                        .endAt(challengeDetail.getChallenge().getEndAt())
+                        .term(challengeDetail.getChallenge().getTerm())
+                        .reward(challengeDetail.getReward())
+                        .participation(myChallengeRepository.selectAllJPQL(challengeDetail.getChallengeId()))
+                        .build();
+                })
                 .toList();
     }
 
     // 상세 조회
     public ChallengeDetailResponse findChallenge(long id, long uid) {
-       Optional<ChallengeDetail> challengeDetail = challengeDetailRepository.findByChallengeId(id);
+
+       ChallengeDetail challengeDetail = challengeDetailRepository.findByChallengeId(id)
+               .orElseThrow(() -> new NotFoundException("Challenge not found"));
        return ChallengeDetailResponse.builder()
-               .id(challengeDetail.get().getChallenge().getId())
-               .challengeType(challengeDetail.get().getChallenge().getChallengeType())
-               .name(challengeDetail.get().getChallenge().getName())
-               .description(challengeDetail.get().getChallenge().getDescription())
-               .logoUrl(challengeDetail.get().getChallenge().getLogoUrl())
-               .startAt(challengeDetail.get().getChallenge().getStartAt())
-               .endAt(challengeDetail.get().getChallenge().getEndAt())
-               .term(challengeDetail.get().getChallenge().getTerm())
-               .detailDescription(challengeDetail.get().getDetailDescription())
-               .badgeName(challengeDetail.get().getBadgeName())
-               .standardNum(challengeDetail.get().getStandardNum())
-               .standardCg(challengeDetail.get().getStandardCg())
-               .reward(challengeDetail.get().getReward())
-               .participation(myChallengeRepository.selectAllJPQL(challengeDetail.get().getChallengeId()))
-               .status(myChallengeRepository.selectstatus(challengeDetail.get().getChallengeId(), uid))
+               .id(challengeDetail.getChallenge().getId())
+               .challengeType(challengeDetail.getChallenge().getChallengeType())
+               .name(challengeDetail.getChallenge().getName())
+               .description(challengeDetail.getChallenge().getDescription())
+               .logoUrl(challengeDetail.getChallenge().getLogoUrl())
+               .startAt(challengeDetail.getChallenge().getStartAt())
+               .endAt(challengeDetail.getChallenge().getEndAt())
+               .term(challengeDetail.getChallenge().getTerm())
+               .detailDescription(challengeDetail.getDetailDescription())
+               .badgeName(challengeDetail.getBadgeName())
+               .standardNum(challengeDetail.getStandardNum())
+               .standardCg(challengeDetail.getStandardCg())
+               .reward(challengeDetail.getReward())
+               .participation(myChallengeRepository.selectAllJPQL(challengeDetail.getChallengeId()))
+               .status(getStatus(challengeDetail.getChallengeId(),uid))
                .build();
+    }
+
+    public String getStatus(long cid, long uid){
+        if(uid==0){
+            return null;
+        }else{
+            return myChallengeRepository.selectstatus(cid, uid);
+        }
     }
 
 
@@ -100,10 +113,6 @@ public class ChallengeService {
         List<Challenge> challengeDetails= challengeRepository.findByNameLike("%"+searchname+"%");
         List<ChallengeSummaryResponse> returnList = new ArrayList<>();
 
-        if(challengeDetails == null){
-            throw new NotFoundException("해당 챌린지를 찾을 수 없습니다");
-
-        }
         for(Challenge c : challengeDetails){
             long id = c.getId();
             int challengeType = c.getChallengeType();
