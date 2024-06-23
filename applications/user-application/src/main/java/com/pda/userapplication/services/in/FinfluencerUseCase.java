@@ -1,5 +1,7 @@
 package com.pda.userapplication.services.in;
 
+import com.pda.userapplication.services.in.dto.res.TokenInfoServiceResponse;
+
 public interface FinfluencerUseCase {
-    void becomeFinfluencer(Long userId, String token);
+    TokenInfoServiceResponse becomeFinfluencer(Long userId, String token);
 }

@@ -260,7 +260,7 @@ public class UserService implements SignUpUseCase, ReissueUseCase,
 
     @Transactional
     @Override
-    public void updateProfile(final UpdateProfileServiceRequest request) {
+    public TokenInfoServiceResponse updateProfile(final UpdateProfileServiceRequest request) {
         User user = readUserOutputPort.getUserByUserId(UserId.of(request.getUserId()));
         UserUpdateOutputRequest.UserUpdateOutputRequestBuilder builder = UserUpdateOutputRequest.builder();
 
@@ -286,7 +286,10 @@ public class UserService implements SignUpUseCase, ReissueUseCase,
         }
 
         sendUpdateUserOutputPort.sendUserOutput(builder.build());
-        saveUserOutputPort.save(user);
+        User saveUser = saveUserOutputPort.save(user);
+
+        return toTokenInfoServiceResponse(
+            generateTokenAndSaveRefresh(saveUser),saveUser);
     }
 
     @Override
