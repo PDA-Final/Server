@@ -4,7 +4,6 @@ project(":utils:api-utils") {
 
     dependencies {
         implementation 'org.springframework:spring-web'
-        implementation 'io.swagger.core.v3:swagger-core-jakarta:2.2.20'
-
+        implementation 'org.springdoc:springdoc-openapi-common:1.8.0'
     }
 }

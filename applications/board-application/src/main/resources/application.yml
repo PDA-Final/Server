@@ -1,65 +1,7 @@
-service-url: /api/board-service
-
 server:
   port: 8082
-  shutdown: graceful
 
 spring:
-  config:
-    import: "application-keys.yml"
   application:
-    name: board-application
-  cloud:
-    inetutils:
-      preferred-networks: 192.168
-  datasource:
-    driver-class-name: com.mysql.cj.jdbc.Driver
-    url: ${mysql.url}
-    username: ${mysql.username}
-    password: ${mysql.password}
+    name: user-application
 
-  sql:
-    init:
-      mode: always
-  jpa:
-    hibernate:
-      ddl-auto: update
-    properties:
-      hibernate:
-        show_sql: true
-        highlight_sql: true
-        use_sql_comments: true
-        format_sql: true
-    defer-datasource-initialization: true
-
-springdoc:
-  default-consumes-media-type: application/json;charset=UTF-8
-  default-produces-media-type: application/json;charset=UTF-8
-  packages-to-scan: com.pda
-  use-fqn: true
-
-eureka:
-  instance:
-    hostname:
-    healthCheckUrlPath: /actuator/health
-    lease-renewal-interval-in-seconds: 30
-    lease-expiration-duration-in-seconds: 10
-    prefer-ip-address: true
-  client:
-    eureka-server-port: 8761
-    register-with-eureka: true
-    fetch-registry: true
-    disable-delta: true
-    service-url:
-      defaultZone: http://192.168.2.20:8761/eureka
-
-management:
-  endpoint:
-    shutdown:
-      enabled: true
-    health:
-      enabled: true
-  endpoints:
-    web:
-      exposure:
-        include: shutdown, health
