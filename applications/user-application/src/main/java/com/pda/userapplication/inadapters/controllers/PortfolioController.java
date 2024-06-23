@@ -41,10 +41,11 @@ public class PortfolioController {
     }
 
     @GetMapping("/{id}/portfolios")
-    @Operation(summary = "포트폴리오 조회", description = "자기자신 or 돈없음 or 이미 구독 중 => X ",
+    @Operation(summary = "포트폴리오 조회", description = "포트폴리오 조회 API",
         security = @SecurityRequirement(name = "bearerAuth"))
     @ApiResponse(responseCode = "201", description = "성공")
-    public GlobalResponse<Void> getPortfolios() {
+    public GlobalResponse<Void> getPortfolios(@AuthUser AuthUserInfo authUser, @PathVariable Long id) {
+        portfolioUseCase.getPortfolios(authUser.getId(), id);
         return ApiUtils.success("포트폴리오 조회");
     }
 }

@@ -27,6 +27,22 @@ public class PortfolioService implements PortfolioUseCase {
     private final PortfolioSubscribeOutputPort portfolioSubscribeOutputPort;
     private final CreditOutputPort creditOutputPort;
 
+    @Override
+    public void getPortfolios(Long myId, Long toUserId) {
+        User myUser = readUserOutputPort.getUserByUserId(UserId.of(myId));
+        User targetUser = readUserOutputPort.getUserByUserId(UserId.of(toUserId));
+
+        // TODO: 포트폴리오 처리하기
+        // 포트폴리오
+        // 자산연결 안되어 있으면...?
+        // 만약 자기 자신 거 조회면 디테일하게
+        // 만약 자기 자신 것이 아니면
+        // - 대상이 핀플루언서면
+        //      - 구독 중이면 -> 대충 보여주기
+        //      - 구독 중이 아니면 -> 에러
+        // - 대상이 일반 유저면 -> 대충 보여주기
+    }
+
     @Transactional
     @Override
     public void subscribe(final PortfolioSubscribeServiceRequest request) {
