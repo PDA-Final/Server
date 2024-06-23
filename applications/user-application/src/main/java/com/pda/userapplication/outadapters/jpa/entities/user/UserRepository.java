@@ -21,7 +21,9 @@ public interface UserRepository extends JpaRepository<UserEntity, Long> {
     List<UserEntity> searchByNickname(@Param("nickname") String nickname,
                                       @Param("lastIndex") Long lastIndex,
                                       @Param("limit") Long limit);
-    long countByNickname(String nickname);
+
+
+    long countByNicknameLike(String nickname);
 
     @Query("select u from UserEntity  u " +
         "where u.nickname like %:nickname% " +

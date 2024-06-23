@@ -23,9 +23,9 @@ public class SwaggerConfig {
         return new OpenAPI()
             .addServersItem(new Server().url(url))
             .info(new Info()
-                .title("유저 & 인증 API")
+                .title("크레딧 API")
                 .version("1.0")
-                .description("유저와 인증 서버의 API 명세서 입니다")
+                .description("크레딧 서버의 API 명세서 입니다")
                 .contact(new Contact()
                     .name("김동원")
                     .email("dongwon000103@gmail.com")));

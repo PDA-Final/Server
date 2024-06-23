@@ -88,9 +88,9 @@ public class FollowJpaAdapter implements ReadFollowOutputPort, SaveFollowOutputP
         FollowInfo followInfo = followRepository.findFollowInfoBy(targetId.toLong(), myId.isPresent()?myId.get().toLong():null);
 
         return FollowInfoResponse.builder()
-            .numOfFollowers(followInfo.getFollowers())
-            .numOfFollowings(followInfo.getFollowings())
-            .isFollow(followInfo.getIsFollow().equals(1))
+            .numOfFollowers(followInfo.getFollowers()==null?0:followInfo.getFollowers())
+            .numOfFollowings(followInfo.getFollowings()==null?0:followInfo.getFollowings())
+            .isFollow(followInfo.getIsFollow()==null?false:followInfo.getIsFollow().equals(1))
             .build();
     }
 

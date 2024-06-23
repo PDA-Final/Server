@@ -2,6 +2,10 @@ service-url: /api/user-service
 out-service:
   asset:
     url: http://localhost:7979
+  product:
+    url: http://localhost:8083
+  credit:
+    url: http://localhost:8085
 
 logging:
   level:

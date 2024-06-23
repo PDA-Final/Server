@@ -12,7 +12,7 @@ public interface ReadUserOutputPort {
     boolean isExistsByTofinId(TofinId tofinId);
     User getByTofinId(TofinId tofinId);
     Optional<User> findByTofinId(TofinId tofinId);
-    Optional<User> findById(UserId userId);
-    User getByUserId(UserId userId);
+    Optional<User> findUserById(UserId userId);
+    User getUserByUserId(UserId userId);
     SearchUserPagingOutputResponse searchByNickname(SearchUserOutputRequest request);
 }
