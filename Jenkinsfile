@@ -51,6 +51,7 @@ pipeline {
             challengeApp = true
             productApp = true
             creditApp = true
+            alertApp = true
           } else {
             def changedFiles = sh(returnStdout: true, script: 'git diff --name-only --diff-filter=ACMRT HEAD^ HEAD').trim().split('\n')
             def changedDirs = new HashSet()
@@ -73,10 +74,11 @@ pipeline {
             challengeApp = changedDirs.contains('challenge-application')
             productApp = changedDirs.contains('product-application')
             creditApp = changedDirs.contains('credit-application')
+            alertApp = changedDirs.contains('alert-application')
           }
         }
         sh 'cp /var/jenkins_home/workspace/configs/server/s3-keys.properties ./utils/s3-utils/src/main/resources/application-keys.properties'
-        echo "utils : ${utils}, user : ${userApp}, board : ${boardApp}, challenge : ${challengeApp}, product : ${productApp}, credit : ${creditApp}"
+        echo "utils : ${utils}, user : ${userApp}, board : ${boardApp}, challenge : ${challengeApp}, product : ${productApp}, credit : ${creditApp}, alert: ${alertApp}"
       }
     }
 
@@ -250,6 +252,41 @@ pipeline {
         script {
           try {
             publishOverSSH('credit-api', 'tofin-credit-api')
+            echo "Publish over ssh Successful"
+          } catch(Exception e) {
+            echo "Publish over ssh failed : ${e.message}"
+            currentBuild.result = 'FAILURE'
+          }
+        }
+
+      }
+    }
+
+    stage('build alert app') {
+      when {
+        anyOf {
+          expression { alertApp }
+          expression { utils }
+        }
+      }
+      steps {
+        echo 'copy configuration files for alert app'
+        sh 'cp /var/jenkins_home/workspace/configs/server/alert/application.yml ./applications/alert-application/src/main/resources/application.yml'
+        echo 'start gradle build for alert app'
+        dir('./') {
+          sh 'chmod +x ./gradlew'
+          sh './gradlew clean'
+          sh './gradlew :applications:alert-application:build'
+        }
+        echo 'start docker build for alert app'
+        dir('./applications/alert-application/') {
+          sh 'docker build -t bkkmw/tofin-alert-api .'
+          sh 'docker push bkkmw/tofin-alert-api'
+        }
+        echo 'publish over ssh for alert app'
+        script {
+          try {
+            publishOverSSH('alert-api', 'tofin-alert-api')
             echo "Publish over ssh Successful"
           } catch(Exception e) {
             echo "Publish over ssh failed : ${e.message}"
