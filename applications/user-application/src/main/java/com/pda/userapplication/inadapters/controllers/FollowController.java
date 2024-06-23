@@ -60,7 +60,7 @@ public class FollowController {
     }
 
     @GetMapping("/users/{id}/follow")
-    @Operation(summary = "팔로우", description = "팔로우 상태 조회 (인증 꼭 필요 없음)",
+    @Operation(summary = "팔로우 상태", description = "팔로우 상태 조회 (인증 꼭 필요 없음)",
         security = @SecurityRequirement(name = "bearerAuth"))
     @ApiResponse(responseCode = "200", description = "성공")
     public GlobalResponse<FollowStatusServiceResponse> getFollowStatus(@AuthUser AuthUserInfo authUser, @PathVariable("id") Long id) {
