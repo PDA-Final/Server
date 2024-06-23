@@ -141,9 +141,10 @@ public class MyEmoChallengeService {
 
     // 감정 저축하기
 
-    public void createMyEmoLog(PostMyEmoLogRequest postMyEmoRequest, String token) {
-        MyAssetChallengeDetail md = myAssetChallengeDetailRepository.findByMyChallengeId(postMyEmoRequest.getMyChallengeId());
-        MyChallenge mc = myChallengeRepository.findById(postMyEmoRequest.getMyChallengeId());
+    public void createMyEmoLog(PostMyEmoLogRequest postMyEmoRequest, String token, Long uid) {
+        long mid = myChallengeRepository.selectMyChallenge(1,uid ).getId();
+        MyAssetChallengeDetail md = myAssetChallengeDetailRepository.findByMyChallengeId(mid);
+        MyChallenge mc = myChallengeRepository.findById(mid);
         long price = emojiRepository.findById(postMyEmoRequest.getEmojiId()).get().getPrice();
 
         // req to User : 토큰 , res from User: 유저 개인 정보
@@ -184,7 +185,7 @@ public class MyEmoChallengeService {
         HttpEntity<Void> transferResponse = restTemplate.postForEntity(uri,assetEntity,null );
 
 
-        MyAssetChallenge myAssetChallenge = postMyEmoRequest.convertToAccountEntity();
+        MyAssetChallenge myAssetChallenge = postMyEmoRequest.convertToAccountEntity(mid);
         myAssetChallengeRepository.save(myAssetChallenge);
 
         if(mc.getEndAt() == LocalDate.now()){
@@ -195,7 +196,8 @@ public class MyEmoChallengeService {
         }
     }
 
-    public MyEmoChallengeLogResponse readAllEmoChallengeLog(long mId) {
+    public MyEmoChallengeLogResponse readAllEmoChallengeLog(long uId) {
+        long mId = myChallengeRepository.selectMyChallenge(1,uId).getId();
         List<MyAssetChallenge> echallenges = myAssetChallengeRepository.findByMyChallengeId(mId);
         int totalprice =0;
         List<MyEmoChallengeLog> mcl = echallenges.stream()

@@ -26,6 +26,6 @@ public interface MyChallengeRepository extends JpaRepository<MyChallenge, Intege
     List<MyChallenge> selectAllChallenge();
 
     @Query(value = "SELECT mc FROM MyChallenge mc WHERE mc.challenge.id = :challengeId AND mc.status = '진행중' AND mc.userId = :userId")
-    MyChallenge selectMyBoardChallenge(@Param("challengeId") long challengeId, @Param("userId") long userId);
+    MyChallenge selectMyChallenge(@Param("challengeId") long challengeId, @Param("userId") long userId);
 
 }

@@ -14,7 +14,7 @@ import lombok.Setter;
 @NoArgsConstructor
 public class CorpChallengeDetail {
     @Id
-    long challengeId;
+    Long challengeId;
     @Column(nullable = false)
     Long corpId;
     @Column(nullable = false)

@@ -14,14 +14,12 @@ import java.time.LocalDate;
 @Getter
 public class PostMyEmoLogRequest {
 
-    @Schema(description = "나의 챌린지 기록ID (챌린지 ID랑 다름!!)", example = "1")
-    long myChallengeId;
     @Schema(description = "선택한 이모지ID", example = "1")
     long emojiId;
 
 
-    public MyAssetChallenge convertToAccountEntity() {
-        MyAssetChallenge myAssetChallenge = new MyAssetChallenge(null, myChallengeId, emojiId, LocalDate.now(), true);
+    public MyAssetChallenge convertToAccountEntity(Long mid) {
+        MyAssetChallenge myAssetChallenge = new MyAssetChallenge(null, mid, emojiId, LocalDate.now(), true);
         return myAssetChallenge;
     }
 }
