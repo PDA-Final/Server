@@ -29,6 +29,10 @@ public class Board extends BaseEntity {
 
     private String content;
 
+    private String summary;
+
+    private String thumbnail;
+
     private String authorNickname;
 
     private int authorType;
