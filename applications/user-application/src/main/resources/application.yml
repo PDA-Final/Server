@@ -1,9 +1,28 @@
 service-url: /api/user-service
+out-service:
+  asset:
+    url: http://localhost:7979
+  product:
+    url: http://localhost:8083
+  credit:
+    url: http://localhost:8085
+
+logging:
+  level:
+    org:
+      hibernate:
+        SQL: DEBUG
 
 server:
   port: 8084
+  shutdown: graceful
 
 spring:
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 20MB
+      max-request-size: 20MB
   application:
     name: user-application
   datasource:
@@ -15,9 +34,10 @@ spring:
   sql:
     init:
       mode: always
+      data-locations: classpath:db/insert_*.sql
   jpa:
     hibernate:
-      ddl-auto: create
+      ddl-auto: create-drop
     properties:
       hibernate:
         show-sql: true
@@ -26,7 +46,43 @@ spring:
         format_sql: true
     defer-datasource-initialization: true
 
+  kafka:
+    producer:
+      bootstrap-servers: localhost:10000,localhost:10001,localhost:10002
+
+  data:
+    redis:
+      host: localhost
+      password: dkssudgktpdy
+      port: 6379
+
 springdoc:
   default-consumes-media-type: application/json;charset=UTF-8
   default-produces-media-type: application/json;charset=UTF-8
   packages-to-scan: com.pda
+
+eureka:
+  instance:
+    hostname:
+    healthCheckUrlPath: /actuator/health
+    lease-renewal-interval-in-seconds: 30
+    lease-expiration-duration-in-seconds: 10
+    prefer-ip-address: true
+  client:
+    eureka-server-port: 8761
+    register-with-eureka: false
+    fetch-registry: false
+    disable-delta: false
+    service-url:
+      defaultZone: http://192.168.2.20:8761/eureka
+
+management:
+  endpoint:
+    shutdown:
+      enabled: true
+    health:
+      enabled: true
+  endpoints:
+    web:
+      exposure:
+        include: shutdown, health
