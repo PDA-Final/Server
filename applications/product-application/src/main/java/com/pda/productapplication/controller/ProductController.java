@@ -212,12 +212,17 @@ public class ProductController {
     public GlobalResponse<Object> searchProductByName(
             @RequestParam("name") String name,
             @RequestParam(required = false, defaultValue = "0", value = "pageNo") int pageNo,
-            @RequestParam(required = false, defaultValue = "10", value = "size") int size
+            @RequestParam(required = false, defaultValue = "10", value = "size") int size,
+            ProductDto.SearchConditionDto searchConditionDto
     ) {
+        if(searchConditionDto != null)
+            log.info(searchConditionDto.getCategory());
+
         log.debug("Get searched product list. page {}, size {}", pageNo, size);
         Map<String, Object> result = new HashMap<>();
 
-        List<ProductDto.BasicRespDto> products = productService.searchProductByName(name, pageNo, size);
+        assert searchConditionDto != null;
+        List<ProductDto.BasicRespDto> products = productService.searchProductByName(name, pageNo, size, searchConditionDto);
         result.put("searched products", products);
 
         return ApiUtils.success("success", result);
