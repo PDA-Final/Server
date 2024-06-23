@@ -1,8 +1,10 @@
 package com.pda.boardapplication.service;
 
 import com.pda.boardapplication.dto.UserDto;
+import com.pda.boardapplication.entity.BoardCount;
 import com.pda.boardapplication.entity.Bookmark;
 import com.pda.boardapplication.entity.Like;
+import com.pda.boardapplication.entity.LikePK;
 import com.pda.boardapplication.repository.BoardRepository;
 import com.pda.boardapplication.repository.BookmarkRepository;
 import com.pda.boardapplication.repository.LikeRepository;
@@ -20,6 +22,7 @@ public class BoardInteractionService {
     private final BoardRepository boardRepository;
     private final LikeRepository likeRepository;
     private final BookmarkRepository bookmarkRepository;
+    private final BoardCountRepository boardCountRepository;
 
 
     /**
@@ -30,6 +33,7 @@ public class BoardInteractionService {
      * @throws NotFoundException target board not found
      */
     public int toggleLike(long boardId, UserDto.InfoDto userInfoDto) {
+        int ret = 0;
         if(!boardRepository.existsById(boardId))
             throw new NotFoundException("Target board does not exist");
 
@@ -37,14 +41,22 @@ public class BoardInteractionService {
                 .board(boardRepository.getReferenceById(boardId))
                 .userId(userInfoDto.getId())
                 .build();
-
-        if(!likeRepository.exists(Example.of(like))) {
+        // Error InvalidDataAccessApiUsageException : circular
+//        if(!likeRepository.exists(Example.of(like))) {
+        if(!likeRepository.existsById(new LikePK(boardId, userInfoDto.getId()))) {
             likeRepository.save(like);
-            return 1;
+            ret = 1;
         } else {
             likeRepository.delete(like);
-            return -1;
+            ret = -1;
         }
+
+        // TODO Update expired(1-2 Week) like counts
+        BoardCount boardCount = boardCountRepository.findById(boardId).orElseThrow(NotFoundException::new);
+        boardCount.updateOnLike(ret);
+        boardCountRepository.save(boardCount);
+
+        return ret;
     }
 
     public int toggleBookmark(long boardId, UserDto.InfoDto userInfoDto) {

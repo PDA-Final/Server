@@ -318,13 +318,29 @@ public class ProductService {
      * @param name product name
      * @param pageNo page number
      * @param size size
+     * @param searchConditionDto search conditions
      * @return searched products
      */
-    public List<ProductDto.BasicRespDto> searchProductByName(String name, int pageNo, int size) {
+    public List<ProductDto.BasicRespDto> searchProductByName(String name, int pageNo, int size, ProductDto.SearchConditionDto searchConditionDto) {
         Pageable pageable = PageRequest.of(pageNo, size);
         Page<Product> products;
 
-        products = productRepository.findByNameLike("%"+name+"%", pageable);
+        String categoryName = searchConditionDto.getCategory();
+
+        if (categoryName == null || categoryName.isEmpty()) {
+            // 전체 상품 검색
+            products = productRepository.findByNameLike(name, pageable);
+        } else {
+            // 카테고리별 상품 검색
+            Optional<Category> categoryOptional = categoryRepository.findByName(categoryName);
+            if (categoryOptional.isPresent()) {
+                Category category = categoryOptional.get();
+                Long categoryId = category.getId();
+                products = productRepository.findByNameLikeAndCategoryId(categoryId, name, pageable);
+            } else {
+                return List.of();
+            }
+        }
 
         return products.stream().map(product ->
                 ProductDto.BasicRespDto.builder()

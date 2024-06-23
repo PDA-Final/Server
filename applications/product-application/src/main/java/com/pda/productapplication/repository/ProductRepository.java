@@ -15,11 +15,15 @@ public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpec
     @Query(value = "SELECT * FROM product p ORDER BY RAND() LIMIT :limit", nativeQuery = true)
     List<Product> findRandomProducts(@Param("limit") int limit);
 
-    Page<Product> findByNameLike(String name, Pageable pageable);
-
     Page<Product> findByCategoryId(Long categoryId, Pageable pageable);
 
     Page<Product> findByCorpId(Long corpId, Pageable pageable);
+
+    @Query("SELECT p FROM Product p WHERE p.name LIKE %:name%")
+    Page<Product> findByNameLike(@Param("name") String name, Pageable pageable);
+
+    @Query(value = "SELECT * FROM product p WHERE p.category_id = :categoryId AND p.name LIKE %:name%", nativeQuery = true)
+    Page<Product> findByNameLikeAndCategoryId(@Param("categoryId") Long categoryId, @Param("name") String name, Pageable pageable);
 
     // 최신순 정렬
     @Query(value = "SELECT * FROM product p WHERE p.category_id = :categoryId ORDER BY p.created_at DESC", nativeQuery = true)

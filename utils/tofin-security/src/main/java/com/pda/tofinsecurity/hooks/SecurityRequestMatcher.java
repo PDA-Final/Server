@@ -91,6 +91,7 @@ public class SecurityRequestMatcher {
             .requestHookType(RequestHookType.HAS_ROLE)
             .httpMethod(method)
             .roles(Collections.singletonList(role))
+            .urls(urls)
             .build();
     }
 

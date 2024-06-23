@@ -55,8 +55,10 @@ public class CreditService {
         }
     }
 
-    public void getAmount(Long userId) {
-
+    @Transactional
+    public Long getAmount(final Long userId) {
+        return storeRepository.findByUserId(userId)
+            .orElseThrow(() -> new BadRequestException("유저가 존재하지 않습니다.")).getAmount();
     }
 
     public void getLogs(Long userId) {

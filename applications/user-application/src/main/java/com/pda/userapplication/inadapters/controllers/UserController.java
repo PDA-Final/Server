@@ -27,6 +27,7 @@ import com.pda.userapplication.services.in.dto.res.AvailableContactServiceRespon
 import com.pda.userapplication.services.in.dto.res.AvailableTofinIdServiceResponse;
 import com.pda.userapplication.services.in.dto.res.ConnectAssetInfoResponse;
 import com.pda.userapplication.services.in.dto.res.GetUserPagingResponse;
+import com.pda.userapplication.services.in.dto.res.TokenInfoServiceResponse;
 import com.pda.userapplication.services.in.dto.res.UserDetailInfoResponse;
 import com.pda.userapplication.services.in.dto.res.UserServiceResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -146,9 +147,9 @@ public class UserController {
     @Operation(summary = "유저 프로필 수정", description = "유저 프로필 설정",
         security = @SecurityRequirement(name = "bearerAuth"))
     @ApiResponse(responseCode = "200", description = "성공")
-    public GlobalResponse<Void> updateProfile(@AuthUser AuthUserInfo authUser,
-                                              @RequestPart(name = "image", required = false) MultipartFile multipartFile,
-                                              @Parameter(name = "request") @RequestPart(name = "request", required = false) UpdateProfileRequest request) {
+    public GlobalResponse<TokenInfoServiceResponse> updateProfile(@AuthUser AuthUserInfo authUser,
+                                                                  @RequestPart(name = "image", required = false) MultipartFile multipartFile,
+                                                                  @Parameter(name = "request") @RequestPart(name = "request", required = false) UpdateProfileRequest request) {
         if (multipartFile == null && request == null)
             throw new BadRequestException("변경사항이 없습니다.");
 
@@ -162,8 +163,7 @@ public class UserController {
                 .nickname(request.getNickname());
         }
 
-        updateUserUseCase.updateProfile(builder.build());
-        return ApiUtils.success("유저 프로필 수정");
+        return ApiUtils.success("유저 프로필 수정",updateUserUseCase.updateProfile(builder.build()));
     }
 
     @GetMapping("/{id}")
@@ -187,5 +187,21 @@ public class UserController {
                 .limit(limit)
                 .nickname(nickname)
             .build()));
+    }
+
+    @GetMapping("/{id}/portfolios")
+    @Operation(summary = "유저 포트폴리오 조회", description = "유저 포트폴리오 조회 -> 인증 필수 아님",
+        security = @SecurityRequirement(name = "bearerAuth"))
+    @ApiResponse(responseCode = "200", description = "성공")
+    public GlobalResponse<Void> getPortfolios(@AuthUser AuthUserInfo authUser, @PathVariable("id") Long id) {
+        return ApiUtils.success("유저 포트폴리오 조회 완료");
+    }
+
+    @GetMapping("/products")
+    @Operation(summary = "유저 보유 상품 조회", description = "유저 본인의 보유 상품 조회",
+        security = @SecurityRequirement(name = "bearerAuth"))
+    @ApiResponse(responseCode = "200", description = "성공")
+    public GlobalResponse<Void> getAsets(@AuthUser AuthUserInfo authUser) {
+        return ApiUtils.success("유저 보유 상품 조회 완료");
     }
 }

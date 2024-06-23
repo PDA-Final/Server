@@ -8,6 +8,7 @@ import com.pda.userapplication.services.in.FollowUseCase;
 import com.pda.userapplication.services.in.dto.req.FollowOrUnFollowServiceRequest;
 import com.pda.userapplication.services.in.dto.req.GetFollowableServiceRequest;
 import com.pda.userapplication.services.in.dto.res.FollowOrUnfollowServiceResponse;
+import com.pda.userapplication.services.in.dto.res.FollowStatusServiceResponse;
 import com.pda.userapplication.services.in.dto.res.GetFollowablePagingResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -56,6 +57,14 @@ public class FollowController {
                 .limit(limit)
                 .lastIndex(last)
             .build()));
+    }
+
+    @GetMapping("/users/{id}/follow")
+    @Operation(summary = "팔로우 상태", description = "팔로우 상태 조회 (인증 꼭 필요 없음)",
+        security = @SecurityRequirement(name = "bearerAuth"))
+    @ApiResponse(responseCode = "200", description = "성공")
+    public GlobalResponse<FollowStatusServiceResponse> getFollowStatus(@AuthUser AuthUserInfo authUser, @PathVariable("id") Long id) {
+        return ApiUtils.success("팔로우 상태 조회", followUseCase.getFollow(id, authUser!=null?authUser.getId():null));
     }
 
     @GetMapping("/users/{id}/followings")

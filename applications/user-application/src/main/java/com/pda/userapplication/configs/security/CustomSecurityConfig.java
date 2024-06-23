@@ -5,6 +5,7 @@ import com.pda.tofinsecurity.hooks.SecurityRequestMatcher;
 import com.pda.tofinsecurity.hooks.SecurityRequestMatcherChain;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 
 import java.util.List;
 
@@ -18,9 +19,11 @@ public class CustomSecurityConfig {
             .add(SecurityRequestMatcher.hasRoleOf(UserRole.ADMIN, "/test"));
         securityRequestMatcherChain
             .add(SecurityRequestMatcher.hasAnyRolesOf(List.of(UserRole.NORMAL, UserRole.FINFLUENCER),
-                "/users/assets", "/users/public-options", "/users/detail-info", "/users/profile"));
+                "/users/assets", "/users/public-options", "/users/detail-info", "/users/tendency", "/users/profile"));
         securityRequestMatcherChain
-            .add(SecurityRequestMatcher.authenticatedOf("/users/{id:[0-9]+}/follow"));
+            .add(SecurityRequestMatcher.authenticatedOf(HttpMethod.POST, "/users/{id:[0-9]+}/follow"));
+        securityRequestMatcherChain
+            .add(SecurityRequestMatcher.hasRoleOf(UserRole.NORMAL, HttpMethod.PUT, "/finfluencer"));
 
         return securityRequestMatcherChain;
     }

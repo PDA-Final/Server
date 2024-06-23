@@ -196,7 +196,7 @@ public class UserService implements SignUpUseCase, ReissueUseCase,
     @Transactional
     @Override
     public List<ConnectAssetInfoResponse> connectAssets(final ConnectAssetsServiceRequest request) {
-        NormalUser user = NormalUser.from(readUserOutputPort.getByUserId(UserId.of(request.getUserId())));
+        NormalUser user = NormalUser.from(readUserOutputPort.getUserByUserId(UserId.of(request.getUserId())));
         if (isDuplicateContact(request.getContact()))
             throw new BadRequestException("해당 전화번호는 이미 사용 중 입니다.");
 
@@ -212,7 +212,7 @@ public class UserService implements SignUpUseCase, ReissueUseCase,
     @Transactional
     @Override
     public void setPublicOption(final SetPublicOptionServiceRequest request) {
-        NormalUser user = readNormalUserOutputPort.findByUserId(UserId.of(request.getUserId()))
+        NormalUser user = readNormalUserOutputPort.findNormalUserByUserId(UserId.of(request.getUserId()))
             .orElseThrow(() -> new NotFoundException("해당 유저의 세부 정보가 존재하지 않습니다."));
 
         if (user.getBackSocialId() == null) throw new BadRequestException("자산 연결부터 하세요");
@@ -226,7 +226,7 @@ public class UserService implements SignUpUseCase, ReissueUseCase,
     @Transactional
     @Override
     public void setTendency(final SetTendencyServiceRequest request) {
-        NormalUser user = readNormalUserOutputPort.findByUserId(UserId.of(request.getUserId()))
+        NormalUser user = readNormalUserOutputPort.findNormalUserByUserId(UserId.of(request.getUserId()))
             .orElseThrow(() -> new NotFoundException("해당 유저의 세부 정보가 존재하지 않습니다."));
 
         if (user.getBackSocialId() == null) throw new BadRequestException("자산 연결부터 하세요");
@@ -247,7 +247,7 @@ public class UserService implements SignUpUseCase, ReissueUseCase,
 
     @Override
     public UserDetailInfoResponse getUserDetailInfo(Long userId) {
-        NormalUser user = readNormalUserOutputPort.findByUserId(UserId.of(userId))
+        NormalUser user = readNormalUserOutputPort.findNormalUserByUserId(UserId.of(userId))
             .orElseThrow(() -> new NotFoundException("해당 유저의 세부 정보가 존재하지 않습니다."));
 
         return UserDetailInfoResponse.builder()
@@ -260,8 +260,8 @@ public class UserService implements SignUpUseCase, ReissueUseCase,
 
     @Transactional
     @Override
-    public void updateProfile(final UpdateProfileServiceRequest request) {
-        User user = readUserOutputPort.getByUserId(UserId.of(request.getUserId()));
+    public TokenInfoServiceResponse updateProfile(final UpdateProfileServiceRequest request) {
+        User user = readUserOutputPort.getUserByUserId(UserId.of(request.getUserId()));
         UserUpdateOutputRequest.UserUpdateOutputRequestBuilder builder = UserUpdateOutputRequest.builder();
 
         if (request.getJob() != null) {
@@ -286,12 +286,15 @@ public class UserService implements SignUpUseCase, ReissueUseCase,
         }
 
         sendUpdateUserOutputPort.sendUserOutput(builder.build());
-        saveUserOutputPort.save(user);
+        User saveUser = saveUserOutputPort.save(user);
+
+        return toTokenInfoServiceResponse(
+            generateTokenAndSaveRefresh(saveUser),saveUser);
     }
 
     @Override
     public UserServiceResponse findById(final Long id, final Long myId) {
-        User user = readUserOutputPort.getByUserId(UserId.of(id));
+        User user = readUserOutputPort.getUserByUserId(UserId.of(id));
         FollowInfoResponse followInfo = readFollowOutputPort
             .getFollowInfo(user.getId(), Optional.ofNullable(myId==null?null:UserId.of(myId)));
 
