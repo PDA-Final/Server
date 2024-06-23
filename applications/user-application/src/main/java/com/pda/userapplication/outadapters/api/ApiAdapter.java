@@ -6,6 +6,7 @@ import com.pda.exceptionhandler.exceptions.InternalServerException;
 import com.pda.userapplication.domains.NormalUser;
 import com.pda.userapplication.services.out.CreditOutputPort;
 import com.pda.userapplication.services.out.GetAssetsOutputPort;
+import com.pda.userapplication.services.out.dto.req.TransferCreditRequest;
 import com.pda.userapplication.services.out.dto.res.AssetInfoResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -50,6 +51,7 @@ public class ApiAdapter implements GetAssetsOutputPort, CreditOutputPort {
         return mono.block().getData();
     }
 
+    // TODO: 이거 아직 안씀
     @Override
     public AssetInfoResponse getAssetsExcludePortfolio(NormalUser normalUser) {
         AssetInfoResponse result = webClient.get().uri(uriBuilder -> uriBuilder
@@ -73,7 +75,7 @@ public class ApiAdapter implements GetAssetsOutputPort, CreditOutputPort {
     }
 
     @Override
-    public boolean consumeCredit(Long amount, String token) {
+    public void consumeCredit(Long amount, String token) {
         Map<String, Object> body = new HashMap<>();
         body.put("amount", amount);
         body.put("transactionDateTime", LocalDateTime.now());
@@ -89,7 +91,25 @@ public class ApiAdapter implements GetAssetsOutputPort, CreditOutputPort {
 
                 return response.bodyToMono(new ParameterizedTypeReference<GlobalResponse<Void>>() {});
             }).block();
+    }
 
-        return true;
+    @Override
+    public void transferCredit(TransferCreditRequest request) {
+        Map<String, Object> body = new HashMap<>();
+        body.put("amount", request.getAmount());
+        body.put("transactionDateTime", LocalDateTime.now());
+        body.put("toUserId", request.getToUserId().toLong());
+
+        webClient.post().uri(creditUrl+"/credit/transfer")
+            .header("Authorization", String.format("Bearer %s", request.getToken()))
+            .body(BodyInserters.fromValue(body))
+            .exchangeToMono(response -> {
+                if (!response.statusCode().is2xxSuccessful()) {
+                    log.error("Credit Server Exception: " + response.statusCode());
+                    throw new BadRequestException("크레딧 이체 실패");
+                }
+
+                return response.bodyToMono(new ParameterizedTypeReference<GlobalResponse<Void>>() {});
+            }).block();
     }
 }

@@ -15,25 +15,25 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 @Schema(description = "유저 Res")
 public class UserServiceResponse {
-    @Schema(name = "유저 id(PK)", example = "1")
+    @Schema(description = "유저 id(PK)", example = "1")
     private Long id;
-    @Schema(name = "유저 닉네임", example = "동원참치")
+    @Schema(description = "유저 닉네임", example = "동원참치")
     private String nickname;
-    @Schema(name = "유저 프로필 이미지", example = "유저 프로필 이미지")
+    @Schema(description = "유저 프로필 이미지", example = "유저 프로필 이미지")
     private String profileImage;
-    @Schema(name = "유저 투핀 아이디", example = "dongwon0103")
+    @Schema(description = "유저 투핀 아이디", example = "dongwon0103")
     private String tofinId;
-    @Schema(name = "유저 롤", example = "NORMAL")
+    @Schema(description = "유저 롤", example = "NORMAL")
     private UserRole role;
-    @Schema(name = "유저 직업", example = "대학생")
+    @Schema(description = "유저 직업", example = "대학생")
     private String job;
-    @Schema(name = "유저 연령대", example = "30")
+    @Schema(description = "유저 연령대", example = "30")
     private Integer ageRange;
-    @Schema(name = "팔로우 중 인지", example = "false")
+    @Schema(description = "팔로우 중 인지", example = "false")
     @JsonProperty("isFollow")
     private boolean follow;
-    @Schema(name = "팔로워 수", example = "4")
+    @Schema(description = "팔로워 수", example = "4")
     private Long followers;
-    @Schema(name = "팔로잉 수", example = "5")
+    @Schema(description = "팔로잉 수", example = "5")
     private Long followings;
 }
