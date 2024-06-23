@@ -226,7 +226,7 @@ public class BoardService {
 
         for (BoardContentDto.BlockDto blockDto : outputDataDto.getBlocks()) {
             if ("image".equals(blockDto.getType()) && ret[0] == null) {
-                ret[0] = ((BoardContentDto.ImageBlockDto) blockDto).getData().getFile();
+                ret[0] = ((BoardContentDto.ImageBlockDto) blockDto).getData().getFile().getUrl();
             } else if ("paragraph".equals(blockDto.getType()) && ret[1] == null) {
                 ret[1] = ((BoardContentDto.ParagraphBlockDto) blockDto).getData().getText();
             }
