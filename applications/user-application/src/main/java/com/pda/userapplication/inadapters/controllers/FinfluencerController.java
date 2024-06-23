@@ -5,6 +5,7 @@ import com.pda.apiutils.GlobalResponse;
 import com.pda.tofinsecurity.user.AuthUser;
 import com.pda.tofinsecurity.user.AuthUserInfo;
 import com.pda.userapplication.services.in.FinfluencerUseCase;
+import com.pda.userapplication.services.in.dto.res.TokenInfoServiceResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -25,8 +26,8 @@ public class FinfluencerController {
     @Operation(summary = "핀플루언서 등업", description = "핀플루언서 등업",
         security = @SecurityRequirement(name = "bearerAuth"))
     @ApiResponse(responseCode = "200", description = "성공")
-    public GlobalResponse<Void> becomeFinfluencer(@AuthUser AuthUserInfo authUser) {
-        finfluencerUseCase.becomeFinfluencer(authUser.getId(), authUser.getToken());
-        return ApiUtils.success("핀플루언서가 되셨습니다");
+    public GlobalResponse<TokenInfoServiceResponse> becomeFinfluencer(@AuthUser AuthUserInfo authUser) {
+        return ApiUtils.success("핀플루언서가 되셨습니다", finfluencerUseCase
+            .becomeFinfluencer(authUser.getId(), authUser.getToken()));
     }
 }
