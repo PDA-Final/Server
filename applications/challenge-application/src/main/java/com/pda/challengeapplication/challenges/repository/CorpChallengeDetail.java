@@ -1,7 +1,6 @@
 package com.pda.challengeapplication.challenges.repository;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -15,12 +14,12 @@ import lombok.Setter;
 @NoArgsConstructor
 public class CorpChallengeDetail {
     @Id
-    long challengeId;
-    @NotNull
-    long corpId;
-    @NotNull
+    Long challengeId;
+    @Column(nullable = false)
+    Long corpId;
+    @Column(nullable = false)
     String corpName;
-    @NotNull
+    @Column(nullable = false)
     String challengeUrl;
     @OneToOne(cascade=CascadeType.ALL)
     @JoinColumn(name = "challenge_id", nullable = false, foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))

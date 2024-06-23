@@ -1,2 +1,2 @@
 INSERT INTO `category`(`id`, `name`) VALUES
-(1, "info"), (2, "fun"), (3, "invegstment"), (4, "corp"), (5, "premium");
+(1, "정보"), (2, "재미"), (3, "투자"), (4, "기업"), (5, "고급");
