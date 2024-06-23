@@ -7,5 +7,5 @@ import java.util.Optional;
 
 public interface ReadNormalUserOutputPort {
     boolean existsByContact(String contact);
-    Optional<NormalUser> findByUserId(UserId userId);
+    Optional<NormalUser> findNormalUserByUserId(UserId userId);
 }

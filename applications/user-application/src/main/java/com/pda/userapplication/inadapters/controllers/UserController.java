@@ -188,4 +188,20 @@ public class UserController {
                 .nickname(nickname)
             .build()));
     }
+
+    @GetMapping("/{id}/portfolios")
+    @Operation(summary = "유저 포트폴리오 조회", description = "유저 포트폴리오 조회 -> 인증 필수 아님",
+        security = @SecurityRequirement(name = "bearerAuth"))
+    @ApiResponse(responseCode = "200", description = "성공")
+    public GlobalResponse<Void> getPortfolios(@AuthUser AuthUserInfo authUser, @PathVariable("id") Long id) {
+        return ApiUtils.success("유저 포트폴리오 조회 완료");
+    }
+
+    @GetMapping("/products")
+    @Operation(summary = "유저 보유 상품 조회", description = "유저 본인의 보유 상품 조회",
+        security = @SecurityRequirement(name = "bearerAuth"))
+    @ApiResponse(responseCode = "200", description = "성공")
+    public GlobalResponse<Void> getAsets(@AuthUser AuthUserInfo authUser) {
+        return ApiUtils.success("유저 보유 상품 조회 완료");
+    }
 }

@@ -53,15 +53,15 @@ public class UserJpaAdapter implements SaveUserOutputPort, ReadUserOutputPort, S
     }
 
     @Override
-    public Optional<User> findById(UserId userId) {
+    public Optional<User> findUserById(UserId userId) {
         return Optional.ofNullable(
             userMapper.toUser(userRepository.findById(userId.toLong())
                 .orElse(null)));
     }
 
     @Override
-    public User getByUserId(UserId userId) {
-        return findById(userId).orElseThrow(
+    public User getUserByUserId(UserId userId) {
+        return findUserById(userId).orElseThrow(
             () -> new BadRequestException("해당 아이디의 유저를 찾을 수 없습니다."));
     }
 
@@ -87,7 +87,7 @@ public class UserJpaAdapter implements SaveUserOutputPort, ReadUserOutputPort, S
         return SearchUserPagingOutputResponse.builder()
             .lastIndex(lastIndex)
             .isLast(isLast)
-            .totalCount(userRepository.countByNickname(request.getNickname()))
+            .totalCount(userRepository.countByNicknameLike(String.format("%%%s%%", request.getNickname())))
             .users(users.stream().map(userMapper::toUser).toList())
             .build();
     }
@@ -112,7 +112,7 @@ public class UserJpaAdapter implements SaveUserOutputPort, ReadUserOutputPort, S
     }
 
     @Override
-    public Optional<NormalUser> findByUserId(UserId userId) {
+    public Optional<NormalUser> findNormalUserByUserId(UserId userId) {
         return Optional.ofNullable(userDetailMapper.toNormalUser(
             userDetailRepository.findByUserId(userId.toLong())
                 .orElse(null)));
