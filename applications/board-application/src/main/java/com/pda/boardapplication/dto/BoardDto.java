@@ -21,11 +21,12 @@ public class BoardDto {
                 example = "⭐️ 내가 들었던 펀드 추천 글 ⭐",
                 requiredMode = Schema.RequiredMode.REQUIRED)
         private String title;
-        @NotBlank
-        @Schema(description = "board content - soon about to be modified",
-                example = "오늘은 내가 들었던 펀드 중에 제일 좋았던 신한은행의 펀드를 이야기해볼게!",
-                requiredMode = Schema.RequiredMode.REQUIRED)
-        private String content;
+//        @NotBlank
+//        @Schema(description = "board content - soon about to be modified",
+//                example = "오늘은 내가 들었던 펀드 중에 제일 좋았던 신한은행의 펀드를 이야기해볼게!",
+//                requiredMode = Schema.RequiredMode.REQUIRED)
+        // TODO add schema description
+        private BoardContentDto.OutputDataDto content;
         @DecimalMax(value = "5", inclusive = true)
         @Schema(description = "category id : 1(기업), 2(꿀팁), 3(소비), 4(절약), 5(투자)",
                 allowableValues = {"1","2","3","4","5"},
@@ -90,6 +91,10 @@ public class BoardDto {
         private String authorNickname;
         @Schema(description = "Img url of author's profile image", example = "https://picsum.photos/seed/picsum/200/200")
         private String authorProfile;
+        @Schema(description = "Whether current user liked board", example = "false")
+        private boolean liked;
+        @Schema(description = "Whether current user bookmarked board", example = "true")
+        private boolean bookmarked;
 
         // TODO : tagged product/challenges
     }
@@ -122,17 +127,21 @@ public class BoardDto {
     @Setter
     @Schema(description = "[Not Implemented Yet] Request query parameter to search | sort board list")
     public static class SearchConditionDto {
-        @Schema(description = "category id : 1(기업), 2(꿀팁), 3(소비), 4(절약), 5(투자)",
+        @Schema(description = "category id : 1(정보), 2(재미), 3(투자), 4(기업), 5(고급)",
                 allowableValues = {"1","2","3","4","5"},
                 example = "2",
                 requiredMode = Schema.RequiredMode.NOT_REQUIRED)
         @Parameter(required = false)
         private String category;
-        @Schema(description = "Sorting condition", example = "popular", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
-        @Parameter
+        @Schema(description = "Sorting condition", example = "인기순",
+                allowableValues = {"인기순", "최신순"},
+                requiredMode = Schema.RequiredMode.NOT_REQUIRED)
         private String sort;
         @Schema(description = "Author's id", example = "1", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
         @Parameter
-        private int userId;
+        private long userId;
+        @Schema(description = "Keyword to search", example = "펀드", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+        @Parameter(required = false)
+        private String keyword;
     }
 }
