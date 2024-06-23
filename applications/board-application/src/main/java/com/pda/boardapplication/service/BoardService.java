@@ -143,6 +143,9 @@ public class BoardService {
         } else if(searchConditionDto.getUserId() > 0) {
             log.info("Search by user id : {}", searchConditionDto.getUserId());
             boards = boardRepository.findByUserId(pageable, searchConditionDto.getUserId()).getContent();
+        } else if(searchConditionDto.getKeyword() != null) {
+            log.info("Search by keyword : {}", searchConditionDto.getKeyword());
+            boards = boardRepository.findByTitleContains(pageable, searchConditionDto.getKeyword()).getContent();
         } else {
             log.info("No adequate search conditions found");
             boards = boardRepository.findAll(pageable).getContent();

@@ -140,5 +140,8 @@ public class BoardDto {
         @Schema(description = "Author's id", example = "1", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
         @Parameter
         private long userId;
+        @Schema(description = "Keyword to search", example = "펀드", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+        @Parameter(required = false)
+        private String keyword;
     }
 }
