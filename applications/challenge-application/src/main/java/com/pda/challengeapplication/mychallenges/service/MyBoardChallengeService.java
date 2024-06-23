@@ -48,6 +48,7 @@ public class MyBoardChallengeService {
         m.editMyChallengeStatus("성공");
         m.editMyChallengeEndAt(LocalDate.now());
         myChallengeRepository.save(m);
+
         // TODO: 알림 보내기
     }
 
