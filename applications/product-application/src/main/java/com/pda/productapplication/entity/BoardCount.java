@@ -18,8 +18,8 @@ public class BoardCount {
     @Column(name = "product_id")
     private Long productId;
 
-    @Column(name = "board_count", nullable = false, columnDefinition = "int default 0")
-    private int boardCount;
+    @Column(name = "board_cnt", nullable = false, columnDefinition = "INT DEFAULT 0")
+    private int boardCnt;
 
     @OneToOne
     @MapsId
@@ -27,6 +27,6 @@ public class BoardCount {
     private Product product;
 
     public void incrementBoardCount() {
-        this.boardCount++;
+        this.boardCnt++;
     }
 }
