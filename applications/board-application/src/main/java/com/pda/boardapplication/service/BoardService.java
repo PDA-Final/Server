@@ -1,5 +1,8 @@
 package com.pda.boardapplication.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.pda.boardapplication.dto.BoardContentDto;
 import com.pda.boardapplication.dto.BoardDto;
 import com.pda.boardapplication.dto.CommentDto;
 import com.pda.boardapplication.dto.UserDto;
@@ -20,6 +23,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.PathVariable;
 
+import java.util.Iterator;
 import java.util.List;
 
 @Service
@@ -33,6 +37,8 @@ public class BoardService {
 
     private final BoardCountRepository boardCountRepository;
 
+    private final S3Service s3Service;
+
     /**
      * Register Board
      * @param registerReqDto data to register board
@@ -42,14 +48,18 @@ public class BoardService {
     public long registerBoard(BoardDto.RegisterReqDto registerReqDto, UserDto.InfoDto authorInfoDto) {
         log.debug("Register Board with title : {}, user name : {}", registerReqDto.getTitle(), authorInfoDto.getNickname());
 
+        String [] boardSummary = parseSummary(registerReqDto.getContent());
+
         Board board = Board.builder()
                 .title(registerReqDto.getTitle())
-                .content(registerReqDto.getContent())
+                .content(boardSummary[2])
                 .category(categoryRepository.getReferenceById(registerReqDto.getCategoryId()))
                 .userId(authorInfoDto.getId())
                 .authorNickname(authorInfoDto.getNickname())
                 .authorType(UserUtils.getUserRoleCode(authorInfoDto.getType()))
                 .authorProfile(authorInfoDto.getProfile())
+                .thumbnail(boardSummary[0])
+                .summary(boardSummary[1])
                 .build();
 
         long boardId = boardRepository.save(board).getId();
@@ -142,9 +152,9 @@ public class BoardService {
                 BoardDto.AbstractRespDto.builder()
                         .id(elem.getId())
                         .title(elem.getTitle())
-                        .summary(elem.getContent())
+                        .summary(elem.getSummary())
                         .createdTime(elem.getCreatedAt())
-    //                    .thumbnail()
+                        .thumbnail(elem.getThumbnail())
                         .likeCount(elem.getLikes().size())
                         .commentCount(elem.getComments().size())
                         .authorNickname(elem.getAuthorNickname())
@@ -197,5 +207,34 @@ public class BoardService {
         }
 
         return Sort.by(Sort.Direction.DESC, "createdAt");
+    }
+
+    /**
+     * Parse summary of content
+     * @param outputDataDto data of content
+     * @return Array of String : { thumbnail image url, summary, serialized content }
+     * @throws BadRequestException Failed to Serialize object
+     */
+    private String[] parseSummary(BoardContentDto.OutputDataDto outputDataDto) {
+        // thumbnail image, summary, serialized
+        String[] ret = new String[] {null, null, null};
+
+        ObjectMapper objectMapper = new ObjectMapper();
+
+        for (BoardContentDto.BlockDto blockDto : outputDataDto.getBlocks()) {
+            if ("image".equals(blockDto.getType()) && ret[0] == null) {
+                ret[0] = ((BoardContentDto.ImageBlockDto) blockDto).getData().getFile();
+            } else if ("paragraph".equals(blockDto.getType()) && ret[1] == null) {
+                ret[1] = ((BoardContentDto.ParagraphBlockDto) blockDto).getData().getText();
+            }
+        }
+
+        try {
+            ret[2] = objectMapper.writeValueAsString(outputDataDto);
+        } catch (JsonProcessingException e) {
+            throw new BadRequestException("Invalid content format. Not Serializable");
+        }
+
+        return ret;
     }
 }
