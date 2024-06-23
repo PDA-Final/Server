@@ -47,7 +47,7 @@ public class Product extends BaseEntity {
     private Loan loan;
 
     @OneToOne(mappedBy = "product", cascade = CascadeType.ALL)
-    private BoardCount boardCount;
+    private BoardCount boardCnt;
 
     protected Product() {
         super();
