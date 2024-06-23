@@ -30,5 +30,7 @@ INSERT INTO corp_challenge_detail VALUES(9,27,'https://m.shinhansec.com/mweb/ane
 INSERT INTO challenge VALUES(0,'2024-07-12','2024-05-13',30,10,'해외주식 투자정보 콘텐츠 이용하고 마이크로소프트 소수점 주식 받으세요', 'https://financial.pstatic.net/pie/common-bi/1.0.2/images/BK_SHINHAN_Profile.png','콘텐츠 이용하고 주식 받으세요');
 INSERT INTO corp_challenge_detail VALUES(10,27,'https://m.shinhansec.com/mweb/anev/evnt/aevnt0001?shareYn=WQ==&detailUrl=https://open.shinhansec.com/m/event2/240513_tpBenefit/event.jsp','신한투자증권');
 
+INSERT INTO challenge VALUES(0,'2024-07-12','2024-05-13',30,10,'해외주식 투자정보 콘텐츠 이용하고 마이크로소프트 소수점 주식 받으세요', 'https://financial.pstatic.net/pie/common-bi/1.0.2/images/BK_SHINHAN_Profile.png','콘텐츠 이용하고 주식 받으세요');
+INSERT INTO corp_challenge_detail VALUES(10,27,'https://m.shinhansec.com/mweb/anev/evnt/aevnt0001?shareYn=WQ==&detailUrl=https://open.shinhansec.com/m/event2/240513_tpBenefit/event.jsp','신한투자증권');
 
 
