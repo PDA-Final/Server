@@ -21,7 +21,7 @@ spring:
 
   sql:
     init:
-      mode: always
+      mode: never
       data-locations: classpath:db/insert_*.sql
   jpa:
     hibernate:
@@ -47,9 +47,9 @@ eureka:
     prefer-ip-address: true
   client:
     eureka-server-port: 8761
-    register-with-eureka: true
-    fetch-registry: true
-    disable-delta: true
+    register-with-eureka: false
+    fetch-registry: false
+    disable-delta: false
     service-url:
       defaultZone: http://192.168.2.20:8761/eureka
 
