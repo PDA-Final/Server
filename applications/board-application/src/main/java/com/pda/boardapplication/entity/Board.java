@@ -72,7 +72,7 @@ public class Board extends BaseEntity {
     @JsonBackReference
     private List<BoardProductTag> taggedProducts;
 
-    @OneToOne(mappedBy = "board", fetch = FetchType.LAZY, orphanRemoval = true)
+    @OneToOne(mappedBy = "board", orphanRemoval = true)
     @OnDelete(action = OnDeleteAction.CASCADE)
     @JsonBackReference
     private BoardCount boardCount;
