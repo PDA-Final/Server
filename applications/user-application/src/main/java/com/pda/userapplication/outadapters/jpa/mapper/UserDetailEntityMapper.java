@@ -55,11 +55,16 @@ public class UserDetailEntityMapper {
         user.setPublicAmount(options[0].equals("1"));
         user.setPublicPercent(options[1].equals("1"));
 
-        String[] tendencies = userDetail.getTendency().split("");
-        user.setAccountTendency(tendencies[0].equals("1"));
-        user.setCardTendency(tendencies[1].equals("1"));
-        user.setLoanTendency(tendencies[2].equals("1"));
-        user.setInvestTendency(tendencies[3].equals("1"));
+        if (userDetail.getTendency() != null) {
+            String[] tendencies = userDetail.getTendency().split("");
+            if (tendencies.length > 3) {
+                user.setAccountTendency(tendencies[0].equals("1"));
+                user.setCardTendency(tendencies[1].equals("1"));
+                user.setLoanTendency(tendencies[2].equals("1"));
+                user.setInvestTendency(tendencies[3].equals("1"));
+            }
+        }
+
 
         user.setPurpose(userDetail.getPurpose());
 

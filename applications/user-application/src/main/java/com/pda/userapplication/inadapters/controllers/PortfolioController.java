@@ -6,6 +6,7 @@ import com.pda.tofinsecurity.user.AuthUser;
 import com.pda.tofinsecurity.user.AuthUserInfo;
 import com.pda.userapplication.services.in.PortfolioUseCase;
 import com.pda.userapplication.services.in.dto.req.PortfolioSubscribeServiceRequest;
+import com.pda.userapplication.services.in.dto.res.GetPortfolioServiceResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -44,8 +45,7 @@ public class PortfolioController {
     @Operation(summary = "포트폴리오 조회", description = "포트폴리오 조회 API",
         security = @SecurityRequirement(name = "bearerAuth"))
     @ApiResponse(responseCode = "201", description = "성공")
-    public GlobalResponse<Void> getPortfolios(@AuthUser AuthUserInfo authUser, @PathVariable Long id) {
-        portfolioUseCase.getPortfolios(authUser.getId(), id);
-        return ApiUtils.success("포트폴리오 조회");
+    public GlobalResponse<GetPortfolioServiceResponse> getPortfolios(@AuthUser AuthUserInfo authUser, @PathVariable Long id) {
+        return ApiUtils.success("포트폴리오 조회", portfolioUseCase.getPortfolios(authUser.getId(), id));
     }
 }

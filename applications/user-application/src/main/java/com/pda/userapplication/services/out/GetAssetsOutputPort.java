@@ -5,5 +5,5 @@ import com.pda.userapplication.services.out.dto.res.AssetInfoResponse;
 
 public interface GetAssetsOutputPort {
     AssetInfoResponse getAssets(NormalUser normalUser);
-    AssetInfoResponse getAssetsExcludePortfolio(NormalUser normalUser);
+    AssetInfoResponse getPortfolio(NormalUser normalUser);
 }
