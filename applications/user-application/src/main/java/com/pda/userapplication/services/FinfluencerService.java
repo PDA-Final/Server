@@ -48,8 +48,6 @@ public class FinfluencerService implements FinfluencerUseCase {
         log.info(String.valueOf(followInfo.getNumOfFollowers()), "fuck followers");
         if (followInfo.getNumOfFollowers() < 300) throw new BadRequestException("핀플루언서로 등업하기 위해서 300명 이상의 팔로워들이 필요합니다.");
 
-
-
         user.setRole(UserRole.FINFLUENCER);
         User saveUser = saveUserOutputPort.save(user);
 
@@ -66,6 +64,7 @@ public class FinfluencerService implements FinfluencerUseCase {
     private TokenInfoServiceResponse toTokenInfoServiceResponse(final TokenInfo tokenInfo, User user) {
         return TokenInfoServiceResponse.builder()
             .id(user.getId().toLong())
+            .nickname(user.getNickname().toString())
             .accessToken(tokenInfo.getAccessToken())
             .refreshToken(tokenInfo.getRefreshToken())
             .grantType(tokenInfo.getGrantType())

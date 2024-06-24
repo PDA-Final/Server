@@ -383,6 +383,7 @@ public class UserService implements SignUpUseCase, ReissueUseCase,
     private TokenInfoServiceResponse toTokenInfoServiceResponse(final TokenInfo tokenInfo, User user) {
         return TokenInfoServiceResponse.builder()
             .id(user.getId().toLong())
+            .nickname(user.getNickname().toString())
             .accessToken(tokenInfo.getAccessToken())
             .refreshToken(tokenInfo.getRefreshToken())
             .grantType(tokenInfo.getGrantType())
