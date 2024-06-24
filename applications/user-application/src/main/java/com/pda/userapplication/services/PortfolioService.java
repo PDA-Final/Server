@@ -2,7 +2,7 @@ package com.pda.userapplication.services;
 
 import com.pda.exceptionhandler.exceptions.BadRequestException;
 import com.pda.tofinenums.user.UserRole;
-import com.pda.userapplication.domains.NormalUser;
+import com.pda.userapplication.domains.UserDetail;
 import com.pda.userapplication.domains.PortfolioSubscribeLog;
 import com.pda.userapplication.domains.User;
 import com.pda.userapplication.domains.vo.UserId;
@@ -15,7 +15,7 @@ import com.pda.userapplication.services.in.dto.res.StockResponse;
 import com.pda.userapplication.services.out.CreditOutputPort;
 import com.pda.userapplication.services.out.GetAssetsOutputPort;
 import com.pda.userapplication.services.out.PortfolioSubscribeOutputPort;
-import com.pda.userapplication.services.out.ReadNormalUserOutputPort;
+import com.pda.userapplication.services.out.ReadUserDetailOutputPort;
 import com.pda.userapplication.services.out.ReadUserOutputPort;
 import com.pda.userapplication.services.out.dto.req.TransferCreditRequest;
 import com.pda.userapplication.services.out.dto.res.AccountResponse;
@@ -35,7 +35,7 @@ import java.util.List;
 @Transactional(readOnly = true)
 public class PortfolioService implements PortfolioUseCase {
     private final ReadUserOutputPort readUserOutputPort;
-    private final ReadNormalUserOutputPort readNormalUserOutputPort;
+    private final ReadUserDetailOutputPort readUserDetailOutputPort;
     private final PortfolioSubscribeOutputPort portfolioSubscribeOutputPort;
     private final CreditOutputPort creditOutputPort;
     private final GetAssetsOutputPort getAssetsOutputPort;
@@ -43,7 +43,7 @@ public class PortfolioService implements PortfolioUseCase {
     @Override
     public GetPortfolioServiceResponse getPortfolios(Long myId, Long toUserId) {
         User myUser = readUserOutputPort.getUserByUserId(UserId.of(myId));
-        NormalUser targetUser = readNormalUserOutputPort.findNormalUserByUserId(UserId.of(toUserId))
+        UserDetail targetUser = readUserDetailOutputPort.findUserDetailById(UserId.of(toUserId))
             .orElseThrow(() -> new BadRequestException("자산연결이 안되어있습니다."));
 
         AssetInfoResponse assets = getAssetsOutputPort.getPortfolio(targetUser);
