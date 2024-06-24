@@ -69,8 +69,14 @@ public class BoardContentDto {
     @NoArgsConstructor
     @Getter
     public static class ImageDto {
-        private String file;
+        private FileDto file;
         private String caption;
+    }
+
+    @NoArgsConstructor
+    @Getter
+    public static class FileDto {
+        private String url;
     }
 
     @NoArgsConstructor

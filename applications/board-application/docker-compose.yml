@@ -1,0 +1,15 @@
+services:
+  mysql:
+    container_name: board-db
+    image: mysql:8.0.33-oracle
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_DATABASE=board-db
+      - TZ="Asia/Seoul"
+      - LANG=C.UTF-8
+      - LC_ALL=C.UTF-8
+    ports:
+      - "3349:3306"
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci

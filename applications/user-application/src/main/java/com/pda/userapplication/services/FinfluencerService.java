@@ -47,16 +47,18 @@ public class FinfluencerService implements FinfluencerUseCase {
 
         log.info(String.valueOf(followInfo.getNumOfFollowers()), "fuck followers");
         if (followInfo.getNumOfFollowers() < 300) throw new BadRequestException("핀플루언서로 등업하기 위해서 300명 이상의 팔로워들이 필요합니다.");
-        if (!creditOutputPort.consumeCredit(500L, token))
-            throw new BadRequestException("크레딧 차감 실패");
+
+
 
         user.setRole(UserRole.FINFLUENCER);
-        sendUpdateUserOutputPort.sendUserOutput(UserUpdateOutputRequest.builder()
-                .userId(userId)
-                .role(UserRole.FINFLUENCER)
-            .build());
         User saveUser = saveUserOutputPort.save(user);
 
+        // 크레딧 차감
+        creditOutputPort.consumeCredit(500L, token);
+        sendUpdateUserOutputPort.sendUserOutput(UserUpdateOutputRequest.builder()
+            .userId(userId)
+            .role(UserRole.FINFLUENCER)
+            .build());
         return toTokenInfoServiceResponse(
             generateTokenAndSaveRefresh(saveUser), saveUser);
     }
