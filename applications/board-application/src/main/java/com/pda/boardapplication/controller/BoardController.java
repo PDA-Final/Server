@@ -91,7 +91,7 @@ public class BoardController {
         log.debug("Update board : {}", boardId);
 
         if((modifyReqDto.getTitle() == null || modifyReqDto.getTitle().isBlank())
-            && (modifyReqDto.getContent() == null || modifyReqDto.getContent().isBlank())) {
+            && (modifyReqDto.getContent() == null || modifyReqDto.getContent().getBlocks() == null)) {
             throw new BadRequestException("At least one property required");
         }
 
