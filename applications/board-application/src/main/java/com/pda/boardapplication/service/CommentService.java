@@ -126,6 +126,10 @@ public class CommentService {
         } else {
             log.info("No siblings, delete comment");
             commentRepository.delete(comment);
+
+            // TODO check parent comment
+            if(comment.getParentComment().getReplies().isEmpty() && comment.getParentComment().isDeleted())
+                commentRepository.delete(comment.getParentComment());
         }
         return 1;
     }

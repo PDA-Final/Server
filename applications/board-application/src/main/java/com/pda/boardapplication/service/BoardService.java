@@ -7,10 +7,10 @@ import com.pda.boardapplication.dto.BoardDto;
 import com.pda.boardapplication.dto.CommentDto;
 import com.pda.boardapplication.dto.UserDto;
 import com.pda.boardapplication.entity.Board;
+import com.pda.boardapplication.entity.BoardChallengeTag;
 import com.pda.boardapplication.entity.BoardCount;
-import com.pda.boardapplication.repository.BoardCountRepository;
-import com.pda.boardapplication.repository.BoardRepository;
-import com.pda.boardapplication.repository.CategoryRepository;
+import com.pda.boardapplication.entity.BoardProductTag;
+import com.pda.boardapplication.repository.*;
 import com.pda.boardapplication.utils.CategoryUtils;
 import com.pda.boardapplication.utils.UserUtils;
 import com.pda.exceptionhandler.exceptions.BadRequestException;
@@ -36,6 +36,10 @@ public class BoardService {
     private final CategoryRepository categoryRepository;
 
     private final BoardCountRepository boardCountRepository;
+
+    private final BoardProductTagRepository boardProductTagRepository;
+
+    private final BoardChallengeTagRepository boardChallengeTagRepository;
 
     private final S3Service s3Service;
 
@@ -68,6 +72,16 @@ public class BoardService {
 
         boardCountRepository.save(BoardCount.builder()
                         .board(board).likeCnt(0).viewCnt(0).build());
+
+        if(registerReqDto.getProductId() > 0)
+            boardProductTagRepository.save(BoardProductTag.builder()
+                    .board(board).productId(registerReqDto.getProductId()).build());
+
+        if(registerReqDto.getChallengeId() > 0)
+            boardChallengeTagRepository.save(BoardChallengeTag.builder()
+                    .board(board).challengeId(registerReqDto.getChallengeId()).build());
+
+        // CREDIT
         return boardId;
     }
 
@@ -189,7 +203,10 @@ public class BoardService {
         Board board = boardRepository.findById(boardId).orElseThrow(NotFoundException::new);
         if(board.getUserId() != userInfoDto.getId())
             throw new ForbiddenException("Illegal access to board by unauthorized user");
-        board.updateEntity(modifyReqDto.getTitle(), modifyReqDto.getContent());
+
+        String [] boardSummary = parseSummary(modifyReqDto.getContent());
+
+        board.updateEntity(modifyReqDto.getTitle(), boardSummary[0], boardSummary[1], boardSummary[2]);
 
         boardRepository.save(board);
         return 1;
@@ -207,6 +224,35 @@ public class BoardService {
 
         boardRepository.deleteById(boardId);
         return 1;
+    }
+
+    public List<BoardDto.AbstractRespDto> getTaggedBoards(int pageNo, int size, long productId, long challengeId) {
+        List<Board> boards;
+        Pageable pageable = PageRequest.of(pageNo, size);
+
+        if(productId > 0) {
+            boards = boardProductTagRepository.findByProductId(pageable, productId)
+                    .getContent().stream().map(BoardProductTag::getBoard).toList();
+        } else if(challengeId > 0){
+            boards = boardChallengeTagRepository.findByChallengeId(pageable, challengeId)
+                    .getContent().stream().map(BoardChallengeTag::getBoard).toList();
+        } else {
+            throw new BadRequestException("At least one of condition required");
+        }
+
+        return boards.stream().map((elem) ->
+                BoardDto.AbstractRespDto.builder()
+                        .id(elem.getId())
+                        .title(elem.getTitle())
+                        .summary(elem.getSummary())
+                        .createdTime(elem.getCreatedAt())
+                        .thumbnail(elem.getThumbnail())
+                        .likeCount(elem.getLikes().size())
+                        .commentCount(elem.getComments().size())
+                        .authorNickname(elem.getAuthorNickname())
+                        .authorProfile(elem.getAuthorProfile())
+                        .build()
+        ).toList();
     }
 
     /**
