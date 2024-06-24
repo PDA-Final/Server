@@ -49,11 +49,13 @@ public class BoardService {
         log.debug("Register Board with title : {}, user name : {}", registerReqDto.getTitle(), authorInfoDto.getNickname());
 
         String [] boardSummary = parseSummary(registerReqDto.getContent());
+        // Given category cannot be blank by @NotBlack Validation
+        Integer categoryId = CategoryUtils.verifyCategory(registerReqDto.getCategory());
 
         Board board = Board.builder()
                 .title(registerReqDto.getTitle())
                 .content(boardSummary[2])
-                .category(categoryRepository.getReferenceById(registerReqDto.getCategoryId()))
+                .category(categoryRepository.getReferenceById(categoryId))
                 .userId(authorInfoDto.getId())
                 .authorNickname(authorInfoDto.getNickname())
                 .authorType(UserUtils.getUserRoleCode(authorInfoDto.getType()))
