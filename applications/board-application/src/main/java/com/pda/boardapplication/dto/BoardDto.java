@@ -32,6 +32,12 @@ public class BoardDto {
                 example = "재미",
                 requiredMode = Schema.RequiredMode.REQUIRED)
         private String category;
+        @Schema(description = "tagged product id", example = "12",
+                requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+        private int productId;
+        @Schema(description = "participated challenge id", example = "12",
+                requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+        private int challengeId;
     }
 
     @Getter

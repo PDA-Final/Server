@@ -7,10 +7,10 @@ import com.pda.boardapplication.dto.BoardDto;
 import com.pda.boardapplication.dto.CommentDto;
 import com.pda.boardapplication.dto.UserDto;
 import com.pda.boardapplication.entity.Board;
+import com.pda.boardapplication.entity.BoardChallengeTag;
 import com.pda.boardapplication.entity.BoardCount;
-import com.pda.boardapplication.repository.BoardCountRepository;
-import com.pda.boardapplication.repository.BoardRepository;
-import com.pda.boardapplication.repository.CategoryRepository;
+import com.pda.boardapplication.entity.BoardProductTag;
+import com.pda.boardapplication.repository.*;
 import com.pda.boardapplication.utils.CategoryUtils;
 import com.pda.boardapplication.utils.UserUtils;
 import com.pda.exceptionhandler.exceptions.BadRequestException;
@@ -36,6 +36,10 @@ public class BoardService {
     private final CategoryRepository categoryRepository;
 
     private final BoardCountRepository boardCountRepository;
+
+    private final BoardProductTagRepository boardProductTagRepository;
+
+    private final BoardChallengeTagRepository boardChallengeTagRepository;
 
     private final S3Service s3Service;
 
@@ -68,6 +72,16 @@ public class BoardService {
 
         boardCountRepository.save(BoardCount.builder()
                         .board(board).likeCnt(0).viewCnt(0).build());
+
+        if(registerReqDto.getProductId() > 0)
+            boardProductTagRepository.save(BoardProductTag.builder()
+                    .board(board).productId(registerReqDto.getProductId()).build());
+
+        if(registerReqDto.getChallengeId() > 0)
+            boardChallengeTagRepository.save(BoardChallengeTag.builder()
+                    .board(board).challengeId(registerReqDto.getChallengeId()).build());
+
+        // CREDIT
         return boardId;
     }
 
