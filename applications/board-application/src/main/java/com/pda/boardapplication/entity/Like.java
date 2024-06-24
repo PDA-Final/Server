@@ -17,7 +17,7 @@ public class Like extends BaseEntity {
 
 
     @Id
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.REMOVE)
     @JoinColumn(name = "board_id")
     private Board board;
 
