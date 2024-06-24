@@ -1,23 +1,19 @@
 package com.pda.boardapplication.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Embeddable;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
+import jakarta.persistence.*;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+
+import java.io.Serializable;
 
 @Embeddable
 @Getter
 @NoArgsConstructor
 @EqualsAndHashCode
-public class BoardChallengeTagPK {
+public class BoardChallengeTagPK implements Serializable {
 
-    @ManyToOne
-    @JoinColumn(name = "board_id")
-    private Board board;
+    private long board;
 
-    @Column(name = "challenge_id")
     private long challengeId;
 }

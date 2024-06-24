@@ -1,7 +1,6 @@
 package com.pda.boardapplication.entity;
 
-import jakarta.persistence.EmbeddedId;
-import jakarta.persistence.Entity;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -12,8 +11,15 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@IdClass(BoardProductTagPK.class)
 public class BoardProductTag extends BaseEntity {
 
-    @EmbeddedId
-    private BoardProductTagPK boardProductTagPK;
+    @Id
+    @ManyToOne(cascade = CascadeType.REMOVE)
+    @JoinColumn(name = "board_id")
+    private Board board;
+
+    @Id
+    @Column
+    private long productId;
 }
