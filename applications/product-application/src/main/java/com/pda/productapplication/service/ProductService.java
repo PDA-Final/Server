@@ -282,6 +282,7 @@ public class ProductService {
                 ProductDto.BasicRespDto.builder()
                         .id(product.getId())
                         .name(product.getName())
+                        .categoryName(product.getCategory().getName())
                         .corpName(product.getCorp().getName())
                         .corpImage(product.getCorp().getLogoImg())
                         .cardImage(product.getCardImg())
