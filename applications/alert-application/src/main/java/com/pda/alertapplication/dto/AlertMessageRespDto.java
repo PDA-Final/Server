@@ -13,10 +13,12 @@ import java.time.LocalDateTime;
 @Builder
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
-public class AlertMessageReqDto implements KafkaJson {
+public class AlertMessageRespDto {
     private Long clientId;
     private String messageType; // FOLLOW, FIN, CREDIT
     private Long targetId; // 상대 유저 ID, 보드 ID, null
     private String content;
     private String thumbnail;
+    private boolean isViewed;
+    private LocalDateTime createdAt;
 }
