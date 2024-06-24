@@ -6,6 +6,7 @@ import com.pda.boardapplication.entity.Comment;
 import com.pda.boardapplication.repository.BoardRepository;
 import com.pda.boardapplication.repository.CommentRepository;
 import com.pda.boardapplication.utils.UserUtils;
+import com.pda.exceptionhandler.exceptions.BadRequestException;
 import com.pda.exceptionhandler.exceptions.ForbiddenException;
 import com.pda.exceptionhandler.exceptions.NotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -32,10 +33,13 @@ public class CommentService {
     public long registerComment(long boardId, CommentDto.RegisterReqDto registerReqDto, UserDto.InfoDto userInfoDto) {
         log.debug("Register comment to board {}, parent: {}", boardId, registerReqDto.getParentId());
 
+        Comment parentComment = registerReqDto.getParentId() == 0 ? null
+                : verifyParentComment(boardId, registerReqDto.getParentId());
+
         Comment comment = Comment.builder()
                 .content(registerReqDto.getContent())
                 .board(boardRepository.getReferenceById(boardId))
-                .parentComment(registerReqDto.getParentId() == 0 ? null : commentRepository.getReferenceById(registerReqDto.getParentId()))
+                .parentComment(parentComment)
                 .userId(userInfoDto.getId())
                 .authorNickname(userInfoDto.getNickname())
                 .authorProfile(userInfoDto.getProfile())
@@ -137,5 +141,25 @@ public class CommentService {
             return false;
 
         else return true;
+    }
+
+    /**
+     * Verify given comment id and board id
+     * @param boardId target board id
+     * @param parentCommentId target parent id
+     * @return parent comment
+     * @throws NotFoundException target comment does not exist
+     * @throws BadRequestException target comment does not belong to target board or deleted
+     */
+    private Comment verifyParentComment(long boardId, long parentCommentId) {
+        Comment parentComment = commentRepository.findById(parentCommentId).orElseThrow(() ->
+            new NotFoundException("Parent Comment does not exists")
+        );
+        if(parentComment.isDeleted())
+            throw new BadRequestException("Comment has been already deleted");
+        if(parentComment.getBoard().getId() != boardId)
+            throw new BadRequestException("Comment does not belong to given board id");
+
+        return parentComment;
     }
 }
