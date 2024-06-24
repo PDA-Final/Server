@@ -15,7 +15,7 @@ import java.time.format.DateTimeFormatter;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
 @Setter
-public class NormalUser extends User {
+public class UserDetail extends User {
     private Long detailId;
     private String backSocialId;
     private boolean publicAmount;
@@ -41,8 +41,8 @@ public class NormalUser extends User {
             .format(DateTimeFormatter.ofPattern("yyMMdd"));
     }
 
-    public static NormalUser from(User user) {
-        return NormalUser.builder()
+    public static UserDetail from(User user) {
+        return UserDetail.builder()
             .id(user.getId())
             .role(user.getRole())
             .birth(user.getBirth())
