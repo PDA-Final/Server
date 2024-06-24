@@ -72,7 +72,7 @@ public class BoardService {
      * Get board detail
      * @param boardId target board id
      * @return
-     * @throws com.pda.exceptionhandler.exceptions.NotFoundException - target does not exists
+     * @throws NotFoundException - target does not exists
      */
     public BoardDto.DetailRespDto getBoardDetail(long boardId, UserDto.InfoDto userInfoDto) {
         log.debug("Get detail of board : {}", boardId);
@@ -89,10 +89,10 @@ public class BoardService {
                 ).map((elem) ->
                     CommentDto.CommentInfoDto.builder()
                             .id(elem.getId())
-                            .content(elem.getContent())
-                            .authorId(elem.getUserId())
-                            .authorName(elem.getAuthorNickname())
-                            .authorProfile(elem.getAuthorProfile())
+                            .content(elem.isDeleted() ? "삭제된 댓글입니다." : elem.getContent())
+                            .authorId(elem.isDeleted() ? 0L : elem.getUserId())
+                            .authorName(elem.isDeleted() ? "anonymous" : elem.getAuthorNickname())
+                            .authorProfile(elem.isDeleted() ? "" : elem.getAuthorProfile())
                             .replies(elem.getReplies().stream().map((el) ->
                                 CommentDto.ReplyInfoDto.builder()
                                         .id(el.getId())
@@ -104,6 +104,7 @@ public class BoardService {
                                         .build()
                             ).toList())
                             .createdTime(elem.getCreatedAt())
+                            .deleted(elem.isDeleted())
                             .build()
                 ).toList())
                 .likeCount(board.getLikes().size())
