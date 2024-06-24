@@ -191,7 +191,7 @@ public class BoardService {
         if(board.getUserId() != userInfoDto.getId())
             throw new ForbiddenException(("Illegal access to board by unauthorized user"));
 
-        boardRepository.delete(board);
+        boardRepository.deleteById(boardId);
         return 1;
     }
 
