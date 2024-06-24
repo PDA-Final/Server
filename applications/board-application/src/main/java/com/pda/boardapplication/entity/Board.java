@@ -6,6 +6,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import java.util.List;
 
@@ -40,31 +42,38 @@ public class Board extends BaseEntity {
 
     private String authorProfile;
 
-    @OneToMany(mappedBy = "board")
+    @OneToMany(mappedBy = "board", fetch = FetchType.LAZY)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     @JsonBackReference
     private List<Comment> comments;
 
-    @OneToMany(mappedBy = "board")
+    @OneToMany(mappedBy = "board", fetch = FetchType.LAZY)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     @JsonBackReference
     private List<Like> likes;
 
-    @OneToMany(mappedBy = "board")
+    @OneToMany(mappedBy = "board", fetch = FetchType.LAZY)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     @JsonBackReference
     private List<Bookmark> bookmarks;
 
-    @OneToMany(mappedBy = "board")
+    @OneToMany(mappedBy = "board", fetch = FetchType.LAZY)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     @JsonBackReference
     private List<View> views;
 
-    @OneToMany(mappedBy = "boardChallengeTagPK.board")
+    @OneToMany(mappedBy = "board", fetch = FetchType.LAZY)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     @JsonBackReference
     private List<BoardChallengeTag> taggedChallenges;
 
-    @OneToMany(mappedBy = "boardProductTagPK.board")
+    @OneToMany(mappedBy = "board", fetch = FetchType.LAZY)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     @JsonBackReference
     private List<BoardProductTag> taggedProducts;
 
-    @OneToOne(mappedBy = "board")
+    @OneToOne(mappedBy = "board", fetch = FetchType.LAZY, orphanRemoval = true)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     @JsonBackReference
     private BoardCount boardCount;
 
