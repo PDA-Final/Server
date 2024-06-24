@@ -3,7 +3,6 @@ package com.pda.boardapplication.dto;
 import com.pda.boardapplication.entity.Category;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 
@@ -27,12 +26,12 @@ public class BoardDto {
 //                requiredMode = Schema.RequiredMode.REQUIRED)
         // TODO add schema description
         private BoardContentDto.OutputDataDto content;
-        @DecimalMax(value = "5", inclusive = true)
-        @Schema(description = "category id : 1(기업), 2(꿀팁), 3(소비), 4(절약), 5(투자)",
-                allowableValues = {"1","2","3","4","5"},
-                example = "2",
+        @NotBlank
+        @Schema(description = "category name : 1(정보), 2(재미), 3(투자), 4(기업), 5(고급)",
+                allowableValues = {"정보","재미","투자","기업","고급"},
+                example = "재미",
                 requiredMode = Schema.RequiredMode.REQUIRED)
-        private int categoryId;
+        private String category;
     }
 
     @Getter
