@@ -11,6 +11,7 @@ import com.pda.boardapplication.entity.BoardCount;
 import com.pda.boardapplication.repository.BoardCountRepository;
 import com.pda.boardapplication.repository.BoardRepository;
 import com.pda.boardapplication.repository.CategoryRepository;
+import com.pda.boardapplication.utils.CategoryUtils;
 import com.pda.boardapplication.utils.UserUtils;
 import com.pda.exceptionhandler.exceptions.BadRequestException;
 import com.pda.exceptionhandler.exceptions.ForbiddenException;
@@ -72,7 +73,7 @@ public class BoardService {
      * Get board detail
      * @param boardId target board id
      * @return
-     * @throws com.pda.exceptionhandler.exceptions.NotFoundException - target does not exists
+     * @throws NotFoundException - target does not exists
      */
     public BoardDto.DetailRespDto getBoardDetail(long boardId, UserDto.InfoDto userInfoDto) {
         log.debug("Get detail of board : {}", boardId);
@@ -89,10 +90,10 @@ public class BoardService {
                 ).map((elem) ->
                     CommentDto.CommentInfoDto.builder()
                             .id(elem.getId())
-                            .content(elem.getContent())
-                            .authorId(elem.getUserId())
-                            .authorName(elem.getAuthorNickname())
-                            .authorProfile(elem.getAuthorProfile())
+                            .content(elem.isDeleted() ? "삭제된 댓글입니다." : elem.getContent())
+                            .authorId(elem.isDeleted() ? 0L : elem.getUserId())
+                            .authorName(elem.isDeleted() ? "anonymous" : elem.getAuthorNickname())
+                            .authorProfile(elem.isDeleted() ? "" : elem.getAuthorProfile())
                             .replies(elem.getReplies().stream().map((el) ->
                                 CommentDto.ReplyInfoDto.builder()
                                         .id(el.getId())
@@ -104,6 +105,7 @@ public class BoardService {
                                         .build()
                             ).toList())
                             .createdTime(elem.getCreatedAt())
+                            .deleted(elem.isDeleted())
                             .build()
                 ).toList())
                 .likeCount(board.getLikes().size())
@@ -135,16 +137,26 @@ public class BoardService {
         log.info("search dto : {}", searchConditionDto);
         Sort sort = getSortBySearchCondition(searchConditionDto);
         Pageable pageable = PageRequest.of(pageNo, size, sort);
+        Integer categoryId = CategoryUtils.verifyCategory(searchConditionDto.getCategory());
 
-        if(searchConditionDto.getCategory() != null) {
+        if(categoryId != null && searchConditionDto.getKeyword() != null) {
+            log.info("Search by category and keyword {} | {}", searchConditionDto.getCategory(), searchConditionDto.getKeyword());
+            boards = boardRepository.findByCategoryIdAndTitleContains(pageable,
+                    categoryId, searchConditionDto.getKeyword()
+            ).getContent();
+
+        } else if(categoryId != null) {
             log.info("Search by category : {}", searchConditionDto.getCategory());
-            boards = boardRepository.findByCategoryId(pageable, Integer.parseInt(searchConditionDto.getCategory())).getContent();
+            boards = boardRepository.findByCategoryId(pageable, categoryId).getContent();
+
         } else if(searchConditionDto.getUserId() > 0) {
             log.info("Search by user id : {}", searchConditionDto.getUserId());
             boards = boardRepository.findByUserId(pageable, searchConditionDto.getUserId()).getContent();
+
         } else if(searchConditionDto.getKeyword() != null) {
             log.info("Search by keyword : {}", searchConditionDto.getKeyword());
             boards = boardRepository.findByTitleContains(pageable, searchConditionDto.getKeyword()).getContent();
+
         } else {
             log.info("No adequate search conditions found");
             boards = boardRepository.findAll(pageable).getContent();
@@ -160,6 +172,7 @@ public class BoardService {
                         .likeCount(elem.getLikes().size())
                         .commentCount(elem.getComments().size())
                         .authorNickname(elem.getAuthorNickname())
+                        .authorProfile(elem.getAuthorProfile())
                         .build()
         ).toList();
     }
@@ -190,7 +203,7 @@ public class BoardService {
         if(board.getUserId() != userInfoDto.getId())
             throw new ForbiddenException(("Illegal access to board by unauthorized user"));
 
-        boardRepository.delete(board);
+        boardRepository.deleteById(boardId);
         return 1;
     }
 
