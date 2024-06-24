@@ -65,7 +65,7 @@ public class FinfluencerService implements FinfluencerUseCase {
 
         // 크레딧 차감
         creditOutputPort.consumeCredit(500L, token);
-        sendUpdateUserOutputPort.sendUserOutput(UserUpdateOutputRequest.builder()
+        sendUpdateUserOutputPort.sendUserUpdate(UserUpdateOutputRequest.builder()
             .userId(userId)
             .role(UserRole.FINFLUENCER)
             .profileImage(user.getProfileImage().toString())

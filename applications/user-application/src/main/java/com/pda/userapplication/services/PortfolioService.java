@@ -17,6 +17,8 @@ import com.pda.userapplication.services.out.GetAssetsOutputPort;
 import com.pda.userapplication.services.out.PortfolioSubscribeOutputPort;
 import com.pda.userapplication.services.out.ReadUserDetailOutputPort;
 import com.pda.userapplication.services.out.ReadUserOutputPort;
+import com.pda.userapplication.services.out.SendAlertMessageOutputPort;
+import com.pda.userapplication.services.out.dto.req.SendMessageRequest;
 import com.pda.userapplication.services.out.dto.req.TransferCreditRequest;
 import com.pda.userapplication.services.out.dto.res.AccountResponse;
 import com.pda.userapplication.services.out.dto.res.AssetInfoResponse;
@@ -39,6 +41,7 @@ public class PortfolioService implements PortfolioUseCase {
     private final PortfolioSubscribeOutputPort portfolioSubscribeOutputPort;
     private final CreditOutputPort creditOutputPort;
     private final GetAssetsOutputPort getAssetsOutputPort;
+    private final SendAlertMessageOutputPort sendAlertMessageOutputPort;
 
     @Override
     public GetPortfolioServiceResponse getPortfolios(Long myId, Long toUserId) {
@@ -86,6 +89,14 @@ public class PortfolioService implements PortfolioUseCase {
                 .amount(50L)
                 .toUserId(targetUser.getId())
                 .token(request.getToken())
+            .build());
+
+        // TODO: 메시지 타입 확인
+        sendAlertMessageOutputPort.sendAlertMessage(SendMessageRequest.builder()
+            .message(String.format("%s님이 회원님의 포트폴리오를 구독하였습니다.", myUser.getNickname().toString()))
+            .image(myUser.getProfileImage().toString())
+            .messageType("FOLLOW")
+            .userId(targetUser.getId().toLong())
             .build());
     }
 
