@@ -128,9 +128,9 @@ public class BoardDto {
     @Setter
     @Schema(description = "[Not Implemented Yet] Request query parameter to search | sort board list")
     public static class SearchConditionDto {
-        @Schema(description = "category id : 1(정보), 2(재미), 3(투자), 4(기업), 5(고급)",
-                allowableValues = {"1","2","3","4","5"},
-                example = "2",
+        @Schema(description = "category name : 1(정보), 2(재미), 3(투자), 4(기업), 5(고급)",
+                allowableValues = {"정보","재미","투자","기업","고급"},
+                example = "정보",
                 requiredMode = Schema.RequiredMode.NOT_REQUIRED)
         @Parameter(required = false)
         private String category;

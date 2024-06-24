@@ -11,6 +11,7 @@ import com.pda.boardapplication.entity.BoardCount;
 import com.pda.boardapplication.repository.BoardCountRepository;
 import com.pda.boardapplication.repository.BoardRepository;
 import com.pda.boardapplication.repository.CategoryRepository;
+import com.pda.boardapplication.utils.CategoryUtils;
 import com.pda.boardapplication.utils.UserUtils;
 import com.pda.exceptionhandler.exceptions.BadRequestException;
 import com.pda.exceptionhandler.exceptions.ForbiddenException;
@@ -136,19 +137,26 @@ public class BoardService {
         log.info("search dto : {}", searchConditionDto);
         Sort sort = getSortBySearchCondition(searchConditionDto);
         Pageable pageable = PageRequest.of(pageNo, size, sort);
+        Integer categoryId = CategoryUtils.verifyCategory(searchConditionDto.getCategory());
 
-        if(searchConditionDto.getCategory() != null && searchConditionDto.getKeyword() != null) {
+        if(categoryId != null && searchConditionDto.getKeyword() != null) {
             log.info("Search by category and keyword {} | {}", searchConditionDto.getCategory(), searchConditionDto.getKeyword());
-            boards = boardRepository.findByCategoryIdAndTitleContains(pageable, Integer.parseInt(searchConditionDto.getCategory()), searchConditionDto.getKeyword()).getContent();
-        } else if(searchConditionDto.getCategory() != null) {
+            boards = boardRepository.findByCategoryIdAndTitleContains(pageable,
+                    categoryId, searchConditionDto.getKeyword()
+            ).getContent();
+
+        } else if(categoryId != null) {
             log.info("Search by category : {}", searchConditionDto.getCategory());
-            boards = boardRepository.findByCategoryId(pageable, Integer.parseInt(searchConditionDto.getCategory())).getContent();
+            boards = boardRepository.findByCategoryId(pageable, categoryId).getContent();
+
         } else if(searchConditionDto.getUserId() > 0) {
             log.info("Search by user id : {}", searchConditionDto.getUserId());
             boards = boardRepository.findByUserId(pageable, searchConditionDto.getUserId()).getContent();
+
         } else if(searchConditionDto.getKeyword() != null) {
             log.info("Search by keyword : {}", searchConditionDto.getKeyword());
             boards = boardRepository.findByTitleContains(pageable, searchConditionDto.getKeyword()).getContent();
+
         } else {
             log.info("No adequate search conditions found");
             boards = boardRepository.findAll(pageable).getContent();
