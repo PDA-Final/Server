@@ -15,6 +15,8 @@ import lombok.NoArgsConstructor;
 public class TokenInfoServiceResponse {
     @Schema(description = "유저 아이디(PK)", example = "65")
     private Long id;
+    @Schema(description = "닉네임", example = "동원참치2")
+    private String nickname;
     @Schema(description = "인증 타입", example = "Bearer")
     private String grantType;
     @Schema(description = "액세스 토큰(15분)", example = "adfjkladfjkaldfjkladfjkladfjakl")
