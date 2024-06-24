@@ -264,6 +264,14 @@ public class UserService implements SignUpUseCase, ReissueUseCase,
         User user = readUserOutputPort.getUserByUserId(UserId.of(request.getUserId()));
         UserUpdateOutputRequest.UserUpdateOutputRequestBuilder builder = UserUpdateOutputRequest.builder();
 
+        // fetch
+        builder
+            .userId(user.getId().toLong())
+            .job(user.getJob())
+            .profileImage(user.getProfileImage().toString())
+            .nickname(user.getNickname().toString())
+            .role(user.getRole());
+
         if (request.getJob() != null) {
             user.setJob(toJobFrom(request.getJob()));
             builder.job(toJobFrom(request.getJob()));

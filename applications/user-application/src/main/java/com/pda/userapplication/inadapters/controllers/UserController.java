@@ -191,7 +191,7 @@ public class UserController {
 
     @GetMapping("/products")
     @Operation(summary = "유저 보유 상품 조회", description = "유저 본인의 보유 상품 조회",
-        security = @SecurityRequirement(name = "bearerAuth"))
+        security = @SecurityRequirement(name = "bearerAuth"), deprecated = true)
     @ApiResponse(responseCode = "200", description = "성공")
     public GlobalResponse<Void> getAsets(@AuthUser AuthUserInfo authUser) {
         return ApiUtils.success("유저 보유 상품 조회 완료");
