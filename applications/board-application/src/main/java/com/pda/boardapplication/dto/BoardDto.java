@@ -119,7 +119,8 @@ public class BoardDto {
         private int commentCount;
         @Schema(description = "Nickname of author", example = "shs")
         private String authorNickname;
-
+        @Schema(description = "Profile Url of author", example = "https://picsum.photos/seed/picsum/200/200")
+        private String authorProfile;
     }
 
     @NoArgsConstructor

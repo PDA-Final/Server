@@ -160,6 +160,7 @@ public class BoardService {
                         .likeCount(elem.getLikes().size())
                         .commentCount(elem.getComments().size())
                         .authorNickname(elem.getAuthorNickname())
+                        .authorProfile(elem.getAuthorProfile())
                         .build()
         ).toList();
     }
