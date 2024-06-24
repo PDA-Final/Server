@@ -11,8 +11,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 @Entity
-@Table(name = "BoardCount")
-@DiscriminatorValue("BoardCount")
+@Table(name = "board_count")
+@DiscriminatorValue("board_count")
 public class BoardCount {
     @Id
     @Column(name = "product_id")
