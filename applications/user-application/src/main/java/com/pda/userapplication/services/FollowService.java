@@ -13,7 +13,9 @@ import com.pda.userapplication.services.in.dto.res.GetFollowableResponse;
 import com.pda.userapplication.services.out.ReadFollowOutputPort;
 import com.pda.userapplication.services.out.ReadUserOutputPort;
 import com.pda.userapplication.services.out.SaveFollowOutputPort;
+import com.pda.userapplication.services.out.SendAlertMessageOutputPort;
 import com.pda.userapplication.services.out.dto.req.FindFollowableUserRequest;
+import com.pda.userapplication.services.out.dto.req.SendMessageRequest;
 import com.pda.userapplication.services.out.dto.res.FollowInfoResponse;
 import com.pda.userapplication.services.out.dto.res.FollowPagingResponse;
 import lombok.RequiredArgsConstructor;
@@ -29,6 +31,7 @@ public class FollowService implements FollowUseCase {
     private final ReadUserOutputPort readUserOutputPort;
     private final ReadFollowOutputPort readFollowOutputPort;
     private final SaveFollowOutputPort saveFollowOutputPort;
+    private final SendAlertMessageOutputPort sendAlertMessageOutputPort;
 
     @Transactional
     @Override
@@ -49,7 +52,13 @@ public class FollowService implements FollowUseCase {
 
         // follow 하기
         Long followCount = saveFollowOutputPort.follow(fromUser.getId(), toUser.getId());
-        // kafka 보내기
+        // TODO: 메시지 타입 확인
+        sendAlertMessageOutputPort.sendAlertMessage(SendMessageRequest.builder()
+                .message(String.format("%s님이 회원님을 팔로우했습니다.", fromUser.getNickname().toString()))
+                .image(fromUser.getProfileImage().toString())
+                .messageType("FOLLOW")
+                .userId(toUser.getId().toLong())
+            .build());
         return FollowOrUnfollowServiceResponse.of(followCount, true);
     }
 

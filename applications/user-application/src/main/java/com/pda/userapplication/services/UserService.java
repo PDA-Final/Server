@@ -293,7 +293,7 @@ public class UserService implements SignUpUseCase, ReissueUseCase,
             builder.profileImage(imageUrl);
         }
 
-        sendUpdateUserOutputPort.sendUserOutput(builder.build());
+        sendUpdateUserOutputPort.sendUserUpdate(builder.build());
         User saveUser = saveUserOutputPort.save(user);
 
         return toTokenInfoServiceResponse(
