@@ -2,7 +2,7 @@ package com.pda.userapplication.services;
 
 import com.pda.exceptionhandler.exceptions.BadRequestException;
 import com.pda.tofinenums.user.UserRole;
-import com.pda.userapplication.domains.NormalUser;
+import com.pda.userapplication.domains.UserDetail;
 import com.pda.userapplication.domains.PortfolioSubscribeLog;
 import com.pda.userapplication.domains.User;
 import com.pda.userapplication.domains.vo.UserId;
@@ -15,8 +15,10 @@ import com.pda.userapplication.services.in.dto.res.StockResponse;
 import com.pda.userapplication.services.out.CreditOutputPort;
 import com.pda.userapplication.services.out.GetAssetsOutputPort;
 import com.pda.userapplication.services.out.PortfolioSubscribeOutputPort;
-import com.pda.userapplication.services.out.ReadNormalUserOutputPort;
+import com.pda.userapplication.services.out.ReadUserDetailOutputPort;
 import com.pda.userapplication.services.out.ReadUserOutputPort;
+import com.pda.userapplication.services.out.SendAlertMessageOutputPort;
+import com.pda.userapplication.services.out.dto.req.SendMessageRequest;
 import com.pda.userapplication.services.out.dto.req.TransferCreditRequest;
 import com.pda.userapplication.services.out.dto.res.AccountResponse;
 import com.pda.userapplication.services.out.dto.res.AssetInfoResponse;
@@ -35,15 +37,16 @@ import java.util.List;
 @Transactional(readOnly = true)
 public class PortfolioService implements PortfolioUseCase {
     private final ReadUserOutputPort readUserOutputPort;
-    private final ReadNormalUserOutputPort readNormalUserOutputPort;
+    private final ReadUserDetailOutputPort readUserDetailOutputPort;
     private final PortfolioSubscribeOutputPort portfolioSubscribeOutputPort;
     private final CreditOutputPort creditOutputPort;
     private final GetAssetsOutputPort getAssetsOutputPort;
+    private final SendAlertMessageOutputPort sendAlertMessageOutputPort;
 
     @Override
     public GetPortfolioServiceResponse getPortfolios(Long myId, Long toUserId) {
         User myUser = readUserOutputPort.getUserByUserId(UserId.of(myId));
-        NormalUser targetUser = readNormalUserOutputPort.findNormalUserByUserId(UserId.of(toUserId))
+        UserDetail targetUser = readUserDetailOutputPort.findUserDetailById(UserId.of(toUserId))
             .orElseThrow(() -> new BadRequestException("자산연결이 안되어있습니다."));
 
         AssetInfoResponse assets = getAssetsOutputPort.getPortfolio(targetUser);
@@ -86,6 +89,14 @@ public class PortfolioService implements PortfolioUseCase {
                 .amount(50L)
                 .toUserId(targetUser.getId())
                 .token(request.getToken())
+            .build());
+
+        // TODO: 메시지 타입 확인
+        sendAlertMessageOutputPort.sendAlertMessage(SendMessageRequest.builder()
+            .message(String.format("%s님이 회원님의 포트폴리오를 구독하였습니다.", myUser.getNickname().toString()))
+            .image(myUser.getProfileImage().toString())
+            .messageType("FOLLOW")
+            .userId(targetUser.getId().toLong())
             .build());
     }
 
