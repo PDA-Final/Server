@@ -189,7 +189,10 @@ public class BoardService {
         Board board = boardRepository.findById(boardId).orElseThrow(NotFoundException::new);
         if(board.getUserId() != userInfoDto.getId())
             throw new ForbiddenException("Illegal access to board by unauthorized user");
-        board.updateEntity(modifyReqDto.getTitle(), modifyReqDto.getContent());
+
+        String [] boardSummary = parseSummary(modifyReqDto.getContent());
+
+        board.updateEntity(modifyReqDto.getTitle(), boardSummary[0], boardSummary[1], boardSummary[2]);
 
         boardRepository.save(board);
         return 1;

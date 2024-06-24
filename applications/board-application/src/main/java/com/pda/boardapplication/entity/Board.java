@@ -77,8 +77,10 @@ public class Board extends BaseEntity {
     @JsonBackReference
     private BoardCount boardCount;
 
-    public void updateEntity(String title, String content) {
+    public void updateEntity(String title, String thumbnail, String summary, String content) {
         this.title = title == null ? this.title : title;
+        this.thumbnail = thumbnail == null ? this.thumbnail : thumbnail;
+        this.summary = summary == null ? this.summary : summary;
         this.content = content == null ? this.content : content;
     }
 }

@@ -43,11 +43,12 @@ public class BoardDto {
                 example = "\uD83E\uDE76️️ 내가 들었던 펀드 추천 글 2 \uD83E\uDE76",
                 requiredMode = Schema.RequiredMode.NOT_REQUIRED)
         private String title;
-        @Schema(description = "board content - soon about to be modified",
-                nullable = true,
-                example = "지난번에는 신한이었는데 이번에는 우리은행의 @@@ ...",
-                requiredMode = Schema.RequiredMode.NOT_REQUIRED)
-        private String content;
+//        @Schema(description = "board content - soon about to be modified",
+//                nullable = true,
+//                example = "지난번에는 신한이었는데 이번에는 우리은행의 @@@ ...",
+//                requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+        // TODO add schema description
+        private BoardContentDto.OutputDataDto content;
     }
 
     @AllArgsConstructor
