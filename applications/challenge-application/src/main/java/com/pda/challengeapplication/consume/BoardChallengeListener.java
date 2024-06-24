@@ -17,7 +17,6 @@ public class BoardChallengeListener {
 
     @KafkaListener(topics = "board-post", concurrency = "3")
     public void listenBoardPost(BoardPostSuccessDto boardPost) {
-        System.out.println("fuck kafka");
         log.info("consume: board-post at challenge service");
         myBoardChallengeService.writeBoardChallenge(PostMyBoardChallengeRequest.builder()
                         .boardId(boardPost.getBoardId())

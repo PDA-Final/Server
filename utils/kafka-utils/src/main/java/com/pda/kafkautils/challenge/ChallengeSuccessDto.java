@@ -13,4 +13,5 @@ import lombok.*;
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class ChallengeSuccessDto implements KafkaJson {
     private Long boardId;
+
 }

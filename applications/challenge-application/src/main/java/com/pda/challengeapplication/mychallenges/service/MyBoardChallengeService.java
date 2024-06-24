@@ -3,6 +3,7 @@ package com.pda.challengeapplication.mychallenges.service;
 import com.pda.challengeapplication.challenges.repository.Challenge;
 import com.pda.challengeapplication.challenges.repository.ChallengeRepository;
 import com.pda.challengeapplication.mychallenges.dto.request.PostMyBoardChallengeRequest;
+import com.pda.challengeapplication.mychallenges.dto.request.outer.SendChallengeResultRequest;
 import com.pda.challengeapplication.mychallenges.repository.MyBoardChallenge;
 import com.pda.challengeapplication.mychallenges.repository.MyBoardChallengeRepository;
 import com.pda.challengeapplication.mychallenges.repository.MyChallenge;
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Service
 @Transactional
@@ -24,6 +26,7 @@ public class MyBoardChallengeService {
     private final MyBoardChallengeRepository myBoardChallengeRepository;
     private final MyChallengeRepository myChallengeRepository;
     private final ChallengeRepository challengeRepository;
+    private final SendMyChallengeResultPort sendMyChallengeResultPort;
 
     // 게시글 작성시
     @Async
@@ -49,7 +52,22 @@ public class MyBoardChallengeService {
         m.editMyChallengeEndAt(LocalDate.now());
         myChallengeRepository.save(m);
 
+        SendResult(m.getChallenge().getName(), m.getChallenge().getLogoUrl(), m.getUserId());
+
         // TODO: 알림 보내기
+    }
+
+    @Async
+    public void SendResult(String chellengeName, String logoUrl, Long userId){
+        sendMyChallengeResultPort.sendChallengeResult(SendChallengeResultRequest.builder()
+                .result("성공")
+                .challengeName(chellengeName)
+                .userId(userId)
+                .transactionDateTime(LocalDateTime.now())
+                .logoUrl(logoUrl)
+                .build());
+
+
     }
 
 
