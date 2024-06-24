@@ -226,6 +226,35 @@ public class BoardService {
         return 1;
     }
 
+    public List<BoardDto.AbstractRespDto> getTaggedBoards(int pageNo, int size, long productId, long challengeId) {
+        List<Board> boards;
+        Pageable pageable = PageRequest.of(pageNo, size);
+
+        if(productId > 0) {
+            boards = boardProductTagRepository.findByProductId(pageable, productId)
+                    .getContent().stream().map(BoardProductTag::getBoard).toList();
+        } else if(challengeId > 0){
+            boards = boardChallengeTagRepository.findByChallengeId(pageable, challengeId)
+                    .getContent().stream().map(BoardChallengeTag::getBoard).toList();
+        } else {
+            throw new BadRequestException("At least one of condition required");
+        }
+
+        return boards.stream().map((elem) ->
+                BoardDto.AbstractRespDto.builder()
+                        .id(elem.getId())
+                        .title(elem.getTitle())
+                        .summary(elem.getSummary())
+                        .createdTime(elem.getCreatedAt())
+                        .thumbnail(elem.getThumbnail())
+                        .likeCount(elem.getLikes().size())
+                        .commentCount(elem.getComments().size())
+                        .authorNickname(elem.getAuthorNickname())
+                        .authorProfile(elem.getAuthorProfile())
+                        .build()
+        ).toList();
+    }
+
     /**
      * Return Sort object by given search condition
      * @param searchConditionDto search conditions from client
