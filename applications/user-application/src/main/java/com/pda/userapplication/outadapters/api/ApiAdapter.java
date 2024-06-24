@@ -19,7 +19,6 @@ import reactor.core.publisher.Mono;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 @Service
@@ -51,27 +50,21 @@ public class ApiAdapter implements GetAssetsOutputPort, CreditOutputPort {
         return mono.block().getData();
     }
 
-    // TODO: 이거 아직 안씀
     @Override
-    public AssetInfoResponse getAssetsExcludePortfolio(NormalUser normalUser) {
-        AssetInfoResponse result = webClient.get().uri(uriBuilder -> uriBuilder
-                .path(assetUrl+"/assets")
-                .queryParam("targets", List.of("ACCOUNT", "CARD", "FUND", "LOAN"))
-                .build())
+    public AssetInfoResponse getPortfolio(NormalUser normalUser) {
+        Mono<GlobalResponse<AssetInfoResponse>> mono = webClient.get().uri(assetUrl+"/assets?targets=PORTFOLIO&targets=ACCOUNT")
             .header("front-social-id", normalUser.getFrontSocialId())
             .header("back-social-id", normalUser.getBackSocialId())
             .header("user-social-contact", normalUser.getContact())
             .exchangeToMono(response -> {
-                if (!response.statusCode().is2xxSuccessful())
-                    throw new BadRequestException("자산 가져오기 실패");
+                if (!response.statusCode().is2xxSuccessful()) {
+                    throw new InternalServerException("외부 API 연결 실패: " + response.statusCode());
+                }
 
                 return response.bodyToMono(new ParameterizedTypeReference<GlobalResponse<AssetInfoResponse>>() {});
-            })
-            .block()
-            .getData();
+            });
 
-
-        return result;
+        return mono.block().getData();
     }
 
     @Override
