@@ -56,6 +56,9 @@ public class FinfluencerService implements FinfluencerUseCase {
         sendUpdateUserOutputPort.sendUserOutput(UserUpdateOutputRequest.builder()
             .userId(userId)
             .role(UserRole.FINFLUENCER)
+            .profileImage(user.getProfileImage().toString())
+            .job(user.getJob())
+            .nickname(user.getNickname().toString())
             .build());
         return toTokenInfoServiceResponse(
             generateTokenAndSaveRefresh(saveUser), saveUser);

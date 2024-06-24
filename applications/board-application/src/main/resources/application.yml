@@ -18,12 +18,17 @@ spring:
     username: ${mysql.username}
     password: ${mysql.password}
 
+  kafka:
+    consumer:
+      group-id: board-group # Group Id
+      auto-offset-reset: earliest
+      bootstrap-servers: localhost:10000,localhost:10001,localhost:10002
   sql:
     init:
       mode: always
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: create
     properties:
       hibernate:
         show_sql: true
