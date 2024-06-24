@@ -153,4 +153,23 @@ public class BoardController {
                 ApiUtils.created("created", result) :
                 ApiUtils.success("deleted", result);
     }
+
+    @GetMapping("/boards/tagged")
+    @Operation(summary = "Get tagged boards", security = @SecurityRequirement(name = "bearerAuth"))
+    public GlobalResponse<List<BoardDto.AbstractRespDto>> getTaggedBoards(
+            @RequestParam(required = false, defaultValue = "0", value = "pageNo") int pageNo,
+            @RequestParam(required = false, defaultValue = "10", value = "size") int size,
+            @RequestParam(required = false, value = "productId") long productId,
+            @RequestParam(required = false, value = "challengeId") long challengeId
+    ) {
+        log.debug("Get Tagged boards by product : {} | challenge : {}", productId, challengeId);
+
+        if((productId == 0 && challengeId == 0) || productId != 0 && challengeId !=0)
+            throw new BadRequestException("At least one or Only one of tagged target required");
+
+        List<BoardDto.AbstractRespDto> boards = boardService.getTaggedBoards(pageNo, size, productId, challengeId);
+
+
+        return ApiUtils.success("success", boards);
+    }
 }
