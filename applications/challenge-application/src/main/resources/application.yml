@@ -47,6 +47,21 @@ springdoc:
   default-produces-media-type: application/json;charset=UTF-8
   packages-to-scan: com.pda
 
+eureka:
+  instance:
+    hostname:
+    healthCheckUrlPath: /actuator/health
+    lease-renewal-interval-in-seconds: 30
+    lease-expiration-duration-in-seconds: 10
+    prefer-ip-address: true
+  client:
+    eureka-server-port: 8761
+    register-with-eureka: false
+    fetch-registry: false
+    disable-delta: false
+    service-url:
+      defaultZone: http://192.168.2.20:8761/eureka
+
 logging:
   level:
     root=info:

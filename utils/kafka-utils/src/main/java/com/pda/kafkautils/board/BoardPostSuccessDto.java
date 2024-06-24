@@ -9,8 +9,8 @@ import lombok.*;
 @JsonSerialize
 @JsonDeserialize
 @Builder
-@NoArgsConstructor(access = AccessLevel.PRIVATE)
-@AllArgsConstructor(access = AccessLevel.PRIVATE)
+@NoArgsConstructor
+@AllArgsConstructor
 public class BoardPostSuccessDto implements KafkaJson {
     private Long boardId;
     private Long userId;
