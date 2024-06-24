@@ -27,6 +27,6 @@ public class BoardChallengeListener {
 
     @KafkaListener(topics = "challenge-success", concurrency = "3")
     public void listenChallengeSuccess(ChallengeSuccessDto challengeSuccessDto) {
-        ;myBoardChallengeService.successBoardChallenge(challengeSuccessDto.getBoardId());
+        myBoardChallengeService.successBoardChallenge(challengeSuccessDto.getBoardId());
     }
 }
