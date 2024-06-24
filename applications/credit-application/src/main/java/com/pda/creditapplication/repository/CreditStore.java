@@ -16,7 +16,7 @@ import org.hibernate.annotations.DynamicUpdate;
 
 @Entity
 @NoArgsConstructor
-@Table(name = "UserCredit")
+@Table(name = "CreditStore")
 @Builder
 @Getter
 @AllArgsConstructor(access = AccessLevel.PRIVATE)

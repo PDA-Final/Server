@@ -61,4 +61,11 @@ public interface FollowRepository extends JpaRepository<FollowEntity, Long> {
     Long countByFromUser(UserEntity userEntity);
     Long countByToUser(UserEntity userEntity);
 
+
+    @Query(value = "select sum(if(f.from_user_id = :userId, 1, 0)) as followings, " +
+        "sum(if(f.to_user_id = :userId, 1, 0)) as followers, " +
+        "sum(if(:myId is not null and f.to_user_id = :userId and f.from_user_id = :myId, 1, 0)) as isFollow " +
+        "from follow f " +
+        "where f.from_user_id = :userId or f.to_user_id = :userId", nativeQuery = true)
+    FollowInfo findFollowInfoBy(@Param("userId") Long userId, @Param("myId") Long myId);
 }

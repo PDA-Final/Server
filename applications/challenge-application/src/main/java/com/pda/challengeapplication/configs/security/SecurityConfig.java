@@ -5,6 +5,9 @@ import com.pda.tofinsecurity.hooks.SecurityRequestMatcher;
 import com.pda.tofinsecurity.hooks.SecurityRequestMatcherChain;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
+
+import java.util.List;
 
 @Configuration
 public class SecurityConfig {
@@ -12,8 +15,20 @@ public class SecurityConfig {
     public SecurityRequestMatcherChain securityRequestMatcherChain() {
         SecurityRequestMatcherChain matcherChain = new SecurityRequestMatcherChain();
 
+        List<UserRole> userRoles = List.of(UserRole.NORMAL, UserRole.FINFLUENCER);
+
         matcherChain.add(
-                SecurityRequestMatcher.hasRoleOf(UserRole.NORMAL, "/my-challenges/**"));
+                SecurityRequestMatcher.permitAllOf(HttpMethod.GET,"/my-challenges"));
+        matcherChain.add(
+                SecurityRequestMatcher.permitAllOf(HttpMethod.GET,"/my-challenges/badge"));
+//        matcherChain.add(
+//                SecurityRequestMatcher.anyHasAnyRoles(userRoles, HttpMethod.POST, "/my-challenges"));
+        matcherChain.add(
+                SecurityRequestMatcher.hasAnyRolesOf(userRoles, "/my-challenges/**"));
+
+        matcherChain.add(
+                SecurityRequestMatcher.hasAnyRolesOf(userRoles, "/my-emoChallenges/**"));
+
 
         return matcherChain;
     }

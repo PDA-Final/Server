@@ -27,7 +27,12 @@ public class Board extends BaseEntity {
 
     private String title;
 
+    @Column(columnDefinition = "TEXT")
     private String content;
+
+    private String summary;
+
+    private String thumbnail;
 
     private String authorNickname;
 
@@ -45,6 +50,10 @@ public class Board extends BaseEntity {
 
     @OneToMany(mappedBy = "board")
     @JsonBackReference
+    private List<Bookmark> bookmarks;
+
+    @OneToMany(mappedBy = "board")
+    @JsonBackReference
     private List<View> views;
 
     @OneToMany(mappedBy = "boardChallengeTagPK.board")
@@ -54,6 +63,10 @@ public class Board extends BaseEntity {
     @OneToMany(mappedBy = "boardProductTagPK.board")
     @JsonBackReference
     private List<BoardProductTag> taggedProducts;
+
+    @OneToOne(mappedBy = "board")
+    @JsonBackReference
+    private BoardCount boardCount;
 
     public void updateEntity(String title, String content) {
         this.title = title == null ? this.title : title;

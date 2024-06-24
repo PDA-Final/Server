@@ -48,18 +48,19 @@ public class MyEmoChallengeController {
             @AuthUser AuthUserInfo userInfo,
             @RequestBody PostMyEmoLogRequest postMyEmoRequest
     ){
-        myEmoChallengeService.createMyEmoLog(postMyEmoRequest, userInfo.getToken());
+        myEmoChallengeService.createMyEmoLog(postMyEmoRequest, userInfo.getToken(), userInfo.getId());
         return ApiUtils.success("오늘 감정 기록 완료");
     }
 
     // 감정저축 로그 조회
     @GetMapping("/log")
-    @Operation(summary = "감정 저축 기록 조회", description = "감정저축 챌린지 기록을 조회합니다")
+    @Operation(summary = "감정 저축 기록 조회", description = "감정저축 챌린지 기록을 조회합니다",
+            security = @SecurityRequirement(name = "bearerAuth"))
     @ApiResponse(responseCode = "200", description = "성공")
     public GlobalResponse<MyEmoChallengeLogResponse> readAllEmoChallengeLog(
-            @RequestParam(value = "myChallengeId") long myChallengeId
+            @AuthUser AuthUserInfo userInfo
     ){
-       MyEmoChallengeLogResponse myEmoChallengeLogResponse = myEmoChallengeService.readAllEmoChallengeLog(myChallengeId);
+       MyEmoChallengeLogResponse myEmoChallengeLogResponse = myEmoChallengeService.readAllEmoChallengeLog(userInfo.getId());
         return ApiUtils.success("감정 저축 로그 조회", myEmoChallengeLogResponse);
 
     }

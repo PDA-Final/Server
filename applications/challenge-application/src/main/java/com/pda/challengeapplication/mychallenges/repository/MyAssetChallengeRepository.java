@@ -11,5 +11,6 @@ public interface MyAssetChallengeRepository extends JpaRepository<MyAssetChallen
     List<MyAssetChallenge> findByMyChallengeId(long myChallengeId);
     MyAssetChallenge save(MyAssetChallenge mc);
 
+
     MyAssetChallenge findByMyChallengeIdAndSavingAt(long id, LocalDate now);
 }

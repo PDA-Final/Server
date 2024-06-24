@@ -7,13 +7,16 @@ import com.pda.userapplication.domains.vo.TofinId;
 import com.pda.userapplication.domains.vo.UserId;
 import com.pda.userapplication.outadapters.jpa.mapper.UserDetailEntityMapper;
 import com.pda.userapplication.outadapters.jpa.mapper.UserEntityMapper;
-import com.pda.userapplication.services.out.SaveUserOutputPort;
 import com.pda.userapplication.services.out.ReadNormalUserOutputPort;
 import com.pda.userapplication.services.out.ReadUserOutputPort;
 import com.pda.userapplication.services.out.SaveNormalUserOutputPort;
+import com.pda.userapplication.services.out.SaveUserOutputPort;
+import com.pda.userapplication.services.out.dto.req.SearchUserOutputRequest;
+import com.pda.userapplication.services.out.dto.res.SearchUserPagingOutputResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -50,16 +53,43 @@ public class UserJpaAdapter implements SaveUserOutputPort, ReadUserOutputPort, S
     }
 
     @Override
-    public Optional<User> findById(UserId userId) {
+    public Optional<User> findUserById(UserId userId) {
         return Optional.ofNullable(
             userMapper.toUser(userRepository.findById(userId.toLong())
                 .orElse(null)));
     }
 
     @Override
-    public User getByUserId(UserId userId) {
-        return findById(userId).orElseThrow(
+    public User getUserByUserId(UserId userId) {
+        return findUserById(userId).orElseThrow(
             () -> new BadRequestException("해당 아이디의 유저를 찾을 수 없습니다."));
+    }
+
+    @Override
+    public SearchUserPagingOutputResponse searchByNickname(final SearchUserOutputRequest request) {
+        List<UserEntity> users = userRepository.searchByNickname(request.getNickname(),
+            request.getLastIndex(), request.getLimit());
+
+        Long lastIndex = users.isEmpty()?null:users.get(0).getId();
+        boolean isLast = true;
+
+        for (UserEntity user : users) {
+            if (lastIndex > user.getId())
+                lastIndex = user.getId();
+        }
+
+        UserEntity lastUser = userRepository.findLastByNickname(request.getNickname())
+            .orElse(null);
+
+        if (lastUser!= null)
+            isLast = lastUser.getId().equals(lastIndex);
+
+        return SearchUserPagingOutputResponse.builder()
+            .lastIndex(lastIndex)
+            .isLast(isLast)
+            .totalCount(userRepository.countByNicknameLike(String.format("%%%s%%", request.getNickname())))
+            .users(users.stream().map(userMapper::toUser).toList())
+            .build();
     }
 
     @Override
@@ -82,7 +112,7 @@ public class UserJpaAdapter implements SaveUserOutputPort, ReadUserOutputPort, S
     }
 
     @Override
-    public Optional<NormalUser> findByUserId(UserId userId) {
+    public Optional<NormalUser> findNormalUserByUserId(UserId userId) {
         return Optional.ofNullable(userDetailMapper.toNormalUser(
             userDetailRepository.findByUserId(userId.toLong())
                 .orElse(null)));

@@ -12,6 +12,7 @@ import jakarta.persistence.EntityListeners;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Index;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
@@ -34,7 +35,9 @@ import java.time.LocalDateTime;
 @Getter
 @EntityListeners(AuditingEntityListener.class)
 @Entity
-@Table(name = "User")
+@Table(name = "User", indexes = {
+    @Index(name = "nickname_index", columnList = "nickname")
+})
 @DynamicInsert
 @DynamicUpdate
 @Builder

@@ -1,7 +1,8 @@
 package com.pda.userapplication.services.in;
 
 import com.pda.userapplication.services.in.dto.req.UpdateProfileServiceRequest;
+import com.pda.userapplication.services.in.dto.res.TokenInfoServiceResponse;
 
 public interface UpdateUserUseCase {
-    void updateProfile(UpdateProfileServiceRequest request);
+    TokenInfoServiceResponse updateProfile(UpdateProfileServiceRequest request);
 }

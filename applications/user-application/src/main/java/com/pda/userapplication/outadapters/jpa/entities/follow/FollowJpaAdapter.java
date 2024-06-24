@@ -7,11 +7,13 @@ import com.pda.userapplication.services.out.ReadFollowOutputPort;
 import com.pda.userapplication.services.out.SaveFollowOutputPort;
 import com.pda.userapplication.services.out.dto.req.FindFollowableUserRequest;
 import com.pda.userapplication.services.out.dto.res.FindFollowableUserResponse;
+import com.pda.userapplication.services.out.dto.res.FollowInfoResponse;
 import com.pda.userapplication.services.out.dto.res.FollowPagingResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -78,6 +80,17 @@ public class FollowJpaAdapter implements ReadFollowOutputPort, SaveFollowOutputP
             .isLast(isLast)
             .totalCount(count)
             .users(from(follows))
+            .build();
+    }
+
+    @Override
+    public FollowInfoResponse getFollowInfo(UserId targetId, Optional<UserId> myId) {
+        FollowInfo followInfo = followRepository.findFollowInfoBy(targetId.toLong(), myId.isPresent()?myId.get().toLong():null);
+
+        return FollowInfoResponse.builder()
+            .numOfFollowers(followInfo.getFollowers()==null?0:followInfo.getFollowers())
+            .numOfFollowings(followInfo.getFollowings()==null?0:followInfo.getFollowings())
+            .isFollow(followInfo.getIsFollow()==null?false:followInfo.getIsFollow().equals(1))
             .build();
     }
 

@@ -10,6 +10,7 @@ import com.pda.exceptionhandler.exceptions.BadRequestException;
 import com.pda.tofinsecurity.user.AuthUser;
 import com.pda.tofinsecurity.user.AuthUserInfo;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -51,11 +52,13 @@ public class BoardController {
     }
 
     @GetMapping("/{boardId}")
-    @Operation(summary = "Get board item detail")
-    public GlobalResponse<BoardDto.DetailRespDto> getBoardDetail(@PathVariable("boardId") long boardId) {
+    @Operation(summary = "Get board item detail", security = @SecurityRequirement(name = "bearerAuth"))
+    public GlobalResponse<BoardDto.DetailRespDto> getBoardDetail(@PathVariable("boardId") long boardId, @AuthUser AuthUserInfo user) {
         log.debug("Retrieve board with id : {}", boardId);
+        UserDto.InfoDto userInfoDto = user != null ?
+                UserDto.InfoDto.fromAuthUserInfo(user) : null;
 
-        BoardDto.DetailRespDto detailRespDto = boardService.getBoardDetail(boardId);
+        BoardDto.DetailRespDto detailRespDto = boardService.getBoardDetail(boardId, userInfoDto);
 
         return ApiUtils.success("success", detailRespDto);
     }
@@ -65,14 +68,15 @@ public class BoardController {
     public GlobalResponse<List<BoardDto.AbstractRespDto>> getBoardList(
             @RequestParam(required = false, defaultValue = "0", value = "pageNo") int pageNo,
             @RequestParam(required = false, defaultValue = "10", value = "size") int size,
-            @RequestParam(required = false) BoardDto.SearchConditionDto searchConditionDto
+            @Parameter BoardDto.SearchConditionDto searchConditionDto
     ) {
         log.debug("Get board lists with page {}, size {}", pageNo, size);
 
+        log.info("{}", searchConditionDto);
         if(searchConditionDto != null)
             log.info(searchConditionDto.getCategory());
 
-        List<BoardDto.AbstractRespDto> boards = boardService.getBoards(pageNo, size);
+        List<BoardDto.AbstractRespDto> boards = boardService.getBoards(pageNo, size, searchConditionDto);
 
         return ApiUtils.success("success", boards);
     }

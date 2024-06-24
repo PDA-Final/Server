@@ -15,12 +15,11 @@ import java.time.LocalDate;
 @Getter
 public class PostMyEmoChallengeRequest {
 
-    long id;
     long challengeId;
     String inACNT;
     String outACNT;
 
-    public MyChallenge converToMCEntity(long id, Challenge c, long userid, LocalDate startAt, LocalDate endAt, String status){
-        return new MyChallenge(id, c, userid, startAt, endAt, status );
+    public MyChallenge converToMCEntity(Challenge c, long userid, LocalDate startAt, LocalDate endAt, String status){
+        return new MyChallenge(null, c, userid, startAt, endAt, status );
     }
 }
