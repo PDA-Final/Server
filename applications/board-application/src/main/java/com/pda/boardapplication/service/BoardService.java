@@ -137,7 +137,10 @@ public class BoardService {
         Sort sort = getSortBySearchCondition(searchConditionDto);
         Pageable pageable = PageRequest.of(pageNo, size, sort);
 
-        if(searchConditionDto.getCategory() != null) {
+        if(searchConditionDto.getCategory() != null && searchConditionDto.getKeyword() != null) {
+            log.info("Search by category and keyword {} | {}", searchConditionDto.getCategory(), searchConditionDto.getKeyword());
+            boards = boardRepository.findByCategoryIdAndTitleContains(pageable, Integer.parseInt(searchConditionDto.getCategory()), searchConditionDto.getKeyword()).getContent();
+        } else if(searchConditionDto.getCategory() != null) {
             log.info("Search by category : {}", searchConditionDto.getCategory());
             boards = boardRepository.findByCategoryId(pageable, Integer.parseInt(searchConditionDto.getCategory())).getContent();
         } else if(searchConditionDto.getUserId() > 0) {
