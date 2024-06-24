@@ -61,10 +61,10 @@ public class CommentService {
                 .map((comment ->
                         CommentDto.CommentInfoDto.builder()
                                 .id(comment.getId())
-                                .content(comment.getContent())
-                                .authorId(comment.getUserId())
-                                .authorName(comment.getAuthorNickname())
-                                .authorProfile(comment.getAuthorProfile())
+                                .content(comment.isDeleted() ? "삭제된 댓글입니다." : comment.getContent())
+                                .authorId(comment.isDeleted() ? 0L : comment.getUserId())
+                                .authorName(comment.isDeleted() ? "anonymous" : comment.getAuthorNickname())
+                                .authorProfile(comment.isDeleted() ? "" : comment.getAuthorProfile())
                                 .replies(comment.getReplies().stream().map((reply) ->
                                                 CommentDto.ReplyInfoDto.builder()
                                                         .id(reply.getId())
@@ -76,6 +76,7 @@ public class CommentService {
                                                         .build()
                                         ).toList())
                                 .createdTime(comment.getCreatedAt())
+                                .deleted(comment.isDeleted())
                                 .build()
                 )).toList();
     }
@@ -114,7 +115,27 @@ public class CommentService {
         if(comment.getUserId() != userInfoDto.getId())
             throw new ForbiddenException("Illegal access to comment by unauthorized user");
 
-        commentRepository.delete(comment);
+        if(doSoftDelete(comment)) {
+            log.info("Cannot delete comment : {} | {}", comment.getParentComment(), comment.getReplies().size());
+            comment.updateSoftDelete();
+            commentRepository.save(comment);
+        } else {
+            log.info("No siblings, delete comment");
+            commentRepository.delete(comment);
+        }
         return 1;
+    }
+
+    /**
+     * Check whether soft delete must be performed to comment or not
+     * @param comment target comment
+     * @return whether soft delete must be performed or not
+     */
+    private boolean doSoftDelete(Comment comment) {
+        log.info("Given comment : {} | {}", comment.getParentComment(), comment.getReplies().size());
+        if(comment.getParentComment() != null || comment.getReplies().isEmpty())
+            return false;
+
+        else return true;
     }
 }
