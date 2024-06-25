@@ -20,7 +20,8 @@ public class CustomSecurityConfig {
         securityRequestMatcherChain
             .add(SecurityRequestMatcher.hasAnyRolesOf(List.of(UserRole.NORMAL, UserRole.FINFLUENCER),
                 "/users/assets", "/users/public-options", "/users/detail-info",
-                "/users/tendency", "/users/profile", "/users/accounts"));
+                "/users/tendency", "/users/profile", "/users/accounts", "/users/birth"
+            ,"/users/assets/status"));
         securityRequestMatcherChain
             .add(SecurityRequestMatcher.hasAnyRolesOf(List.of(UserRole.NORMAL, UserRole.FINFLUENCER),
                 HttpMethod.POST, "/users/{id:[0-9]+}/portfolios"));

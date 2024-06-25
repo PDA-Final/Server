@@ -32,6 +32,10 @@ public class BoardDto {
                 example = "재미",
                 requiredMode = Schema.RequiredMode.REQUIRED)
         private String category;
+        @Schema(description = "Whether current board is locked content or not",
+                example = "false",
+                requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+        private boolean locked;
         @Schema(description = "tagged product id", example = "12",
                 requiredMode = Schema.RequiredMode.NOT_REQUIRED)
         private int productId;
@@ -127,6 +131,16 @@ public class BoardDto {
         private String authorNickname;
         @Schema(description = "Profile Url of author", example = "https://picsum.photos/seed/picsum/200/200")
         private String authorProfile;
+        @Schema(description = "Whether current board is locked", example = "false")
+        private boolean locked;
+    }
+
+    @Builder
+    @Getter
+    @Schema(description = "Stat summary of locked content")
+    public static class LockedContentRespDto {
+        private int unlockedCount;
+        private int likedCount;
     }
 
     @NoArgsConstructor

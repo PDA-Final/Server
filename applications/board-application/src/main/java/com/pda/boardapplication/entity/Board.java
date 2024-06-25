@@ -42,6 +42,8 @@ public class Board extends BaseEntity {
 
     private String authorProfile;
 
+    private boolean locked;
+
     @OneToMany(mappedBy = "board", fetch = FetchType.LAZY)
     @OnDelete(action = OnDeleteAction.CASCADE)
     @JsonBackReference
