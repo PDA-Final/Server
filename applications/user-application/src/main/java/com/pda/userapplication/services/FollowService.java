@@ -56,6 +56,7 @@ public class FollowService implements FollowUseCase {
         sendAlertMessageOutputPort.sendAlertMessage(SendMessageRequest.builder()
                 .message(String.format("%s님이 회원님을 팔로우했습니다.", fromUser.getNickname().toString()))
                 .image(fromUser.getProfileImage().toString())
+                .targetId(fromUser.getId().toLong())
                 .messageType("FOLLOW")
                 .userId(toUser.getId().toLong())
             .build());

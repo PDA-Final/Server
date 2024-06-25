@@ -91,11 +91,10 @@ public class PortfolioService implements PortfolioUseCase {
                 .token(request.getToken())
             .build());
 
-        // TODO: 메시지 타입 확인
         sendAlertMessageOutputPort.sendAlertMessage(SendMessageRequest.builder()
             .message(String.format("%s님이 회원님의 포트폴리오를 구독하였습니다.", myUser.getNickname().toString()))
             .image(myUser.getProfileImage().toString())
-            .messageType("FOLLOW")
+            .messageType("CREDIT")
             .userId(targetUser.getId().toLong())
             .build());
     }
