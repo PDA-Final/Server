@@ -40,8 +40,9 @@ public class BoardInteractionService {
      */
     public int toggleLike(long boardId, UserDto.InfoDto userInfoDto) {
         int ret = 0;
-        if(!boardRepository.existsById(boardId))
-            throw new NotFoundException("Target board does not exist");
+
+        Board board = boardRepository.findById(boardId).orElseThrow(() ->
+                new NotFoundException("Target board does not exist"));
 
         Like like = Like.builder()
                 .board(boardRepository.getReferenceById(boardId))
@@ -57,6 +58,9 @@ public class BoardInteractionService {
             if(challengeId > -1)
                 producerService.sendBoardChallengeSuccess(
                         ChallengeSuccessDto.builder().boardId(boardId).build());
+
+            producerService.sendLikeAlertPosted(board.getUserId(), userInfoDto.getNickname(),
+                    boardId, board.getThumbnail());
 
             ret = 1;
         } else {

@@ -50,4 +50,15 @@ public class ProducerService {
                 .build()
         );
     }
+
+    public void sendLikeAlertPosted(long clientId, String userNickname, long boardId, String thumbnail) {
+        log.info("Produce: like has been posted to board : {}", boardId);
+
+        kafkaTemplate.send("alert-msg", AlertMessageDto.builder()
+                .messageType("FIN").clientId(clientId).targetId(boardId)
+                .content(String.format("%s님이 회원님의 핀을 좋아합니다.", userNickname))
+                .thumbnail(thumbnail)
+                .build()
+        );
+    }
 }
