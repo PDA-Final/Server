@@ -54,6 +54,13 @@ public class BoardInteractionService {
         return ret;
     }
 
+    /**
+     * Toggle status of bookmark by user
+     * @param boardId target board id
+     * @param userInfoDto request user's info
+     * @return in/decrement
+     * @throws NotFoundException target board not found
+     */
     public int toggleBookmark(long boardId, UserDto.InfoDto userInfoDto) {
         if(!boardRepository.existsById(boardId))
             throw new NotFoundException("Target board does not exists");
