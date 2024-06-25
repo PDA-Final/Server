@@ -6,16 +6,24 @@ import com.pda.boardapplication.repository.BoardCountRepository;
 import com.pda.boardapplication.repository.BoardRepository;
 import com.pda.boardapplication.repository.BookmarkRepository;
 import com.pda.boardapplication.repository.LikeRepository;
+import com.pda.boardapplication.utils.ChallengeUtils;
 import com.pda.exceptionhandler.exceptions.NotFoundException;
+import com.pda.kafkautils.board.BoardPostSuccessDto;
+import com.pda.kafkautils.challenge.ChallengeSuccessDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Example;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+import java.util.NoSuchElementException;
+
 @Service
 @Slf4j
 @RequiredArgsConstructor
 public class BoardInteractionService {
+
+    private final ProducerService producerService;
 
     private final BoardRepository boardRepository;
     private final LikeRepository likeRepository;
@@ -32,8 +40,9 @@ public class BoardInteractionService {
      */
     public int toggleLike(long boardId, UserDto.InfoDto userInfoDto) {
         int ret = 0;
-        if(!boardRepository.existsById(boardId))
-            throw new NotFoundException("Target board does not exist");
+
+        Board board = boardRepository.findById(boardId).orElseThrow(() ->
+                new NotFoundException("Target board does not exist"));
 
         Like like = Like.builder()
                 .board(boardRepository.getReferenceById(boardId))
@@ -43,6 +52,16 @@ public class BoardInteractionService {
 //        if(!likeRepository.exists(Example.of(like))) {
         if(!likeRepository.existsById(new LikePK(boardId, userInfoDto.getId()))) {
             likeRepository.save(like);
+
+            long challengeId = checkBoardChallengeSuccess(boardId);
+
+            if(challengeId > -1)
+                producerService.sendBoardChallengeSuccess(
+                        ChallengeSuccessDto.builder().boardId(boardId).build());
+
+            producerService.sendLikeAlertPosted(board.getUserId(), userInfoDto.getNickname(),
+                    boardId, board.getThumbnail());
+
             ret = 1;
         } else {
             likeRepository.delete(like);
@@ -73,5 +92,26 @@ public class BoardInteractionService {
             bookmarkRepository.delete(bookmark);
             return -1;
         }
+    }
+
+    /**
+     * Check whether board challenge has been completed
+     * @param boardId target board id
+     * @return challenge id, -1 if false
+     */
+    private long checkBoardChallengeSuccess(long boardId) {
+        Board board = boardRepository.findById(boardId).orElseThrow(NoSuchElementException::new);
+
+        ChallengeUtils.BoardChallengeInfo taggedChallengeInfo =
+                ChallengeUtils.getBoardChallengeInfoById(
+                        board.getTaggedChallenges().get(0).getChallengeId());
+
+        log.info("Tagged challenge for board {} was : {}", boardId, taggedChallengeInfo);
+
+        if((taggedChallengeInfo != null) &&
+                (board.getLikes().size() == taggedChallengeInfo.getSuccessThreshold()))
+            return board.getTaggedChallenges().get(0).getChallengeId();
+
+        return -1;
     }
 }
