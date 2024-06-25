@@ -18,7 +18,7 @@ import java.util.Map;
 @Slf4j
 @RequiredArgsConstructor
 public class EmitterService {
-    private final AlertService alertService; // TODO
+    private final AlertService alertService;
     private final EmitterRepository emitterRepository;
 
     private static final int MAX_NOTIFICATIONS_COUNT = 6;
@@ -27,7 +27,6 @@ public class EmitterService {
     @KafkaListener(topics = "alert-msg", concurrency = "2")
     public void listen(AlertMessageDto alertMessageDto) {
         log.info("카프카에게 받은 메세지: {}", alertMessageDto);
-        log.info("카프카에게 받은 메세지 중에 본문: {}", alertMessageDto.getContent());
 
         Long clientId = alertMessageDto.getClientId();
         Alert alert = Alert.builder()
@@ -62,7 +61,7 @@ public class EmitterService {
             emitter.send(SseEmitter.event()
                     .id(emitterId)
                     .data(data));
-            log.info("Kafka로부터 전달 받은 메세지 클라이언트에게 전송. emitterId : {}, message : {}", emitterId, data);
+            log.info("Kafka로부터 전달 받은 메세지를 클라이언트에게 전송. emitterId : {}, message : {}", emitterId, data);
         } catch (IOException e) {
             emitterRepository.deleteById(emitterId);
             log.error("메시지 전송 에러 : {}", e);

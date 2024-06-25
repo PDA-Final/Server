@@ -29,7 +29,7 @@ public class AlertController {
     @ApiResponse(responseCode = "200", description = "Success!")
     public SseEmitter subscribe(
             @AuthUser AuthUserInfo clientId,
-            @PathVariable (value = "Last-Event-ID", required = false) String lastEventId) {
+            @RequestHeader (value = "Last-Event-ID", required = false) String lastEventId) {
         return emitterService.addEmitter(clientId.getId(), lastEventId);
     }
 }

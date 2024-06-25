@@ -1,7 +1,5 @@
 package com.pda.alertapplication.repository;
 
-import jakarta.ws.rs.sse.Sse;
-import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
