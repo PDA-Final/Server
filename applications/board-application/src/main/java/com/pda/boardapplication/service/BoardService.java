@@ -191,7 +191,7 @@ public class BoardService {
                         elem.getUserId() == userInfoDto.getId()))
                 .bookmarked(board.getBookmarks().stream().anyMatch(elem ->
                         elem.getUserId() == userInfoDto.getId()))
-                .locked(isAccessible)
+                .locked(!isAccessible)
                 .unlockedCount(board.isLocked() ? unlockedRepository.findAllByBoardId(boardId).size() : 0)
                 .build();
     }
