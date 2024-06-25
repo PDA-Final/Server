@@ -17,7 +17,7 @@ public class KafkaOutputAdapter implements SendMyChallengeResultPort {
     @Async
     @Override
     public void sendChallengeResult(final SendChallengeResultRequest request){
-        kafkaTemplate.send("alret-topic", AlertMessageDto.builder()
+        kafkaTemplate.send("alret-msg", AlertMessageDto.builder()
                 .userId(request.getUserId())
                 .messageType("CREDIT")
                 .content(request.getResult())
