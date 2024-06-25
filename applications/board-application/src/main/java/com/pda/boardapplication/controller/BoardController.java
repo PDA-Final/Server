@@ -159,8 +159,8 @@ public class BoardController {
     public GlobalResponse<List<BoardDto.AbstractRespDto>> getTaggedBoards(
             @RequestParam(required = false, defaultValue = "0", value = "pageNo") int pageNo,
             @RequestParam(required = false, defaultValue = "10", value = "size") int size,
-            @RequestParam(required = false, value = "productId") long productId,
-            @RequestParam(required = false, value = "challengeId") long challengeId
+            @RequestParam(required = false, defaultValue = "0", value = "productId") long productId,
+            @RequestParam(required = false, defaultValue = "0", value = "challengeId") long challengeId
     ) {
         log.debug("Get Tagged boards by product : {} | challenge : {}", productId, challengeId);
 
