@@ -12,6 +12,7 @@ import com.pda.userapplication.services.in.SignInUseCase;
 import com.pda.userapplication.services.in.SignUpUseCase;
 import com.pda.userapplication.services.in.dto.req.SignInServiceRequest;
 import com.pda.userapplication.services.in.dto.req.SignUpServiceRequest;
+import com.pda.userapplication.services.in.dto.res.SignInResponse;
 import com.pda.userapplication.services.in.dto.res.TokenInfoServiceResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -54,7 +55,7 @@ public class AuthController {
     @PostMapping("/sign-in")
     @Operation(summary = "로그인", description = "모든 유저 로그인")
     @ApiResponse(responseCode = "200", description = "성공")
-    public GlobalResponse<TokenInfoServiceResponse> signIn(@Valid @RequestBody SignInRequest signInRequest) {
+    public GlobalResponse<SignInResponse> signIn(@Valid @RequestBody SignInRequest signInRequest) {
         return ApiUtils.success("로그인 성공", signInUseCase.signIn(SignInServiceRequest.builder()
                 .tofinId(signInRequest.getTofinId())
                 .userInfo(signInRequest.getUserInfo())

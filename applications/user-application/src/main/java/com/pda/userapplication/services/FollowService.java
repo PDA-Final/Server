@@ -52,10 +52,10 @@ public class FollowService implements FollowUseCase {
 
         // follow 하기
         Long followCount = saveFollowOutputPort.follow(fromUser.getId(), toUser.getId());
-        // TODO: 메시지 타입 확인
         sendAlertMessageOutputPort.sendAlertMessage(SendMessageRequest.builder()
                 .message(String.format("%s님이 회원님을 팔로우했습니다.", fromUser.getNickname().toString()))
                 .image(fromUser.getProfileImage().toString())
+                .targetId(fromUser.getId().toLong())
                 .messageType("FOLLOW")
                 .userId(toUser.getId().toLong())
             .build());

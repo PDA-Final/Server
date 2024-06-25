@@ -28,6 +28,7 @@ import com.pda.userapplication.services.in.dto.res.AvailableContactServiceRespon
 import com.pda.userapplication.services.in.dto.res.AvailableTofinIdServiceResponse;
 import com.pda.userapplication.services.in.dto.res.AssetInfoServiceResponse;
 import com.pda.userapplication.services.in.dto.res.GetUserPagingResponse;
+import com.pda.userapplication.services.in.dto.res.SetTendencyResponse;
 import com.pda.userapplication.services.in.dto.res.TokenInfoServiceResponse;
 import com.pda.userapplication.services.in.dto.res.UserDetailInfoResponse;
 import com.pda.userapplication.services.in.dto.res.UserServiceResponse;
@@ -125,16 +126,15 @@ public class UserController {
     @Operation(summary = "투자 성향 설정", description = "유저의 투자성향을 설정하는 API",
         security = @SecurityRequirement(name = "bearerAuth"))
     @ApiResponse(responseCode = "201", description = "성공")
-    public GlobalResponse<Void> setTendency(@AuthUser AuthUserInfo authUser, @Valid @RequestBody SetTendencyRequest request) {
-        setTendencyUseCase.setTendency(SetTendencyServiceRequest.builder()
-                .card(request.isCard())
-                .loan(request.isLoan())
-                .account(request.isAccount())
-                .invest(request.isInvest())
-                .purpose(request.getPurpose())
-                .userId(authUser.getId())
-            .build());
-        return ApiUtils.success("유저 성향 설정 완료");
+    public GlobalResponse<SetTendencyResponse> setTendency(@AuthUser AuthUserInfo authUser, @Valid @RequestBody SetTendencyRequest request) {
+        return ApiUtils.success("유저 성향 설정 완료",setTendencyUseCase.setTendency(SetTendencyServiceRequest.builder()
+            .card(request.isCard())
+            .loan(request.isLoan())
+            .account(request.isAccount())
+            .invest(request.isInvest())
+            .purpose(request.getPurpose())
+            .userId(authUser.getId())
+            .build()));
     }
 
     @GetMapping("/detail-info")

@@ -42,6 +42,8 @@ import com.pda.userapplication.services.in.dto.res.AvailableTofinIdServiceRespon
 import com.pda.userapplication.services.in.dto.res.AssetInfoServiceResponse;
 import com.pda.userapplication.services.in.dto.res.GetUserPagingResponse;
 import com.pda.userapplication.services.in.dto.res.GetUserSummaryResponse;
+import com.pda.userapplication.services.in.dto.res.SetTendencyResponse;
+import com.pda.userapplication.services.in.dto.res.SignInResponse;
 import com.pda.userapplication.services.in.dto.res.TokenInfoServiceResponse;
 import com.pda.userapplication.services.in.dto.res.UserDetailInfoResponse;
 import com.pda.userapplication.services.in.dto.res.UserServiceResponse;
@@ -149,15 +151,32 @@ public class UserService implements SignUpUseCase, ReissueUseCase,
 
     @Transactional
     @Override
-    public TokenInfoServiceResponse signIn(final SignInServiceRequest request) {
+    public SignInResponse signIn(final SignInServiceRequest request) {
         User user = readUserOutputPort.findByTofinId(TofinId.of(request.getTofinId()))
             .orElseThrow(() -> new UnAuthorizedException("아이디 혹은 비밀번호가 틀렸습니다."));
 
         if (!userInfoEncoder.matches(request.getUserInfo(), user.getUserInfo()))
             throw new UnAuthorizedException("아이디 혹은 비밀번호가 틀렸습니다.");
 
-        return toTokenInfoServiceResponse(
-            generateTokenAndSaveRefresh(user), user);
+        TokenInfo tokenInfo = generateTokenAndSaveRefresh(user);
+
+        SignInResponse.SignInResponseBuilder builder = SignInResponse.builder()
+            .id(user.getId().toLong())
+            .nickname(user.getNickname().toString())
+            .accessToken(tokenInfo.getAccessToken())
+            .grantType(tokenInfo.getGrantType())
+            .refreshToken(tokenInfo.getRefreshToken());
+
+        Optional<UserDetail> userDetail = readUserDetailOutputPort.findUserDetailById(user.getId());
+        if (userDetail.isPresent()) {
+            builder.loan(userDetail.get().isLoanTendency());
+            builder.account(userDetail.get().isAccountTendency());
+            builder.invest(userDetail.get().isInvestTendency());
+            builder.card(userDetail.get().isCardTendency());
+            builder.purpose(userDetail.get().getPurpose()==null?null:userDetail.get().getPurpose().toString());
+        }
+
+        return builder.build();
     }
 
     @Transactional
@@ -225,7 +244,7 @@ public class UserService implements SignUpUseCase, ReissueUseCase,
 
     @Transactional
     @Override
-    public void setTendency(final SetTendencyServiceRequest request) {
+    public SetTendencyResponse setTendency(final SetTendencyServiceRequest request) {
         UserDetail user = readUserDetailOutputPort.findUserDetailById(UserId.of(request.getUserId()))
             .orElseThrow(() -> new NotFoundException("해당 유저의 세부 정보가 존재하지 않습니다."));
 
@@ -243,6 +262,14 @@ public class UserService implements SignUpUseCase, ReissueUseCase,
         }
 
         saveUserDetailOutputPort.save(user);
+
+        return SetTendencyResponse.builder()
+            .purpose(request.getPurpose())
+            .account(request.isAccount())
+            .card(request.isCard())
+            .loan(request.isLoan())
+            .invest(request.isInvest())
+            .build();
     }
 
     @Override
