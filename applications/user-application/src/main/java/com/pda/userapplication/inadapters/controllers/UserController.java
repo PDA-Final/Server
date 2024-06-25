@@ -52,6 +52,7 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Tag(name = "User", description = "투핀 유저 API")
@@ -198,5 +199,13 @@ public class UserController {
     public GlobalResponse<List<AssetInfoServiceResponse>> getAsets(@AuthUser AuthUserInfo authUser) {
         return ApiUtils.success("유저 보유 상품 조회 완료", getUserAssetsUseCase
             .getAccounts(authUser.getId()));
+    }
+
+    @GetMapping("/birth")
+    @Operation(summary = "유저 생일 조회", description = "유저 생일 조회",
+        security = @SecurityRequirement(name = "bearerAuth"))
+    @ApiResponse(responseCode = "200", description = "성공")
+    public GlobalResponse<LocalDate> getBirth(@AuthUser AuthUserInfo authUser) {
+        return ApiUtils.success("생일 조회 완료", getUserUseCase.getBirth(authUser.getId()));
     }
 }
