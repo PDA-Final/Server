@@ -80,7 +80,7 @@ public class BoardService {
         // Given category cannot be blank by @NotBlack Validation
         Integer categoryId = CategoryUtils.verifyCategory(registerReqDto.getCategory());
 
-        log.info("{}, {}", registerReqDto.isLocked(), categoryId);
+        log.debug("{}, {}", registerReqDto.isLocked(), categoryId);
         if(registerReqDto.isLocked() && (categoryId != 5))
             throw new BadRequestException("Given category cannot be locked");
         log.info("Given category was : {} verified to : {}", registerReqDto.getCategory(), categoryId);
@@ -106,16 +106,16 @@ public class BoardService {
         log.debug("tagged info {} {}", registerReqDto.getProductId(), registerReqDto.getChallengeId());
 
         if(registerReqDto.getProductId() > 0) {
-            log.debug("Create product tag {} with board {}", registerReqDto.getProductId(), registerReqDto.getProductId());
+            log.info("Create product tag {} with board {}", registerReqDto.getProductId(), registerReqDto.getProductId());
             boardProductTagRepository.save(BoardProductTag.builder()
                     .board(board).productId(registerReqDto.getProductId()).build());
         }
         if(registerReqDto.getChallengeId() > 0) {
-            log.debug("Create product tag {} with challenge {}", registerReqDto.getProductId(), registerReqDto.getChallengeId());
+            log.info("Create product tag {} with challenge {}", registerReqDto.getProductId(), registerReqDto.getChallengeId());
             boardChallengeTagRepository.save(BoardChallengeTag.builder()
                     .board(board).challengeId(registerReqDto.getChallengeId()).build());
         }
-        // CREDIT
+
         if(ChallengeUtils.checkIfBoardChallenge(registerReqDto.getChallengeId())) {
             producerService.sendBoardChallengePosted(authorInfoDto.getId(),
                             (long)registerReqDto.getChallengeId(),boardId);
@@ -147,6 +147,7 @@ public class BoardService {
         if(board.getUserId() == userInfoDto.getId()) {
             log.debug("User's board, SKIP");
         } else if (board.isLocked() && !unlockedRepository.existsById(new UnlockedPK(boardId, userInfoDto.getId()))) {
+            log.info("Target board : {} is locked, user {} has not been unlocked yet", boardId, userInfoDto.getId());
             int unlockedCount = unlockedRepository.findAllByBoardId(boardId).size();
             throw new LockedBoardException(unlockedCount ,board.getLikes().size());
         }
@@ -155,7 +156,6 @@ public class BoardService {
                 .title(board.getTitle())
                 .content(board.getContent())
                 .category(board.getCategory())
-                // TODO : comments and replies
                 .comments(board.getComments().stream().filter((comment) ->
                         comment.getParentComment() == null
                 ).map((elem) ->
@@ -203,7 +203,7 @@ public class BoardService {
             BoardDto.SearchConditionDto searchConditionDto
     ) {
         List<Board> boards;
-        log.info("search dto : {}", searchConditionDto);
+        log.debug("search dto : {}", searchConditionDto);
         Sort sort = getSortBySearchCondition(searchConditionDto);
         Pageable pageable = PageRequest.of(pageNo, size, sort);
         Integer categoryId = CategoryUtils.verifyCategory(searchConditionDto.getCategory());
@@ -280,14 +280,24 @@ public class BoardService {
         return 1;
     }
 
+    /**
+     * Get tagged board list
+     * @param pageNo
+     * @param size
+     * @param productId   zero for none
+     * @param challengeId zero for none
+     * @return
+     */
     public List<BoardDto.AbstractRespDto> getTaggedBoards(int pageNo, int size, long productId, long challengeId) {
         List<Board> boards;
         Pageable pageable = PageRequest.of(pageNo, size);
 
         if(productId > 0) {
+            log.info("Search by product id : {}", productId);
             boards = boardProductTagRepository.findByProductId(pageable, productId)
                     .getContent().stream().map(BoardProductTag::getBoard).toList();
         } else if(challengeId > 0){
+            log.info("Search by challenge id : {}", challengeId);
             boards = boardChallengeTagRepository.findByChallengeId(pageable, challengeId)
                     .getContent().stream().map(BoardChallengeTag::getBoard).toList();
         } else {

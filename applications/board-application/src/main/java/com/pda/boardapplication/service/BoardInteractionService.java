@@ -154,7 +154,6 @@ public class BoardInteractionService {
 
         HttpEntity<Map<String, Object>> entity = new HttpEntity<>(reqBody, headers);
 
-        log.warn(creditServerUrl);
         ResponseEntity<Object> response
                 = restTemplate.exchange(
                 creditServerUrl + "/credit/transfer", HttpMethod.POST,

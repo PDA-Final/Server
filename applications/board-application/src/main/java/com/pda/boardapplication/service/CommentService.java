@@ -68,7 +68,7 @@ public class CommentService {
 
         List<Comment> comments = commentRepository.findAllByBoardId(boardId).orElse(new ArrayList<>());
 
-        log.info("Total {} comments found for board {}", comments.size(), boardId);
+        log.debug("Total {} comments found for board {}", comments.size(), boardId);
 
         return comments.stream()
                 .filter((comment) -> comment.getParentComment() == null)
