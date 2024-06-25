@@ -117,26 +117,17 @@ public class BoardService {
         }
         // CREDIT
         if(ChallengeUtils.checkIfBoardChallenge(registerReqDto.getChallengeId())) {
-            producerService.sendBoardChallengePosted(
-                    BoardPostSuccessDto.builder()
-                            .userId(authorInfoDto.getId())
-                            .challengeId((long)registerReqDto.getChallengeId())
-                            .boardId(boardId)
-                    .build());
+            producerService.sendBoardChallengePosted(authorInfoDto.getId(),
+                            (long)registerReqDto.getChallengeId(),boardId);
         }
 
         if(registerReqDto.getProductId() > 0) {
             fetchProductTagIncrement(registerReqDto.getProductId());
         }
 
-        producerService.sendBoardAlertPosted(AlertMessageDto.builder()
-                .messageType("CREDIT").clientId(authorInfoDto.getId())
-                .content("핀 작성으로 1 크레딧을 획득하셨습니다.")
-                .build());
+        producerService.sendBoardAlertPosted(authorInfoDto.getId());
 
-        producerService.sendBoardCreditAcquired(AddCreditDto.builder()
-                .userId(authorInfoDto.getId()).amount(1L)
-                .transactionDateTime(LocalDateTime.now()).build());
+        producerService.sendBoardCreditAcquired(authorInfoDto.getId(), 1L);
 
         return boardId;
     }

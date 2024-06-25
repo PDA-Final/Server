@@ -67,8 +67,7 @@ public class BoardInteractionService {
             long challengeId = checkBoardChallengeSuccess(boardId);
 
             if(challengeId > -1)
-                producerService.sendBoardChallengeSuccess(
-                        ChallengeSuccessDto.builder().boardId(boardId).build());
+                producerService.sendBoardChallengeSuccess(boardId);
 
             producerService.sendLikeAlertPosted(board.getUserId(), userInfoDto.getNickname(),
                     boardId, board.getThumbnail());
