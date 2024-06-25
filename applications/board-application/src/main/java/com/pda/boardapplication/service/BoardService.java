@@ -153,7 +153,7 @@ public class BoardService {
 //            throw new LockedBoardException(unlockedCount ,board.getLikes().size());
 //        }
 
-        boolean isAccessible = board.isLocked() && !unlockedRepository.existsById(new UnlockedPK(boardId, userInfoDto.getId()));
+        boolean isAccessible = !(board.isLocked() && !unlockedRepository.existsById(new UnlockedPK(boardId, userInfoDto.getId())));
         return BoardDto.DetailRespDto.builder()
                 .title(board.getTitle())
                 .content(isAccessible ? board.getContent() : "")
