@@ -1,6 +1,5 @@
 package com.pda.alertapplication.repository;
 
-import com.pda.kafkautils.alert.AlertMessageType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -12,6 +11,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+
+import java.time.LocalDateTime;
 
 @Entity
 @NoArgsConstructor
@@ -25,13 +26,13 @@ public class Alert {
     @Column(name = "id")
     private Long id;
 
-    @Column(name = "user_id", unique = true) // TODO
-    private Long userId;
+    @Column(name = "client_id", unique = true)
+    private Long clientId;
 
     @Column(name = "message_type", nullable = false)
     private String messageType;
 
-    @Column(name = "target_id", nullable = false)
+    @Column(name = "target_id")
     private Long targetId;
 
     @Column(name = "content")
@@ -39,4 +40,10 @@ public class Alert {
 
     @Column(name = "thumbnail")
     private String thumbnail;
+
+    @Column(name = "isViewed")
+    private boolean isViewed; // false: unread, true: read
+
+    @Column(name = "created_at")
+    private LocalDateTime createdAt;
 }

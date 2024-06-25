@@ -1,8 +1,7 @@
-package com.pda.kafkautils.alert;
+package com.pda.alertapplication.dto;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.pda.kafkautils.KafkaJson;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -11,9 +10,9 @@ import java.time.LocalDateTime;
 @JsonSerialize
 @JsonDeserialize
 @Builder
-@NoArgsConstructor(access = AccessLevel.PRIVATE)
-@AllArgsConstructor(access = AccessLevel.PRIVATE)
-public class AlertMessageRespDto {
+@NoArgsConstructor // TODO
+@AllArgsConstructor // TODO
+public class AlertMessageSendDto {
     private Long clientId;
     private String messageType; // FOLLOW, FIN, CREDIT
     private Long targetId; // 상대 유저 ID, 보드 ID, null

@@ -1,6 +1,7 @@
 package com.pda.alertapplication.controller;
 
-import com.pda.alertapplication.service.SseService;
+import com.pda.alertapplication.service.AlertService;
+import com.pda.alertapplication.service.EmitterService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,15 +15,18 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 @Tag(name = "[Alert]", description = "Alert API")
 @RequestMapping(value = "/alerts")
 public class AlertController {
-    private final SseService sseService;
 
-    @GetMapping("/subscribe/{clientId}")
-    public SseEmitter subscribe(@PathVariable String clientId) {
-        return sseService.subscribe(clientId);
+    private final EmitterService emitterService;
+    private final AlertService alertService;
+
+    @GetMapping(value = "/subscribe/{clientId}", produces = "text/event-stream")
+    public SseEmitter subscribe(
+            @PathVariable Long clientId,
+            @PathVariable (value = "Last-Event-ID", required = false) String lastEventId) {
+        return emitterService.addEmitter(clientId, lastEventId);
     }
 
     // 알림 몇 개 안 읽었는지 알려주는
-
     // 알림 페이지 열면 안 읽은 알림 0개됨
 
     // 1. 구독
