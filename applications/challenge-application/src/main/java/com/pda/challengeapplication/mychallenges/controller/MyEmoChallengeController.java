@@ -35,7 +35,7 @@ public class MyEmoChallengeController {
     ){
 
         myEmoChallengeService.participateEmoChallenge(pa, userInfo.getToken(), userInfo.getId());
-        return ApiUtils.success("챌린지 참여");
+        return ApiUtils.success("챌린지 참여",1);
 
     }
 

@@ -32,7 +32,8 @@ public class MyBoardChallengeController {
             @RequestBody PostMyBoardChallengeRequest postMyBoardChallengeRequest
             ){
        myBoardChallengeService.writeBoardChallenge(postMyBoardChallengeRequest);
-        return ApiUtils.success("게시글 작성 완료");
+       long cid = postMyBoardChallengeRequest.getChallengeId();
+        return ApiUtils.success("게시글 작성 완료", cid);
 
     }
 

@@ -48,6 +48,9 @@ public class MyBoardChallengeService {
     public void successBoardChallenge(long boardId){
         MyBoardChallenge mb = myBoardChallengeRepository.findByBoardId(boardId);
         MyChallenge m = myChallengeRepository.findById(mb.getMyChallengeId());
+        if(m.getStatus() != "진행중"){
+            return;
+        }
         m.editMyChallengeStatus("성공");
         m.editMyChallengeEndAt(LocalDate.now());
         myChallengeRepository.save(m);
