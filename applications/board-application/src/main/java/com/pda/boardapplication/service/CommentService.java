@@ -53,8 +53,9 @@ public class CommentService {
 
         long commentId = commentRepository.save(comment).getId();
 
-        producerService.sendCommentAlertPosted(board.getUserId(),
-                userInfoDto.getNickname(), boardId, board.getThumbnail());
+        if(board.getUserId() != userInfoDto.getId())
+            producerService.sendCommentAlertPosted(board.getUserId(),
+                    userInfoDto.getNickname(), boardId, board.getThumbnail());
 
         return commentId;
     }

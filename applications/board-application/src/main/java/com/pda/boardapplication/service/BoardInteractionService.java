@@ -69,8 +69,9 @@ public class BoardInteractionService {
             if(challengeId > -1)
                 producerService.sendBoardChallengeSuccess(boardId);
 
-            producerService.sendLikeAlertPosted(board.getUserId(), userInfoDto.getNickname(),
-                    boardId, board.getThumbnail());
+            if(board.getUserId() != userInfoDto.getId())
+                producerService.sendLikeAlertPosted(board.getUserId(), userInfoDto.getNickname(),
+                        boardId, board.getThumbnail());
 
             ret = 1;
         } else {
