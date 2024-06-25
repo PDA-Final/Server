@@ -30,13 +30,14 @@ public class MyBoardChallengeService {
 
     // 게시글 작성시
     @Async
-    public void writeBoardChallenge(PostMyBoardChallengeRequest postMyBoardChallengeRequest) {
+    public Long writeBoardChallenge(PostMyBoardChallengeRequest postMyBoardChallengeRequest) {
         Challenge c = challengeRepository.findById(postMyBoardChallengeRequest.getChallengeId());
         //챌린지 참여
         MyChallenge myChallenge = postMyBoardChallengeRequest.convertToMyChallengeEntitiy(c);
         MyBoardChallenge myBoardChallenge = postMyBoardChallengeRequest.convertToBoardEntity(myChallengeRepository.save(myChallenge));
         myBoardChallengeRepository.save(myBoardChallenge);
         log.info("process success at participate board challenge");
+        return myChallenge.getId();
         //myChallenge.editMyChallengeStatus("성공");
         //myChallenge.editMyChallengeEndAt(LocalDate.now());
         //return myChallengeRepository.save(myChallenge);

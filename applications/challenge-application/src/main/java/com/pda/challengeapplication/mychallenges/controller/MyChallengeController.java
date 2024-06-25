@@ -59,11 +59,11 @@ public class MyChallengeController {
             @AuthUser AuthUserInfo userInfo,
             @PathVariable(value = "id") Integer id
     ) {
-       boolean isTrue= false;
-       isTrue = myChallengeService.checkMyChallenge(userInfo.getId(), id);
+       boolean istrue= false;
+       istrue = myChallengeService.checkMyChallenge(userInfo.getId(), id);
 
 
-        return ApiUtils.success("유저 참여 챌린지 조회", isTrue);
+        return ApiUtils.success("유저 참여 챌린지 조회", istrue);
     }
 
 

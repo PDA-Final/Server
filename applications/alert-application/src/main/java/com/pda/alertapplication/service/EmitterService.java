@@ -60,6 +60,7 @@ public class EmitterService {
         try {
             emitter.send(SseEmitter.event()
                     .id(emitterId)
+                    .name("alert")
                     .data(data));
             log.info("Kafka로부터 전달 받은 메세지를 클라이언트에게 전송. emitterId : {}, message : {}", emitterId, data);
         } catch (IOException e) {

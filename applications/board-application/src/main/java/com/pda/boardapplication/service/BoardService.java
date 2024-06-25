@@ -9,13 +9,23 @@ import com.pda.boardapplication.dto.UserDto;
 import com.pda.boardapplication.entity.Board;
 import com.pda.boardapplication.entity.BoardChallengeTag;
 import com.pda.boardapplication.entity.BoardCount;
+import com.pda.boardapplication.entity.UnlockedPK;
+import com.pda.boardapplication.exceptions.LockedBoardException;
+import com.pda.boardapplication.repository.BoardCountRepository;
+import com.pda.boardapplication.repository.BoardRepository;
+import com.pda.boardapplication.repository.CategoryRepository;
+import com.pda.boardapplication.repository.UnlockedRepository;
 import com.pda.boardapplication.entity.BoardProductTag;
 import com.pda.boardapplication.repository.*;
 import com.pda.boardapplication.utils.CategoryUtils;
+import com.pda.boardapplication.utils.ChallengeUtils;
 import com.pda.boardapplication.utils.UserUtils;
 import com.pda.exceptionhandler.exceptions.BadRequestException;
 import com.pda.exceptionhandler.exceptions.ForbiddenException;
 import com.pda.exceptionhandler.exceptions.NotFoundException;
+import com.pda.kafkautils.alert.AlertMessageDto;
+import com.pda.kafkautils.board.BoardPostSuccessDto;
+import com.pda.kafkautils.credit.AddCreditDto;
 import com.pda.s3utils.service.S3Service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,6 +34,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -37,9 +48,12 @@ public class BoardService {
 
     private final BoardCountRepository boardCountRepository;
 
+    private final UnlockedRepository unlockedRepository;
     private final BoardProductTagRepository boardProductTagRepository;
 
     private final BoardChallengeTagRepository boardChallengeTagRepository;
+
+    private final ProducerService producerService;
 
     private final S3Service s3Service;
 
@@ -56,6 +70,9 @@ public class BoardService {
         // Given category cannot be blank by @NotBlack Validation
         Integer categoryId = CategoryUtils.verifyCategory(registerReqDto.getCategory());
 
+        log.info("{}, {}", registerReqDto.isLocked(), categoryId);
+        if(registerReqDto.isLocked() && (categoryId != 5))
+            throw new BadRequestException("Given category cannot be locked");
         log.info("Given category was : {} verified to : {}", registerReqDto.getCategory(), categoryId);
 
         Board board = Board.builder()
@@ -68,6 +85,7 @@ public class BoardService {
                 .authorProfile(authorInfoDto.getProfile())
                 .thumbnail(boardSummary[0])
                 .summary(boardSummary[1])
+                .locked(registerReqDto.isLocked())
                 .build();
 
         long boardId = boardRepository.save(board).getId();
@@ -88,6 +106,24 @@ public class BoardService {
                     .board(board).challengeId(registerReqDto.getChallengeId()).build());
         }
         // CREDIT
+        if(ChallengeUtils.checkIfBoardChallenge(registerReqDto.getChallengeId())) {
+            producerService.sendBoardChallengePosted(
+                    BoardPostSuccessDto.builder()
+                            .userId(authorInfoDto.getId())
+                            .challengeId((long)registerReqDto.getChallengeId())
+                            .boardId(boardId)
+                    .build());
+        }
+
+        producerService.sendBoardAlertPosted(AlertMessageDto.builder()
+                .messageType("CREDIT").clientId(authorInfoDto.getId())
+                .content("핀 작성으로 1 크레딧을 획득하셨습니다.")
+                .build());
+
+        producerService.sendBoardCreditAcquired(AddCreditDto.builder()
+                .userId(authorInfoDto.getId()).amount(1L)
+                .transactionDateTime(LocalDateTime.now()).build());
+
         return boardId;
     }
 
@@ -95,12 +131,20 @@ public class BoardService {
      * Get board detail
      * @param boardId target board id
      * @return
-     * @throws NotFoundException - target does not exists
+     * @throws NotFoundException - target does not exist
+     * @throws LockedBoardException - target is locked
      */
-    public BoardDto.DetailRespDto getBoardDetail(long boardId, UserDto.InfoDto userInfoDto) {
+    public BoardDto.DetailRespDto getBoardDetail(long boardId, UserDto.InfoDto userInfoDto) throws LockedBoardException {
         log.debug("Get detail of board : {}", boardId);
 
         Board board = boardRepository.findById(boardId).orElseThrow(NotFoundException::new);
+
+        if(board.getUserId() == userInfoDto.getId()) {
+            log.debug("User's board, SKIP");
+        } else if (board.isLocked() && !unlockedRepository.existsById(new UnlockedPK(boardId, userInfoDto.getId()))) {
+            int unlockedCount = unlockedRepository.findAllByBoardId(boardId).size();
+            throw new LockedBoardException(unlockedCount ,board.getLikes().size());
+        }
 
         return BoardDto.DetailRespDto.builder()
                 .title(board.getTitle())
@@ -195,6 +239,7 @@ public class BoardService {
                         .commentCount(elem.getComments().size())
                         .authorNickname(elem.getAuthorNickname())
                         .authorProfile(elem.getAuthorProfile())
+                        .locked(elem.isLocked())
                         .build()
         ).toList();
     }

@@ -33,9 +33,8 @@ public class MyEmoChallengeController {
             @AuthUser AuthUserInfo userInfo,
             @RequestBody PostMyEmoChallengeRequest pa
     ){
-
-        myEmoChallengeService.participateEmoChallenge(pa, userInfo.getToken(), userInfo.getId());
-        return ApiUtils.success("챌린지 참여",1);
+        long mcid = myEmoChallengeService.participateEmoChallenge(pa, userInfo.getToken(), userInfo.getId());
+        return ApiUtils.success("챌린지 참여",mcid);
 
     }
 
