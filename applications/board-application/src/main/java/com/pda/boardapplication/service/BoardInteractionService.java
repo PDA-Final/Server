@@ -132,6 +132,10 @@ public class BoardInteractionService {
         }
 
         getTransferResponse(boardId, 10, userInfoDto.getToken());
+        producerService.sendBoardAlertUnlocked(
+                board.getUserId(), userInfoDto.getId(),
+                boardId, board.getThumbnail());
+
         unlockedRepository.save(unlocked);
 
         return 1;

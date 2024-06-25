@@ -71,4 +71,14 @@ public class ProducerService {
                 .build()
         );
     }
+
+    public void sendBoardAlertUnlocked(long clientId, long targetId, long boardId, String thumbnail) {
+        log.info("Produce: board {} has been unlocked by user {}", boardId, clientId);
+        kafkaTemplate.send("alert-msg", AlertMessageDto.builder()
+                .messageType("FOLLOW").clientId(clientId).targetId(targetId)
+                .content(String.format("%s님이 회원님의 잠겨진 핀을 열람하여 10 크레딧을 획득하셨습니다."))
+                .thumbnail(thumbnail)
+                .build()
+        );
+    }
 }
