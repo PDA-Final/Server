@@ -2,14 +2,10 @@ package com.pda.boardapplication.service;
 
 import com.pda.boardapplication.dto.UserDto;
 import com.pda.boardapplication.entity.*;
-import com.pda.boardapplication.repository.BoardCountRepository;
-import com.pda.boardapplication.repository.BoardRepository;
-import com.pda.boardapplication.repository.BookmarkRepository;
-import com.pda.boardapplication.repository.LikeRepository;
+import com.pda.boardapplication.repository.*;
 import com.pda.exceptionhandler.exceptions.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Example;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -21,6 +17,7 @@ public class BoardInteractionService {
     private final LikeRepository likeRepository;
     private final BookmarkRepository bookmarkRepository;
     private final BoardCountRepository boardCountRepository;
+    private final UnlockedRepository unlockedRepository;
 
 
     /**
