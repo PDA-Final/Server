@@ -59,7 +59,7 @@ public class JwtProvider {
 
     public TokenInfo generateToken(TokenableInfo payload) {
         LocalDateTime now = LocalDateTime.now();
-        LocalDateTime accessExpiredTime = now.plusMinutes(15);
+        LocalDateTime accessExpiredTime = now.plusHours(24); // TODO: 원복하기
         LocalDateTime refreshExpiredTime = now.plusDays(30);
 
         String accessToken = Jwts.builder()
