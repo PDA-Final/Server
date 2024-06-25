@@ -71,6 +71,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -367,6 +368,11 @@ public class UserService implements SignUpUseCase, ReissueUseCase,
             .isLast(response.isLast())
             .lastIndex(response.getLastIndex())
             .build();
+    }
+
+    @Override
+    public LocalDate getBirth(Long id) {
+        return readUserOutputPort.getUserByUserId(UserId.of(id)).getBirth().toLocalDate();
     }
 
     private String uploadImage(MultipartFile file, UserId id) {
