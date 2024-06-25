@@ -11,4 +11,5 @@ public interface GetUserUseCase {
     UserServiceResponse findById(Long id, Long myId);
     GetUserPagingResponse searchUserByNickname(SearchUserServiceRequest request);
     LocalDate getBirth(Long id);
+    boolean isAssetConnected(Long id);
 }

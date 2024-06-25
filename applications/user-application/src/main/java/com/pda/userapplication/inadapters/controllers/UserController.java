@@ -208,4 +208,12 @@ public class UserController {
     public GlobalResponse<LocalDate> getBirth(@AuthUser AuthUserInfo authUser) {
         return ApiUtils.success("생일 조회 완료", getUserUseCase.getBirth(authUser.getId()));
     }
+
+    @GetMapping("/assets/status")
+    @Operation(summary = "유저 자산 연결 여부", description = "유저 자산 연결 여부",
+        security = @SecurityRequirement(name = "bearerAuth"))
+    @ApiResponse(responseCode = "200", description = "성공")
+    public GlobalResponse<Boolean> isAssetConnected(@AuthUser AuthUserInfo authUser) {
+        return ApiUtils.success("생일 조회 완료", getUserUseCase.isAssetConnected(authUser.getId()));
+    }
 }

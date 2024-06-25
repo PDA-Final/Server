@@ -375,6 +375,11 @@ public class UserService implements SignUpUseCase, ReissueUseCase,
         return readUserOutputPort.getUserByUserId(UserId.of(id)).getBirth().toLocalDate();
     }
 
+    @Override
+    public boolean isAssetConnected(Long id) {
+        return readUserDetailOutputPort.findUserDetailById(UserId.of(id)).isPresent();
+    }
+
     private String uploadImage(MultipartFile file, UserId id) {
         try {
             return s3Service.upload(file,String.format("users/profile/%d",id.toLong()));
