@@ -238,7 +238,7 @@ public class MyEmoChallengeService {
         int totalprice =0;
         List<MyEmoChallengeLog> mcl = echallenges.stream()
                 .map((c)->MyEmoChallengeLog.builder()
-                        .savingAt(LocalDate.now())
+                        .savingAt(c.getSavingAt())
                         .price(emojiRepository.findById(c.getEmojiId()).get().getPrice())
                         .emotion(emojiRepository.findById(c.getEmojiId()).get().getEmotion())
                         .emojiUrl(emojiRepository.findById(c.getEmojiId()).get().getImgUrl())
