@@ -4,6 +4,7 @@ import com.pda.apiutils.ApiUtils;
 import com.pda.apiutils.GlobalResponse;
 import com.pda.boardapplication.dto.BoardDto;
 import com.pda.boardapplication.dto.UserDto;
+import com.pda.boardapplication.exceptions.LockedBoardException;
 import com.pda.boardapplication.service.BoardInteractionService;
 import com.pda.boardapplication.service.BoardService;
 import com.pda.exceptionhandler.exceptions.BadRequestException;
@@ -58,9 +59,21 @@ public class BoardController {
         UserDto.InfoDto userInfoDto = user != null ?
                 UserDto.InfoDto.fromAuthUserInfo(user) : null;
 
+
         BoardDto.DetailRespDto detailRespDto = boardService.getBoardDetail(boardId, userInfoDto);
 
         return ApiUtils.success("success", detailRespDto);
+    }
+
+    @ExceptionHandler(LockedBoardException.class)
+    public GlobalResponse<BoardDto.LockedContentRespDto> handleLockedBoardException(LockedBoardException e) {
+        BoardDto.LockedContentRespDto lockedContentRespDto =
+                BoardDto.LockedContentRespDto.builder()
+                        .unlockedCount(e.getUnlockedCount())
+                        .likedCount(e.getLikeCount())
+                        .build();
+
+        return ApiUtils.success("success", lockedContentRespDto);
     }
 
     @GetMapping
@@ -152,6 +165,18 @@ public class BoardController {
         return count > 0 ?
                 ApiUtils.created("created", result) :
                 ApiUtils.success("deleted", result);
+    }
+
+    @PostMapping("/{boardId}/unlock")
+    @Operation(summary = "Unlock board item using credit", security = @SecurityRequirement(name = "bearerAuth"))
+    public GlobalResponse<String> unlockBoard(@PathVariable("boardId") long boardId, @AuthUser AuthUserInfo user) {
+        log.debug("Unlock board {} by user {}", boardId, user.getId());
+
+        UserDto.InfoDto userInfoDto = UserDto.InfoDto.fromAuthUserInfo(user);
+
+        boardInteractionService.unlockBoard(boardId, userInfoDto);
+
+        return ApiUtils.success("success");
     }
 
     @GetMapping("/boards/tagged")

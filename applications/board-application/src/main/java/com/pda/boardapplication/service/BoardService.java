@@ -9,6 +9,12 @@ import com.pda.boardapplication.dto.UserDto;
 import com.pda.boardapplication.entity.Board;
 import com.pda.boardapplication.entity.BoardChallengeTag;
 import com.pda.boardapplication.entity.BoardCount;
+import com.pda.boardapplication.entity.UnlockedPK;
+import com.pda.boardapplication.exceptions.LockedBoardException;
+import com.pda.boardapplication.repository.BoardCountRepository;
+import com.pda.boardapplication.repository.BoardRepository;
+import com.pda.boardapplication.repository.CategoryRepository;
+import com.pda.boardapplication.repository.UnlockedRepository;
 import com.pda.boardapplication.entity.BoardProductTag;
 import com.pda.boardapplication.repository.*;
 import com.pda.boardapplication.utils.CategoryUtils;
@@ -42,6 +48,7 @@ public class BoardService {
 
     private final BoardCountRepository boardCountRepository;
 
+    private final UnlockedRepository unlockedRepository;
     private final BoardProductTagRepository boardProductTagRepository;
 
     private final BoardChallengeTagRepository boardChallengeTagRepository;
@@ -63,6 +70,9 @@ public class BoardService {
         // Given category cannot be blank by @NotBlack Validation
         Integer categoryId = CategoryUtils.verifyCategory(registerReqDto.getCategory());
 
+        log.info("{}, {}", registerReqDto.isLocked(), categoryId);
+        if(registerReqDto.isLocked() && (categoryId != 5))
+            throw new BadRequestException("Given category cannot be locked");
         log.info("Given category was : {} verified to : {}", registerReqDto.getCategory(), categoryId);
 
         Board board = Board.builder()
@@ -75,6 +85,7 @@ public class BoardService {
                 .authorProfile(authorInfoDto.getProfile())
                 .thumbnail(boardSummary[0])
                 .summary(boardSummary[1])
+                .locked(registerReqDto.isLocked())
                 .build();
 
         long boardId = boardRepository.save(board).getId();
@@ -120,12 +131,20 @@ public class BoardService {
      * Get board detail
      * @param boardId target board id
      * @return
-     * @throws NotFoundException - target does not exists
+     * @throws NotFoundException - target does not exist
+     * @throws LockedBoardException - target is locked
      */
-    public BoardDto.DetailRespDto getBoardDetail(long boardId, UserDto.InfoDto userInfoDto) {
+    public BoardDto.DetailRespDto getBoardDetail(long boardId, UserDto.InfoDto userInfoDto) throws LockedBoardException {
         log.debug("Get detail of board : {}", boardId);
 
         Board board = boardRepository.findById(boardId).orElseThrow(NotFoundException::new);
+
+        if(board.getUserId() == userInfoDto.getId()) {
+            log.debug("User's board, SKIP");
+        } else if (board.isLocked() && !unlockedRepository.existsById(new UnlockedPK(boardId, userInfoDto.getId()))) {
+            int unlockedCount = unlockedRepository.findAllByBoardId(boardId).size();
+            throw new LockedBoardException(unlockedCount ,board.getLikes().size());
+        }
 
         return BoardDto.DetailRespDto.builder()
                 .title(board.getTitle())
@@ -220,6 +239,7 @@ public class BoardService {
                         .commentCount(elem.getComments().size())
                         .authorNickname(elem.getAuthorNickname())
                         .authorProfile(elem.getAuthorProfile())
+                        .locked(elem.isLocked())
                         .build()
         ).toList();
     }

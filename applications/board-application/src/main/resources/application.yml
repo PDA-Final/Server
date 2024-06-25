@@ -1,5 +1,9 @@
 service-url: /api/board-service
 
+out-service:
+  credit:
+    url: http://localhost:8085
+
 server:
   port: 8082
   shutdown: graceful
@@ -71,3 +75,8 @@ management:
     web:
       exposure:
         include: shutdown, health
+
+logging:
+  level:
+    com.netflix: ERROR
+    org.apache.kafka: ERROR
