@@ -11,7 +11,6 @@ import com.pda.boardapplication.repository.BookmarkRepository;
 import com.pda.boardapplication.repository.LikeRepository;
 import com.pda.boardapplication.utils.ChallengeUtils;
 import com.pda.exceptionhandler.exceptions.NotFoundException;
-import com.pda.kafkautils.board.BoardPostSuccessDto;
 import com.pda.kafkautils.challenge.ChallengeSuccessDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

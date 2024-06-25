@@ -55,8 +55,6 @@ public class BoardService {
 
     private final ProducerService producerService;
 
-    private final S3Service s3Service;
-
     /**
      * Register Board
      * @param registerReqDto data to register board
@@ -93,7 +91,7 @@ public class BoardService {
         boardCountRepository.save(BoardCount.builder()
                         .board(board).likeCnt(0).viewCnt(0).build());
 
-        log.debug("tagged onfo {} {}", registerReqDto.getProductId(), registerReqDto.getChallengeId());
+        log.debug("tagged info {} {}", registerReqDto.getProductId(), registerReqDto.getChallengeId());
 
         if(registerReqDto.getProductId() > 0) {
             log.debug("Create product tag {} with board {}", registerReqDto.getProductId(), registerReqDto.getProductId());
@@ -180,11 +178,9 @@ public class BoardService {
                 .authorId(board.getUserId())
                 .authorNickname(board.getAuthorNickname())
                 .authorProfile(board.getAuthorProfile())
-                .liked(userInfoDto != null &&
-                        board.getLikes().stream().anyMatch(elem ->
+                .liked(board.getLikes().stream().anyMatch(elem ->
                         elem.getUserId() == userInfoDto.getId()))
-                .bookmarked(userInfoDto != null &&
-                        board.getBookmarks().stream().anyMatch(elem ->
+                .bookmarked(board.getBookmarks().stream().anyMatch(elem ->
                         elem.getUserId() == userInfoDto.getId()))
                 .build();
     }
