@@ -154,6 +154,7 @@ public class PortfolioService implements PortfolioUseCase {
                 domesticStocks.add(StockResponse.builder()
                     .code(portfolio.getCode())
                     .name(portfolio.getName())
+                        .dartCode(portfolio.getDartCode())
                     .rate(getRate(portfolio.getQuantity()*portfolio.getPrice(), domesticStockAmount))
                     .build());
             }
