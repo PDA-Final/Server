@@ -3,7 +3,7 @@ package com.pda.challengeapplication.configs.kafka;
 import com.pda.challengeapplication.mychallenges.dto.request.outer.SendChallengeResultRequest;
 import com.pda.challengeapplication.mychallenges.service.SendMyChallengeResultPort;
 import com.pda.kafkautils.KafkaJson;
-import com.pda.kafkautils.challenge.ChallengeResultDto;
+import com.pda.kafkautils.alert.AlertMessageDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.scheduling.annotation.Async;
@@ -17,12 +17,11 @@ public class KafkaOutputAdapter implements SendMyChallengeResultPort {
     @Async
     @Override
     public void sendChallengeResult(final SendChallengeResultRequest request){
-        kafkaTemplate.send("alret-topic", ChallengeResultDto.builder()
-                .result(request.getResult())
-                .challengeName(request.getChallengeName())
-                .logoUrl(request.getLogoUrl())
+        kafkaTemplate.send("alret-topic", AlertMessageDto.builder()
                 .userId(request.getUserId())
-                .transactionDateTime(request.getTransactionDateTime())
+                .messageType("CREDIT")
+                .content(request.getResult())
+                .thumbnail(request.getLogoUrl())
                 .build());
     }
 }
