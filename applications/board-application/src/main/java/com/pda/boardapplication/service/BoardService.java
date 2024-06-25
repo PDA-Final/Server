@@ -144,17 +144,19 @@ public class BoardService {
 
         Board board = boardRepository.findById(boardId).orElseThrow(NotFoundException::new);
 
-        if(board.getUserId() == userInfoDto.getId()) {
-            log.debug("User's board, SKIP");
-        } else if (board.isLocked() && !unlockedRepository.existsById(new UnlockedPK(boardId, userInfoDto.getId()))) {
-            log.info("Target board : {} is locked, user {} has not been unlocked yet", boardId, userInfoDto.getId());
-            int unlockedCount = unlockedRepository.findAllByBoardId(boardId).size();
-            throw new LockedBoardException(unlockedCount ,board.getLikes().size());
-        }
+//        if(board.getUserId() == userInfoDto.getId()) {
+//            log.debug("User's board, SKIP");
+//        }
+//        else if (board.isLocked() && !unlockedRepository.existsById(new UnlockedPK(boardId, userInfoDto.getId()))) {
+//            log.info("Target board : {} is locked, user {} has not been unlocked yet", boardId, userInfoDto.getId());
+//            int unlockedCount = unlockedRepository.findAllByBoardId(boardId).size();
+//            throw new LockedBoardException(unlockedCount ,board.getLikes().size());
+//        }
 
         return BoardDto.DetailRespDto.builder()
                 .title(board.getTitle())
-                .content(board.getContent())
+                .content(board.isLocked() && !unlockedRepository.existsById(new UnlockedPK(boardId, userInfoDto.getId())) ?
+                        board.getContent() : "")
                 .category(board.getCategory())
                 .comments(board.getComments().stream().filter((comment) ->
                         comment.getParentComment() == null
@@ -189,6 +191,8 @@ public class BoardService {
                         elem.getUserId() == userInfoDto.getId()))
                 .bookmarked(board.getBookmarks().stream().anyMatch(elem ->
                         elem.getUserId() == userInfoDto.getId()))
+                .locked(board.isLocked())
+                .unlockedCount(board.isLocked() ? unlockedRepository.findAllByBoardId(boardId).size() : 0)
                 .build();
     }
 
