@@ -2,7 +2,7 @@ package com.pda.challengeapplication.configs.kafka;
 
 import com.pda.kafkautils.KafkaJson;
 import com.pda.kafkautils.KafkaUtils;
-import com.pda.kafkautils.challenge.ChallengeResultDto;
+import com.pda.kafkautils.alert.AlertMessageDto;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.RoundRobinPartitioner;
 import org.apache.kafka.common.serialization.StringSerializer;
@@ -30,7 +30,7 @@ public class KafkaProducerConfig {
         config.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
         config.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class);
         config.put(JsonSerializer.TYPE_MAPPINGS, KafkaUtils.getJsonTypeMappingInfo(
-                ChallengeResultDto.class));
+                AlertMessageDto.class));
         return new DefaultKafkaProducerFactory<>(config);
     }
 

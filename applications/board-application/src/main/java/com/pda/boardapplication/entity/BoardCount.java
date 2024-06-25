@@ -18,7 +18,7 @@ public class BoardCount extends BaseEntity {
     private long boardId;
 
     @MapsId
-    @OneToOne
+    @OneToOne(cascade = CascadeType.REMOVE)
     @JoinColumn(name = "board_id")
     private Board board;
 

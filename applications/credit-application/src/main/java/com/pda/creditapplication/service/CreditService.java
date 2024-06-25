@@ -5,6 +5,7 @@ import com.pda.creditapplication.repository.CreditLogRepository;
 import com.pda.creditapplication.repository.CreditStore;
 import com.pda.creditapplication.repository.CreditStoreRepository;
 import com.pda.creditapplication.service.dto.req.SetAmountServiceRequest;
+import com.pda.creditapplication.service.dto.req.TransferServiceRequest;
 import com.pda.exceptionhandler.exceptions.BadRequestException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Async;
@@ -56,6 +57,20 @@ public class CreditService {
     }
 
     @Transactional
+    public void transfer(final TransferServiceRequest request) {
+        withdraw(SetAmountServiceRequest.builder()
+            .amount(request.getAmount())
+            .transactionDateTime(LocalDateTime.now())
+            .userId(request.getFromUserId())
+            .build());
+
+        deposit(SetAmountServiceRequest.builder()
+            .amount(request.getAmount())
+            .transactionDateTime(LocalDateTime.now())
+            .userId(request.getToUserId())
+            .build());
+    }
+
     public Long getAmount(final Long userId) {
         return storeRepository.findByUserId(userId)
             .orElseThrow(() -> new BadRequestException("유저가 존재하지 않습니다.")).getAmount();

@@ -110,7 +110,7 @@ public class SecurityRequestMatcher {
             .build();
     }
 
-    public static SecurityRequestMatcher anyHasAnyRoles(List<UserRole> roles, HttpMethod method, String  ...urls) {
+    public static SecurityRequestMatcher hasAnyRolesOf(List<UserRole> roles, HttpMethod method, String  ...urls) {
         return SecurityRequestMatcher.builder()
             .requestHookType(RequestHookType.HAS_ANY_ROLE)
             .urls(urls)
@@ -119,7 +119,7 @@ public class SecurityRequestMatcher {
             .build();
     }
 
-    public static SecurityRequestMatcher anyHasAnyRoles(List<UserRole> roles) {
+    public static SecurityRequestMatcher hasAnyRolesOf(List<UserRole> roles) {
         return SecurityRequestMatcher.builder()
             .requestHookType(RequestHookType.HAS_ANY_ROLE)
             .roles(roles)

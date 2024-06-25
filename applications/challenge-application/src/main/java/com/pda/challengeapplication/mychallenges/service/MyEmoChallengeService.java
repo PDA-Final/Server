@@ -6,6 +6,7 @@ import com.pda.challengeapplication.challenges.repository.ChallengeRepository;
 import com.pda.challengeapplication.emojis.EmojiRepository;
 import com.pda.challengeapplication.mychallenges.dto.request.PostMyEmoLogRequest;
 import com.pda.challengeapplication.mychallenges.dto.request.outer.PostMyEmoChallengeRequest;
+import com.pda.challengeapplication.mychallenges.dto.request.outer.SendChallengeResultRequest;
 import com.pda.challengeapplication.mychallenges.dto.request.outer.TransferRequest;
 import com.pda.challengeapplication.mychallenges.dto.response.MyEmoChallengeLog;
 import com.pda.challengeapplication.mychallenges.dto.response.MyEmoChallengeLogResponse;
@@ -23,6 +24,7 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -31,6 +33,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 import java.net.URI;
 import java.nio.charset.Charset;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -49,6 +52,7 @@ public class MyEmoChallengeService {
     private final MyChallengeRepository myChallengeRepository;
     private final EmojiRepository emojiRepository;
     private final ChallengeRepository challengeRepository;
+    private final  SendMyChallengeResultPort sendMyChallengeResultPort;
 
     //챌린지 참여
     public void participateEmoChallenge(PostMyEmoChallengeRequest pa, String token, long uid) {
@@ -139,6 +143,8 @@ public class MyEmoChallengeService {
 
     }
 
+
+
     // 감정 저축하기
 
     public void createMyEmoLog(PostMyEmoLogRequest postMyEmoRequest, String token, Long uid) {
@@ -191,10 +197,40 @@ public class MyEmoChallengeService {
         if(mc.getEndAt() == LocalDate.now()){
             mc.editMyChallengeStatus("성공");
             myChallengeRepository.save(mc);
+            SendResult(mc.getChallenge().getName(), mc.getChallenge().getLogoUrl(), mc.getUserId(), mc.getChallenge().getChallengeDetail().getReward());
             // TODO 저축 챌린지 성공 알림
 
         }
     }
+
+    @Async
+    public void SendResult(String challengeName, String logoUrl, Long userId, Integer reward){
+        sendMyChallengeResultPort.sendChallengeResult(SendChallengeResultRequest.builder()
+                .result(challengeName+"성공으로" +reward+" 크레딧을 획득하셨습니다.")
+                .challengeName(challengeName)
+                .userId(userId)
+                .transactionDateTime(LocalDateTime.now())
+                .logoUrl(logoUrl)
+                .build());
+
+
+    }
+
+    @Async
+    public void SendFailResult(String challengeName, String logoUrl, Long userId){
+        sendMyChallengeResultPort.sendChallengeResult(SendChallengeResultRequest.builder()
+                .result(challengeName+"를 실패하셨습니다")
+                .challengeName(challengeName)
+                .userId(userId)
+                .transactionDateTime(LocalDateTime.now())
+                .logoUrl(logoUrl)
+                .build());
+
+
+    }
+
+
+
 
     public MyEmoChallengeLogResponse readAllEmoChallengeLog(long uId) {
         long mId = myChallengeRepository.selectMyChallenge(1,uId).getId();
@@ -232,6 +268,7 @@ public class MyEmoChallengeService {
             if(myAssetChallengeRepository.findByMyChallengeIdAndSavingAt(s.getId(),LocalDate.now()) == null){
                 // 그날 감정 저축한 기록이 없으면 해당 myChallengeId는 실패로
                 isSuccess = "실패";
+                SendFailResult(s.getChallenge().getName(), s.getChallenge().getLogoUrl(), s.getUserId());
                 //TODO 저축 알림 실패했을 경우 알람
             }
             s.editMyChallengeStatus(isSuccess);

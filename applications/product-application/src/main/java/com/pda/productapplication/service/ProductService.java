@@ -1,6 +1,5 @@
 package com.pda.productapplication.service;
 
-import com.pda.exceptionhandler.exceptions.BadRequestException;
 import com.pda.exceptionhandler.exceptions.NotFoundException;
 import com.pda.productapplication.dto.ProductDto;
 import com.pda.productapplication.entity.*;
@@ -10,7 +9,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
@@ -74,7 +72,7 @@ public class ProductService {
                         .corpImage(product.getCorp().getLogoImg())
                         .cardImage(product.getCardImg())
                         .tags(convertToList(product.getTags()))
-                        .boardCount(product.getBoardCount().getBoardCount())
+                        .boardCount(product.getBoardCnt().getBoardCnt())
                         .createdTime(product.getCreatedAt())
                         .build()
         ).collect(Collectors.toList());
@@ -97,7 +95,7 @@ public class ProductService {
                 .corpImage(product.getCorp().getLogoImg())
                 .cardImage(product.getCardImg())
                 .tags(convertToList(product.getTags()))
-                .boardCount(product.getBoardCount().getBoardCount())
+                .boardCount(product.getBoardCnt().getBoardCnt())
                 .createdTime(product.getCreatedAt())
                 .build();
     }
@@ -284,11 +282,12 @@ public class ProductService {
                 ProductDto.BasicRespDto.builder()
                         .id(product.getId())
                         .name(product.getName())
+                        .categoryName(product.getCategory().getName())
                         .corpName(product.getCorp().getName())
                         .corpImage(product.getCorp().getLogoImg())
                         .cardImage(product.getCardImg())
                         .tags(convertToList(product.getTags()))
-                        .boardCount(product.getBoardCount().getBoardCount())
+                        .boardCount(product.getBoardCnt().getBoardCnt())
                         .createdTime(product.getCreatedAt())
                         .build()
         ).collect(Collectors.toList());
@@ -309,7 +308,7 @@ public class ProductService {
 
         return ProductDto.BoardCountReqDto.builder()
                 .productId(boardCount.getProductId())
-                .boardCount(boardCount.getBoardCount())
+                .boardCnt(boardCount.getBoardCnt())
                 .build();
     }
 
@@ -346,11 +345,12 @@ public class ProductService {
                 ProductDto.BasicRespDto.builder()
                         .id(product.getId())
                         .name(product.getName())
+                        .categoryName(product.getCategory().getName())
                         .corpName(product.getCorp().getName())
                         .corpImage(product.getCorp().getLogoImg())
                         .cardImage(product.getCardImg())
                         .tags(convertToList(product.getTags()))
-                        .boardCount(product.getBoardCount().getBoardCount())
+                        .boardCount(product.getBoardCnt().getBoardCnt())
                         .createdTime(product.getCreatedAt())
                         .build()
         ).collect(Collectors.toList());
@@ -380,7 +380,7 @@ public class ProductService {
                     .corpImage(product.getCorp().getLogoImg())
                     .cardImage(product.getCardImg())
                     .tags(convertToList(product.getTags()))
-                    .boardCount(product.getBoardCount().getBoardCount())
+                    .boardCount(product.getBoardCnt().getBoardCnt())
                     .createdTime(product.getCreatedAt())
                     .build()).toList());
         });
@@ -413,7 +413,7 @@ public class ProductService {
                         .corpImage(product.getCorp().getLogoImg())
                         .cardImage(product.getCardImg())
                         .tags(convertToList(product.getTags()))
-                        .boardCount(product.getBoardCount().getBoardCount())
+                        .boardCount(product.getBoardCnt().getBoardCnt())
                         .createdTime(product.getCreatedAt())
                         .build()
         ).collect(Collectors.toList());

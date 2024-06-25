@@ -6,6 +6,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import java.util.List;
 
@@ -27,6 +29,7 @@ public class Board extends BaseEntity {
 
     private String title;
 
+    @Column(columnDefinition = "TEXT")
     private String content;
 
     private String summary;
@@ -39,36 +42,45 @@ public class Board extends BaseEntity {
 
     private String authorProfile;
 
-    @OneToMany(mappedBy = "board")
+    @OneToMany(mappedBy = "board", fetch = FetchType.LAZY)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     @JsonBackReference
     private List<Comment> comments;
 
-    @OneToMany(mappedBy = "board")
+    @OneToMany(mappedBy = "board", fetch = FetchType.LAZY)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     @JsonBackReference
     private List<Like> likes;
 
-    @OneToMany(mappedBy = "board")
+    @OneToMany(mappedBy = "board", fetch = FetchType.LAZY)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     @JsonBackReference
     private List<Bookmark> bookmarks;
 
-    @OneToMany(mappedBy = "board")
+    @OneToMany(mappedBy = "board", fetch = FetchType.LAZY)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     @JsonBackReference
     private List<View> views;
 
-    @OneToMany(mappedBy = "boardChallengeTagPK.board")
+    @OneToMany(mappedBy = "board", fetch = FetchType.LAZY)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     @JsonBackReference
     private List<BoardChallengeTag> taggedChallenges;
 
-    @OneToMany(mappedBy = "boardProductTagPK.board")
+    @OneToMany(mappedBy = "board", fetch = FetchType.LAZY)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     @JsonBackReference
     private List<BoardProductTag> taggedProducts;
 
-    @OneToOne(mappedBy = "board")
+    @OneToOne(mappedBy = "board", orphanRemoval = true)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     @JsonBackReference
     private BoardCount boardCount;
 
-    public void updateEntity(String title, String content) {
+    public void updateEntity(String title, String thumbnail, String summary, String content) {
         this.title = title == null ? this.title : title;
+        this.thumbnail = thumbnail == null ? this.thumbnail : thumbnail;
+        this.summary = summary == null ? this.summary : summary;
         this.content = content == null ? this.content : content;
     }
 }

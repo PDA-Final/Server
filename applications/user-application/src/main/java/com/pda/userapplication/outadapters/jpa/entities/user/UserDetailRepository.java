@@ -15,4 +15,6 @@ public interface UserDetailRepository extends JpaRepository<UserDetailEntity, Lo
         "left join UserEntity u on ud.user.id = u.id " +
         "where ud.user.id = :userId")
     Optional<UserDetailEntity> findByUserId(@Param("userId") Long userId);
+
+    Optional<UserDetailEntity> findByContact(String contact);
 }

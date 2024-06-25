@@ -20,6 +20,8 @@ project(":applications:board-application") {
         implementation project(':utils:api-utils')
         implementation project(':utils:tofin-security')
         implementation project(':utils:s3-utils')
+        implementation 'org.springframework.kafka:spring-kafka'
+        implementation project(":utils:kafka-utils")
 
         testImplementation 'org.springframework.boot:spring-boot-starter-test'
     }

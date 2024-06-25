@@ -12,7 +12,7 @@ import com.pda.tofinsecurity.UserInfoEncoder;
 import com.pda.tofinsecurity.jwt.JwtProvider;
 import com.pda.tofinsecurity.jwt.TokenInfo;
 import com.pda.tofinsecurity.jwt.TokenableUser;
-import com.pda.userapplication.domains.NormalUser;
+import com.pda.userapplication.domains.UserDetail;
 import com.pda.userapplication.domains.User;
 import com.pda.userapplication.domains.vo.Birth;
 import com.pda.userapplication.domains.vo.ImageUrl;
@@ -39,18 +39,20 @@ import com.pda.userapplication.services.in.dto.req.SignUpServiceRequest;
 import com.pda.userapplication.services.in.dto.req.UpdateProfileServiceRequest;
 import com.pda.userapplication.services.in.dto.res.AvailableContactServiceResponse;
 import com.pda.userapplication.services.in.dto.res.AvailableTofinIdServiceResponse;
-import com.pda.userapplication.services.in.dto.res.ConnectAssetInfoResponse;
+import com.pda.userapplication.services.in.dto.res.AssetInfoServiceResponse;
 import com.pda.userapplication.services.in.dto.res.GetUserPagingResponse;
 import com.pda.userapplication.services.in.dto.res.GetUserSummaryResponse;
+import com.pda.userapplication.services.in.dto.res.SetTendencyResponse;
+import com.pda.userapplication.services.in.dto.res.SignInResponse;
 import com.pda.userapplication.services.in.dto.res.TokenInfoServiceResponse;
 import com.pda.userapplication.services.in.dto.res.UserDetailInfoResponse;
 import com.pda.userapplication.services.in.dto.res.UserServiceResponse;
 import com.pda.userapplication.services.out.GetAssetsOutputPort;
 import com.pda.userapplication.services.out.ReadFollowOutputPort;
-import com.pda.userapplication.services.out.ReadNormalUserOutputPort;
+import com.pda.userapplication.services.out.ReadUserDetailOutputPort;
 import com.pda.userapplication.services.out.ReadUserOutputPort;
 import com.pda.userapplication.services.out.RefreshTokenOutputPort;
-import com.pda.userapplication.services.out.SaveNormalUserOutputPort;
+import com.pda.userapplication.services.out.SaveUserDetailOutputPort;
 import com.pda.userapplication.services.out.SaveUserOutputPort;
 import com.pda.userapplication.services.out.SendCreditOutputPort;
 import com.pda.userapplication.services.out.SendUpdateUserOutputPort;
@@ -87,9 +89,9 @@ public class UserService implements SignUpUseCase, ReissueUseCase,
     private final UserInfoEncoder userInfoEncoder;
     private final JwtProvider jwtProvider;
     private final RefreshTokenOutputPort refreshTokenOutputPort;
-    private final SaveNormalUserOutputPort saveNormalUserOutputPort;
+    private final SaveUserDetailOutputPort saveUserDetailOutputPort;
     private final GetAssetsOutputPort getAssetsOutputPort;
-    private final ReadNormalUserOutputPort readNormalUserOutputPort;
+    private final ReadUserDetailOutputPort readUserDetailOutputPort;
     private final SendCreditOutputPort sendCreditOutputPort;
     private final S3Service s3Service;
     private final SendUpdateUserOutputPort sendUpdateUserOutputPort;
@@ -101,7 +103,7 @@ public class UserService implements SignUpUseCase, ReissueUseCase,
         if (isDuplicateTofinId(TofinId.of(request.getTofinId())))
             throw new ConflictException("해당 아이디는 이미 존재합니다.");
 
-        User user = saveUserOutputPort.save(NormalUser.builder()
+        User user = saveUserOutputPort.save(UserDetail.builder()
             .toFinId(TofinId.of(request.getTofinId()))
             .userInfo(userInfoEncoder.hashed(request.getUserInfo()))
             .birth(Birth.of(request.getBirth()))
@@ -149,15 +151,32 @@ public class UserService implements SignUpUseCase, ReissueUseCase,
 
     @Transactional
     @Override
-    public TokenInfoServiceResponse signIn(final SignInServiceRequest request) {
+    public SignInResponse signIn(final SignInServiceRequest request) {
         User user = readUserOutputPort.findByTofinId(TofinId.of(request.getTofinId()))
             .orElseThrow(() -> new UnAuthorizedException("아이디 혹은 비밀번호가 틀렸습니다."));
 
         if (!userInfoEncoder.matches(request.getUserInfo(), user.getUserInfo()))
             throw new UnAuthorizedException("아이디 혹은 비밀번호가 틀렸습니다.");
 
-        return toTokenInfoServiceResponse(
-            generateTokenAndSaveRefresh(user), user);
+        TokenInfo tokenInfo = generateTokenAndSaveRefresh(user);
+
+        SignInResponse.SignInResponseBuilder builder = SignInResponse.builder()
+            .id(user.getId().toLong())
+            .nickname(user.getNickname().toString())
+            .accessToken(tokenInfo.getAccessToken())
+            .grantType(tokenInfo.getGrantType())
+            .refreshToken(tokenInfo.getRefreshToken());
+
+        Optional<UserDetail> userDetail = readUserDetailOutputPort.findUserDetailById(user.getId());
+        if (userDetail.isPresent()) {
+            builder.loan(userDetail.get().isLoanTendency());
+            builder.account(userDetail.get().isAccountTendency());
+            builder.invest(userDetail.get().isInvestTendency());
+            builder.card(userDetail.get().isCardTendency());
+            builder.purpose(userDetail.get().getPurpose()==null?null:userDetail.get().getPurpose().toString());
+        }
+
+        return builder.build();
     }
 
     @Transactional
@@ -195,8 +214,8 @@ public class UserService implements SignUpUseCase, ReissueUseCase,
 
     @Transactional
     @Override
-    public List<ConnectAssetInfoResponse> connectAssets(final ConnectAssetsServiceRequest request) {
-        NormalUser user = NormalUser.from(readUserOutputPort.getUserByUserId(UserId.of(request.getUserId())));
+    public List<AssetInfoServiceResponse> connectAssets(final ConnectAssetsServiceRequest request) {
+        UserDetail user = UserDetail.from(readUserOutputPort.getUserByUserId(UserId.of(request.getUserId())));
         if (isDuplicateContact(request.getContact()))
             throw new BadRequestException("해당 전화번호는 이미 사용 중 입니다.");
 
@@ -204,7 +223,7 @@ public class UserService implements SignUpUseCase, ReissueUseCase,
         user.setBackSocialId(request.getBackSocialId());
         user.setSocialName(request.getSocialName());
 
-        user = saveNormalUserOutputPort.save(user);
+        user = saveUserDetailOutputPort.save(user);
 
         return toConnectAssetInfoListFrom(getAssetsOutputPort.getAssets(user));
     }
@@ -212,7 +231,7 @@ public class UserService implements SignUpUseCase, ReissueUseCase,
     @Transactional
     @Override
     public void setPublicOption(final SetPublicOptionServiceRequest request) {
-        NormalUser user = readNormalUserOutputPort.findNormalUserByUserId(UserId.of(request.getUserId()))
+        UserDetail user = readUserDetailOutputPort.findUserDetailById(UserId.of(request.getUserId()))
             .orElseThrow(() -> new NotFoundException("해당 유저의 세부 정보가 존재하지 않습니다."));
 
         if (user.getBackSocialId() == null) throw new BadRequestException("자산 연결부터 하세요");
@@ -220,13 +239,13 @@ public class UserService implements SignUpUseCase, ReissueUseCase,
         user.setPublicAmount(request.isPublicAmount());
         user.setPublicPercent(request.isPublicPercent());
 
-        saveNormalUserOutputPort.save(user);
+        saveUserDetailOutputPort.save(user);
     }
 
     @Transactional
     @Override
-    public void setTendency(final SetTendencyServiceRequest request) {
-        NormalUser user = readNormalUserOutputPort.findNormalUserByUserId(UserId.of(request.getUserId()))
+    public SetTendencyResponse setTendency(final SetTendencyServiceRequest request) {
+        UserDetail user = readUserDetailOutputPort.findUserDetailById(UserId.of(request.getUserId()))
             .orElseThrow(() -> new NotFoundException("해당 유저의 세부 정보가 존재하지 않습니다."));
 
         if (user.getBackSocialId() == null) throw new BadRequestException("자산 연결부터 하세요");
@@ -242,12 +261,20 @@ public class UserService implements SignUpUseCase, ReissueUseCase,
             throw new BadRequestException("서비스 이용 목적이 올바르지 않습니다.");
         }
 
-        saveNormalUserOutputPort.save(user);
+        saveUserDetailOutputPort.save(user);
+
+        return SetTendencyResponse.builder()
+            .purpose(request.getPurpose())
+            .account(request.isAccount())
+            .card(request.isCard())
+            .loan(request.isLoan())
+            .invest(request.isInvest())
+            .build();
     }
 
     @Override
     public UserDetailInfoResponse getUserDetailInfo(Long userId) {
-        NormalUser user = readNormalUserOutputPort.findNormalUserByUserId(UserId.of(userId))
+        UserDetail user = readUserDetailOutputPort.findUserDetailById(UserId.of(userId))
             .orElseThrow(() -> new NotFoundException("해당 유저의 세부 정보가 존재하지 않습니다."));
 
         return UserDetailInfoResponse.builder()
@@ -263,6 +290,14 @@ public class UserService implements SignUpUseCase, ReissueUseCase,
     public TokenInfoServiceResponse updateProfile(final UpdateProfileServiceRequest request) {
         User user = readUserOutputPort.getUserByUserId(UserId.of(request.getUserId()));
         UserUpdateOutputRequest.UserUpdateOutputRequestBuilder builder = UserUpdateOutputRequest.builder();
+
+        // fetch
+        builder
+            .userId(user.getId().toLong())
+            .job(user.getJob())
+            .profileImage(user.getProfileImage().toString())
+            .nickname(user.getNickname().toString())
+            .role(user.getRole());
 
         if (request.getJob() != null) {
             user.setJob(toJobFrom(request.getJob()));
@@ -285,7 +320,7 @@ public class UserService implements SignUpUseCase, ReissueUseCase,
             builder.profileImage(imageUrl);
         }
 
-        sendUpdateUserOutputPort.sendUserOutput(builder.build());
+        sendUpdateUserOutputPort.sendUserUpdate(builder.build());
         User saveUser = saveUserOutputPort.save(user);
 
         return toTokenInfoServiceResponse(
@@ -383,6 +418,7 @@ public class UserService implements SignUpUseCase, ReissueUseCase,
     private TokenInfoServiceResponse toTokenInfoServiceResponse(final TokenInfo tokenInfo, User user) {
         return TokenInfoServiceResponse.builder()
             .id(user.getId().toLong())
+            .nickname(user.getNickname().toString())
             .accessToken(tokenInfo.getAccessToken())
             .refreshToken(tokenInfo.getRefreshToken())
             .grantType(tokenInfo.getGrantType())
@@ -390,14 +426,14 @@ public class UserService implements SignUpUseCase, ReissueUseCase,
     }
 
     private boolean isDuplicateContact(String contact) {
-        return readNormalUserOutputPort.existsByContact(contact);
+        return readUserDetailOutputPort.existsByContact(contact);
     }
 
-    private List<ConnectAssetInfoResponse> toConnectAssetInfoListFrom(AssetInfoResponse assetInfo) {
-        List<ConnectAssetInfoResponse> connectAssetInfos = new ArrayList<>();
+    private List<AssetInfoServiceResponse> toConnectAssetInfoListFrom(AssetInfoResponse assetInfo) {
+        List<AssetInfoServiceResponse> connectAssetInfos = new ArrayList<>();
 
         for(AccountResponse account: assetInfo.getAccounts()) {
-            connectAssetInfos.add(ConnectAssetInfoResponse.builder()
+            connectAssetInfos.add(AssetInfoServiceResponse.builder()
                     .cash(account.getCash())
                     .image(account.getLogo())
                     .productType(account.getAccountType())
@@ -407,7 +443,7 @@ public class UserService implements SignUpUseCase, ReissueUseCase,
         }
 
         for(CardResponse card: assetInfo.getCards()) {
-            connectAssetInfos.add(ConnectAssetInfoResponse.builder()
+            connectAssetInfos.add(AssetInfoServiceResponse.builder()
                     .number(card.getCardNumber())
                     .name(card.getName())
                     .productType("CARD")

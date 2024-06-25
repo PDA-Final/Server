@@ -1,10 +1,8 @@
 package com.pda.boardapplication.service;
 
 import com.pda.boardapplication.dto.UserDto;
-import com.pda.boardapplication.entity.BoardCount;
-import com.pda.boardapplication.entity.Bookmark;
-import com.pda.boardapplication.entity.Like;
-import com.pda.boardapplication.entity.LikePK;
+import com.pda.boardapplication.entity.*;
+import com.pda.boardapplication.repository.BoardCountRepository;
 import com.pda.boardapplication.repository.BoardRepository;
 import com.pda.boardapplication.repository.BookmarkRepository;
 import com.pda.boardapplication.repository.LikeRepository;
@@ -68,7 +66,7 @@ public class BoardInteractionService {
                 .userId(userInfoDto.getId())
                 .build();
 
-        if(!bookmarkRepository.exists(Example.of(bookmark))) {
+        if(!bookmarkRepository.existsById(new BookmarkPk(boardId, userInfoDto.getId()))) {
             bookmarkRepository.save(bookmark);
             return 1;
         } else {

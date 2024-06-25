@@ -6,6 +6,7 @@ import com.pda.boardapplication.entity.Comment;
 import com.pda.boardapplication.repository.BoardRepository;
 import com.pda.boardapplication.repository.CommentRepository;
 import com.pda.boardapplication.utils.UserUtils;
+import com.pda.exceptionhandler.exceptions.BadRequestException;
 import com.pda.exceptionhandler.exceptions.ForbiddenException;
 import com.pda.exceptionhandler.exceptions.NotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -32,10 +33,13 @@ public class CommentService {
     public long registerComment(long boardId, CommentDto.RegisterReqDto registerReqDto, UserDto.InfoDto userInfoDto) {
         log.debug("Register comment to board {}, parent: {}", boardId, registerReqDto.getParentId());
 
+        Comment parentComment = registerReqDto.getParentId() == 0 ? null
+                : verifyParentComment(boardId, registerReqDto.getParentId());
+
         Comment comment = Comment.builder()
                 .content(registerReqDto.getContent())
                 .board(boardRepository.getReferenceById(boardId))
-                .parentComment(registerReqDto.getParentId() == 0 ? null : commentRepository.getReferenceById(registerReqDto.getParentId()))
+                .parentComment(parentComment)
                 .userId(userInfoDto.getId())
                 .authorNickname(userInfoDto.getNickname())
                 .authorProfile(userInfoDto.getProfile())
@@ -61,10 +65,10 @@ public class CommentService {
                 .map((comment ->
                         CommentDto.CommentInfoDto.builder()
                                 .id(comment.getId())
-                                .content(comment.getContent())
-                                .authorId(comment.getUserId())
-                                .authorName(comment.getAuthorNickname())
-                                .authorProfile(comment.getAuthorProfile())
+                                .content(comment.isDeleted() ? "삭제된 댓글입니다." : comment.getContent())
+                                .authorId(comment.isDeleted() ? 0L : comment.getUserId())
+                                .authorName(comment.isDeleted() ? "anonymous" : comment.getAuthorNickname())
+                                .authorProfile(comment.isDeleted() ? "" : comment.getAuthorProfile())
                                 .replies(comment.getReplies().stream().map((reply) ->
                                                 CommentDto.ReplyInfoDto.builder()
                                                         .id(reply.getId())
@@ -76,6 +80,7 @@ public class CommentService {
                                                         .build()
                                         ).toList())
                                 .createdTime(comment.getCreatedAt())
+                                .deleted(comment.isDeleted())
                                 .build()
                 )).toList();
     }
@@ -114,7 +119,51 @@ public class CommentService {
         if(comment.getUserId() != userInfoDto.getId())
             throw new ForbiddenException("Illegal access to comment by unauthorized user");
 
-        commentRepository.delete(comment);
+        if(doSoftDelete(comment)) {
+            log.info("Cannot delete comment : {} | {}", comment.getParentComment(), comment.getReplies().size());
+            comment.updateSoftDelete();
+            commentRepository.save(comment);
+        } else {
+            log.info("No siblings, delete comment");
+            commentRepository.delete(comment);
+
+            // TODO check parent comment
+            if(comment.getParentComment().getReplies().isEmpty() && comment.getParentComment().isDeleted())
+                commentRepository.delete(comment.getParentComment());
+        }
         return 1;
+    }
+
+    /**
+     * Check whether soft delete must be performed to comment or not
+     * @param comment target comment
+     * @return whether soft delete must be performed or not
+     */
+    private boolean doSoftDelete(Comment comment) {
+        log.info("Given comment : {} | {}", comment.getParentComment(), comment.getReplies().size());
+        if(comment.getParentComment() != null || comment.getReplies().isEmpty())
+            return false;
+
+        else return true;
+    }
+
+    /**
+     * Verify given comment id and board id
+     * @param boardId target board id
+     * @param parentCommentId target parent id
+     * @return parent comment
+     * @throws NotFoundException target comment does not exist
+     * @throws BadRequestException target comment does not belong to target board or deleted
+     */
+    private Comment verifyParentComment(long boardId, long parentCommentId) {
+        Comment parentComment = commentRepository.findById(parentCommentId).orElseThrow(() ->
+            new NotFoundException("Parent Comment does not exists")
+        );
+        if(parentComment.isDeleted())
+            throw new BadRequestException("Comment has been already deleted");
+        if(parentComment.getBoard().getId() != boardId)
+            throw new BadRequestException("Comment does not belong to given board id");
+
+        return parentComment;
     }
 }

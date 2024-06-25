@@ -5,6 +5,7 @@ import com.pda.challengeapplication.challenges.repository.ChallengeDetailReposit
 import com.pda.challengeapplication.challenges.repository.ChallengeRepository;
 import com.pda.challengeapplication.challenges.repository.CorpChallengeDetailRepository;
 import com.pda.challengeapplication.mychallenges.dto.request.PostMyChallengeRequest;
+import com.pda.challengeapplication.mychallenges.dto.request.outer.SendChallengeResultRequest;
 import com.pda.challengeapplication.mychallenges.dto.response.MyChallengeBadgeResponse;
 import com.pda.challengeapplication.mychallenges.dto.response.MyChallengeResponse;
 import com.pda.challengeapplication.mychallenges.repository.MyAssetChallengeRepository;
@@ -12,10 +13,12 @@ import com.pda.challengeapplication.mychallenges.repository.MyChallenge;
 import com.pda.challengeapplication.mychallenges.repository.MyChallengeRepository;
 import com.pda.exceptionhandler.exceptions.ConflictException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -28,6 +31,7 @@ public class MyChallengeService {
     private final ChallengeDetailRepository challengeDetailRepository;
     private final MyChallengeRepository myChallengeRepository;
     private final MyAssetChallengeRepository myAssetChallengeRepository;
+    private final  SendMyChallengeResultPort sendMyChallengeResultPort;
 
     //진행중인 유저 챌린지
     public List<MyChallengeResponse> findChallengeByUserId(Long userId) {
@@ -216,10 +220,26 @@ public class MyChallengeService {
         for(MyChallenge mc : c){
             if(mc.getEndAt().isBefore(LocalDate.now()) ){
                 mc.editMyChallengeStatus("실패");
+                SendResult(mc.getChallenge().getName(), mc.getChallenge().getLogoUrl(), mc.getUserId());
                 // TODO 자산저축챌린지가 아닌 경우 실패 알림
+
+
             }
             myChallengeRepository.save(mc);
         }
+    }
+
+    @Async
+    public void SendResult(String challengeName, String logoUrl, Long userId){
+
+        sendMyChallengeResultPort.sendChallengeResult(SendChallengeResultRequest.builder()
+                .result(challengeName + "챌린지를 실패하셨습니다." )
+                .userId(userId)
+                .transactionDateTime(LocalDateTime.now())
+                .logoUrl(logoUrl)
+                .build());
+
+
     }
 
 

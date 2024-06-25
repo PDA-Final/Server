@@ -30,6 +30,6 @@ public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpec
     Page<Product> findByCategoryIdOrderByCreatedAt(@Param("categoryId") Long categoryId, Pageable pageable);
 
     // 인기순 정렬
-    @Query("SELECT p FROM Product p JOIN p.boardCount b WHERE p.category.id = :categoryId ORDER BY b.boardCount DESC")
+    @Query("SELECT p FROM Product p JOIN p.boardCnt b WHERE p.category.id = :categoryId ORDER BY b.boardCnt DESC")
     Page<Product> findByCategoryIdOrderByBoardCount(@Param("categoryId") Long categoryId, Pageable pageable);
 }
