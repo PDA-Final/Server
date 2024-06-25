@@ -55,7 +55,7 @@ public class MyEmoChallengeService {
     private final  SendMyChallengeResultPort sendMyChallengeResultPort;
 
     //챌린지 참여
-    public void participateEmoChallenge(PostMyEmoChallengeRequest pa, String token, long uid) {
+    public Long participateEmoChallenge(PostMyEmoChallengeRequest pa, String token, long uid) {
         log.info("url!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!", assetUrl);
         log.info("url!??????????", userUrl);
         if(pa.getInACNT() == pa.getOutACNT()){
@@ -139,7 +139,7 @@ public class MyEmoChallengeService {
         MyAssetChallengeDetail md = new MyAssetChallengeDetail(mySaveChallenge.getId(),pa.getInACNT(), pa.getOutACNT());
         myAssetChallengeDetailRepository.save(md);
 
-
+        return mySaveChallenge.getId();
 
     }
 
