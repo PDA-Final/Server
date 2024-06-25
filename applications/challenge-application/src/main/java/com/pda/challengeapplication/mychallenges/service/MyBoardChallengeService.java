@@ -52,16 +52,15 @@ public class MyBoardChallengeService {
         m.editMyChallengeEndAt(LocalDate.now());
         myChallengeRepository.save(m);
 
-        SendResult(m.getChallenge().getName(), m.getChallenge().getLogoUrl(), m.getUserId());
+        SendResult(m.getChallenge().getName(), m.getChallenge().getLogoUrl(), m.getUserId(), m.getChallenge().getChallengeDetail().getReward());
 
         // TODO: 알림 보내기
     }
 
     @Async
-    public void SendResult(String chellengeName, String logoUrl, Long userId){
+    public void SendResult(String challengeName, String logoUrl, Long userId, Integer reward){
         sendMyChallengeResultPort.sendChallengeResult(SendChallengeResultRequest.builder()
-                .result("성공")
-                .challengeName(chellengeName)
+                .result(challengeName + "에 성공하여 " + reward + "크레딧을 획득하셨습니다.")
                 .userId(userId)
                 .transactionDateTime(LocalDateTime.now())
                 .logoUrl(logoUrl)
