@@ -15,6 +15,7 @@ public class PortfolioResponse {
     private String stockType;
     private String name;
     private String engName;
+    private String dartCode;
     private int price;
     private Double dollar;
     private int quantity;

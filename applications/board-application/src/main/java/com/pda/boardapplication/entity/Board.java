@@ -74,13 +74,15 @@ public class Board extends BaseEntity {
     @JsonBackReference
     private List<BoardProductTag> taggedProducts;
 
-    @OneToOne(mappedBy = "board", fetch = FetchType.LAZY, orphanRemoval = true)
+    @OneToOne(mappedBy = "board", orphanRemoval = true)
     @OnDelete(action = OnDeleteAction.CASCADE)
     @JsonBackReference
     private BoardCount boardCount;
 
-    public void updateEntity(String title, String content) {
+    public void updateEntity(String title, String thumbnail, String summary, String content) {
         this.title = title == null ? this.title : title;
+        this.thumbnail = thumbnail == null ? this.thumbnail : thumbnail;
+        this.summary = summary == null ? this.summary : summary;
         this.content = content == null ? this.content : content;
     }
 }

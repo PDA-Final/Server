@@ -2,6 +2,8 @@ package com.pda.userapplication.outadapters.kafka.config;
 
 import com.pda.kafkautils.KafkaJson;
 import com.pda.kafkautils.KafkaUtils;
+import com.pda.kafkautils.alert.AlertMessageDto;
+import com.pda.kafkautils.credit.AddCreditDto;
 import com.pda.kafkautils.user.UserUpdateDto;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.RoundRobinPartitioner;
@@ -30,7 +32,7 @@ public class KafkaProducerConfig {
         config.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
         config.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class);
         config.put(JsonSerializer.TYPE_MAPPINGS, KafkaUtils.getJsonTypeMappingInfo(
-            UserUpdateDto.class));
+            AddCreditDto.class, AlertMessageDto.class, UserUpdateDto.class));
         return new DefaultKafkaProducerFactory<>(config);
     }
 

@@ -5,7 +5,14 @@ import com.pda.boardapplication.entity.*;
 import com.pda.boardapplication.repository.*;
 import com.pda.exceptionhandler.exceptions.BadRequestException;
 import com.pda.exceptionhandler.exceptions.ConflictException;
+import com.pda.boardapplication.repository.BoardCountRepository;
+import com.pda.boardapplication.repository.BoardRepository;
+import com.pda.boardapplication.repository.BookmarkRepository;
+import com.pda.boardapplication.repository.LikeRepository;
+import com.pda.boardapplication.utils.ChallengeUtils;
 import com.pda.exceptionhandler.exceptions.NotFoundException;
+import com.pda.kafkautils.board.BoardPostSuccessDto;
+import com.pda.kafkautils.challenge.ChallengeSuccessDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -17,6 +24,8 @@ import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
+import java.util.NoSuchElementException;
+
 @Service
 @Slf4j
 @RequiredArgsConstructor
@@ -25,6 +34,7 @@ public class BoardInteractionService {
     @Value("${out-service.credit.url}")
     private String creditServerUrl;
     private final RestTemplate restTemplate;
+    private final ProducerService producerService;
 
     private final BoardRepository boardRepository;
     private final LikeRepository likeRepository;
@@ -42,8 +52,9 @@ public class BoardInteractionService {
      */
     public int toggleLike(long boardId, UserDto.InfoDto userInfoDto) {
         int ret = 0;
-        if(!boardRepository.existsById(boardId))
-            throw new NotFoundException("Target board does not exist");
+
+        Board board = boardRepository.findById(boardId).orElseThrow(() ->
+                new NotFoundException("Target board does not exist"));
 
         Like like = Like.builder()
                 .board(boardRepository.getReferenceById(boardId))
@@ -53,6 +64,16 @@ public class BoardInteractionService {
 //        if(!likeRepository.exists(Example.of(like))) {
         if(!likeRepository.existsById(new LikePK(boardId, userInfoDto.getId()))) {
             likeRepository.save(like);
+
+            long challengeId = checkBoardChallengeSuccess(boardId);
+
+            if(challengeId > -1)
+                producerService.sendBoardChallengeSuccess(
+                        ChallengeSuccessDto.builder().boardId(boardId).build());
+
+            producerService.sendLikeAlertPosted(board.getUserId(), userInfoDto.getNickname(),
+                    boardId, board.getThumbnail());
+
             ret = 1;
         } else {
             likeRepository.delete(like);
@@ -138,13 +159,34 @@ public class BoardInteractionService {
         log.warn(creditServerUrl);
         ResponseEntity<Object> response
                 = restTemplate.exchange(
-                        creditServerUrl+"/credit/transfer", HttpMethod.POST,
-                        entity, Object.class);
+                creditServerUrl + "/credit/transfer", HttpMethod.POST,
+                entity, Object.class);
 
         log.info("Response from credit : {}", response.getStatusCode());
 
-        if(response.getStatusCode() != HttpStatus.OK) {
+        if (response.getStatusCode() != HttpStatus.OK) {
             throw new BadRequestException("Failed to transfer");
         }
+    }
+
+    /**
+     * Check whether board challenge has been completed
+     * @param boardId target board id
+     * @return challenge id, -1 if false
+     */
+    private long checkBoardChallengeSuccess(long boardId) {
+        Board board = boardRepository.findById(boardId).orElseThrow(NoSuchElementException::new);
+
+        ChallengeUtils.BoardChallengeInfo taggedChallengeInfo =
+                ChallengeUtils.getBoardChallengeInfoById(
+                        board.getTaggedChallenges().get(0).getChallengeId());
+
+        log.info("Tagged challenge for board {} was : {}", boardId, taggedChallengeInfo);
+
+        if((taggedChallengeInfo != null) &&
+                (board.getLikes().size() == taggedChallengeInfo.getSuccessThreshold()))
+            return board.getTaggedChallenges().get(0).getChallengeId();
+
+        return -1;
     }
 }

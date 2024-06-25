@@ -14,4 +14,5 @@ public class StockResponse {
     private String code;
     private String name;
     private Double rate;
+    private String dartCode;
 }

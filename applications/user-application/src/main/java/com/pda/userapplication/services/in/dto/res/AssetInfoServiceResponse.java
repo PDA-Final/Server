@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Schema(description = "연결 자산 Response")
-public class ConnectAssetInfoResponse {
+public class AssetInfoServiceResponse {
     @Schema(description = "계좌 번호, 카드 번호", example = "231-123232-1232")
     private String number;
     @Schema(description = "상품타입", example = "CARD")

@@ -1,5 +1,9 @@
 package com.pda.userapplication.services.in;
 
+import com.pda.userapplication.services.in.dto.res.AssetInfoServiceResponse;
+
+import java.util.List;
+
 public interface GetUserAssetsUseCase {
-    void getProductsBy(Long userId);
+    List<AssetInfoServiceResponse> getAccounts(Long userId);
 }

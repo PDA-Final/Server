@@ -55,7 +55,7 @@ public class MyEmoChallengeService {
     private final  SendMyChallengeResultPort sendMyChallengeResultPort;
 
     //챌린지 참여
-    public void participateEmoChallenge(PostMyEmoChallengeRequest pa, String token, long uid) {
+    public Long participateEmoChallenge(PostMyEmoChallengeRequest pa, String token, long uid) {
         log.info("url!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!", assetUrl);
         log.info("url!??????????", userUrl);
         if(pa.getInACNT() == pa.getOutACNT()){
@@ -139,7 +139,7 @@ public class MyEmoChallengeService {
         MyAssetChallengeDetail md = new MyAssetChallengeDetail(mySaveChallenge.getId(),pa.getInACNT(), pa.getOutACNT());
         myAssetChallengeDetailRepository.save(md);
 
-
+        return mySaveChallenge.getId();
 
     }
 
@@ -197,17 +197,30 @@ public class MyEmoChallengeService {
         if(mc.getEndAt() == LocalDate.now()){
             mc.editMyChallengeStatus("성공");
             myChallengeRepository.save(mc);
-            SendResult(mc.getChallenge().getName(), mc.getChallenge().getLogoUrl(), mc.getUserId(), "성공");
+            SendResult(mc.getChallenge().getName(), mc.getChallenge().getLogoUrl(), mc.getUserId(), mc.getChallenge().getChallengeDetail().getReward());
             // TODO 저축 챌린지 성공 알림
 
         }
     }
 
     @Async
-    public void SendResult(String chellengeName, String logoUrl, Long userId, String result){
+    public void SendResult(String challengeName, String logoUrl, Long userId, Integer reward){
         sendMyChallengeResultPort.sendChallengeResult(SendChallengeResultRequest.builder()
-                .result(result)
-                .challengeName(chellengeName)
+                .result(challengeName+"성공으로" +reward+" 크레딧을 획득하셨습니다.")
+                .challengeName(challengeName)
+                .userId(userId)
+                .transactionDateTime(LocalDateTime.now())
+                .logoUrl(logoUrl)
+                .build());
+
+
+    }
+
+    @Async
+    public void SendFailResult(String challengeName, String logoUrl, Long userId){
+        sendMyChallengeResultPort.sendChallengeResult(SendChallengeResultRequest.builder()
+                .result(challengeName+"를 실패하셨습니다")
+                .challengeName(challengeName)
                 .userId(userId)
                 .transactionDateTime(LocalDateTime.now())
                 .logoUrl(logoUrl)
@@ -255,7 +268,7 @@ public class MyEmoChallengeService {
             if(myAssetChallengeRepository.findByMyChallengeIdAndSavingAt(s.getId(),LocalDate.now()) == null){
                 // 그날 감정 저축한 기록이 없으면 해당 myChallengeId는 실패로
                 isSuccess = "실패";
-                SendResult(s.getChallenge().getName(), s.getChallenge().getLogoUrl(), s.getUserId(),"실패");
+                SendFailResult(s.getChallenge().getName(), s.getChallenge().getLogoUrl(), s.getUserId());
                 //TODO 저축 알림 실패했을 경우 알람
             }
             s.editMyChallengeStatus(isSuccess);

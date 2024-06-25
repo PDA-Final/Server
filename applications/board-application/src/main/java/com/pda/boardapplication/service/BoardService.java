@@ -7,6 +7,7 @@ import com.pda.boardapplication.dto.BoardDto;
 import com.pda.boardapplication.dto.CommentDto;
 import com.pda.boardapplication.dto.UserDto;
 import com.pda.boardapplication.entity.Board;
+import com.pda.boardapplication.entity.BoardChallengeTag;
 import com.pda.boardapplication.entity.BoardCount;
 import com.pda.boardapplication.entity.UnlockedPK;
 import com.pda.boardapplication.exceptions.LockedBoardException;
@@ -14,11 +15,18 @@ import com.pda.boardapplication.repository.BoardCountRepository;
 import com.pda.boardapplication.repository.BoardRepository;
 import com.pda.boardapplication.repository.CategoryRepository;
 import com.pda.boardapplication.repository.UnlockedRepository;
+import com.pda.boardapplication.entity.BoardProductTag;
+import com.pda.boardapplication.repository.*;
 import com.pda.boardapplication.utils.CategoryUtils;
+import com.pda.boardapplication.utils.ChallengeUtils;
 import com.pda.boardapplication.utils.UserUtils;
 import com.pda.exceptionhandler.exceptions.BadRequestException;
 import com.pda.exceptionhandler.exceptions.ForbiddenException;
 import com.pda.exceptionhandler.exceptions.NotFoundException;
+import com.pda.kafkautils.alert.AlertMessageDto;
+import com.pda.kafkautils.board.BoardPostSuccessDto;
+import com.pda.kafkautils.credit.AddCreditDto;
+import com.pda.s3utils.service.S3Service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
@@ -26,6 +34,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -40,6 +49,13 @@ public class BoardService {
     private final BoardCountRepository boardCountRepository;
 
     private final UnlockedRepository unlockedRepository;
+    private final BoardProductTagRepository boardProductTagRepository;
+
+    private final BoardChallengeTagRepository boardChallengeTagRepository;
+
+    private final ProducerService producerService;
+
+    private final S3Service s3Service;
 
     /**
      * Register Board
@@ -57,6 +73,7 @@ public class BoardService {
         log.info("{}, {}", registerReqDto.isLocked(), categoryId);
         if(registerReqDto.isLocked() && (categoryId != 5))
             throw new BadRequestException("Given category cannot be locked");
+        log.info("Given category was : {} verified to : {}", registerReqDto.getCategory(), categoryId);
 
         Board board = Board.builder()
                 .title(registerReqDto.getTitle())
@@ -75,6 +92,38 @@ public class BoardService {
 
         boardCountRepository.save(BoardCount.builder()
                         .board(board).likeCnt(0).viewCnt(0).build());
+
+        log.debug("tagged onfo {} {}", registerReqDto.getProductId(), registerReqDto.getChallengeId());
+
+        if(registerReqDto.getProductId() > 0) {
+            log.debug("Create product tag {} with board {}", registerReqDto.getProductId(), registerReqDto.getProductId());
+            boardProductTagRepository.save(BoardProductTag.builder()
+                    .board(board).productId(registerReqDto.getProductId()).build());
+        }
+        if(registerReqDto.getChallengeId() > 0) {
+            log.debug("Create product tag {} with challenge {}", registerReqDto.getProductId(), registerReqDto.getChallengeId());
+            boardChallengeTagRepository.save(BoardChallengeTag.builder()
+                    .board(board).challengeId(registerReqDto.getChallengeId()).build());
+        }
+        // CREDIT
+        if(ChallengeUtils.checkIfBoardChallenge(registerReqDto.getChallengeId())) {
+            producerService.sendBoardChallengePosted(
+                    BoardPostSuccessDto.builder()
+                            .userId(authorInfoDto.getId())
+                            .challengeId((long)registerReqDto.getChallengeId())
+                            .boardId(boardId)
+                    .build());
+        }
+
+        producerService.sendBoardAlertPosted(AlertMessageDto.builder()
+                .messageType("CREDIT").clientId(authorInfoDto.getId())
+                .content("핀 작성으로 1 크레딧을 획득하셨습니다.")
+                .build());
+
+        producerService.sendBoardCreditAcquired(AddCreditDto.builder()
+                .userId(authorInfoDto.getId()).amount(1L)
+                .transactionDateTime(LocalDateTime.now()).build());
+
         return boardId;
     }
 
@@ -203,7 +252,10 @@ public class BoardService {
         Board board = boardRepository.findById(boardId).orElseThrow(NotFoundException::new);
         if(board.getUserId() != userInfoDto.getId())
             throw new ForbiddenException("Illegal access to board by unauthorized user");
-        board.updateEntity(modifyReqDto.getTitle(), modifyReqDto.getContent());
+
+        String [] boardSummary = parseSummary(modifyReqDto.getContent());
+
+        board.updateEntity(modifyReqDto.getTitle(), boardSummary[0], boardSummary[1], boardSummary[2]);
 
         boardRepository.save(board);
         return 1;
@@ -221,6 +273,35 @@ public class BoardService {
 
         boardRepository.deleteById(boardId);
         return 1;
+    }
+
+    public List<BoardDto.AbstractRespDto> getTaggedBoards(int pageNo, int size, long productId, long challengeId) {
+        List<Board> boards;
+        Pageable pageable = PageRequest.of(pageNo, size);
+
+        if(productId > 0) {
+            boards = boardProductTagRepository.findByProductId(pageable, productId)
+                    .getContent().stream().map(BoardProductTag::getBoard).toList();
+        } else if(challengeId > 0){
+            boards = boardChallengeTagRepository.findByChallengeId(pageable, challengeId)
+                    .getContent().stream().map(BoardChallengeTag::getBoard).toList();
+        } else {
+            throw new BadRequestException("At least one of condition required");
+        }
+
+        return boards.stream().map((elem) ->
+                BoardDto.AbstractRespDto.builder()
+                        .id(elem.getId())
+                        .title(elem.getTitle())
+                        .summary(elem.getSummary())
+                        .createdTime(elem.getCreatedAt())
+                        .thumbnail(elem.getThumbnail())
+                        .likeCount(elem.getLikes().size())
+                        .commentCount(elem.getComments().size())
+                        .authorNickname(elem.getAuthorNickname())
+                        .authorProfile(elem.getAuthorProfile())
+                        .build()
+        ).toList();
     }
 
     /**

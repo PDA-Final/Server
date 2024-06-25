@@ -11,6 +11,7 @@ import com.pda.userapplication.inadapters.controllers.dto.req.SetTendencyRequest
 import com.pda.userapplication.inadapters.controllers.dto.req.UpdateProfileRequest;
 import com.pda.userapplication.services.in.ConnectAssetUseCase;
 import com.pda.userapplication.services.in.GetJobsUseCase;
+import com.pda.userapplication.services.in.GetUserAssetsUseCase;
 import com.pda.userapplication.services.in.GetUserDetailInfo;
 import com.pda.userapplication.services.in.GetUserUseCase;
 import com.pda.userapplication.services.in.IsAvailableContact;
@@ -25,8 +26,9 @@ import com.pda.userapplication.services.in.dto.req.SetTendencyServiceRequest;
 import com.pda.userapplication.services.in.dto.req.UpdateProfileServiceRequest;
 import com.pda.userapplication.services.in.dto.res.AvailableContactServiceResponse;
 import com.pda.userapplication.services.in.dto.res.AvailableTofinIdServiceResponse;
-import com.pda.userapplication.services.in.dto.res.ConnectAssetInfoResponse;
+import com.pda.userapplication.services.in.dto.res.AssetInfoServiceResponse;
 import com.pda.userapplication.services.in.dto.res.GetUserPagingResponse;
+import com.pda.userapplication.services.in.dto.res.SetTendencyResponse;
 import com.pda.userapplication.services.in.dto.res.TokenInfoServiceResponse;
 import com.pda.userapplication.services.in.dto.res.UserDetailInfoResponse;
 import com.pda.userapplication.services.in.dto.res.UserServiceResponse;
@@ -50,6 +52,7 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Tag(name = "User", description = "투핀 유저 API")
@@ -67,6 +70,7 @@ public class UserController {
     private final GetUserDetailInfo getUserDetailInfo;
     private final UpdateUserUseCase updateUserUseCase;
     private final GetUserUseCase getUserUseCase;
+    private final GetUserAssetsUseCase getUserAssetsUseCase;
 
     @GetMapping("/jobs")
     @Operation(summary = "직업 리스트 조회", description = "모든 직업들의 리스트를 한글로 반환합니다")
@@ -89,7 +93,7 @@ public class UserController {
     @Operation(summary = "자산 연결", description = "자산 연결 API (Generate)",
         security = @SecurityRequirement(name = "bearerAuth"))
     @ApiResponse(responseCode = "201", description = "성공")
-    public GlobalResponse<List<ConnectAssetInfoResponse>> connectAssets(@AuthUser AuthUserInfo authUser, @Valid @RequestBody ConnectAssetsRequest request) {
+    public GlobalResponse<List<AssetInfoServiceResponse>> connectAssets(@AuthUser AuthUserInfo authUser, @Valid @RequestBody ConnectAssetsRequest request) {
         return ApiUtils.success("자산 연결 성공", connectAssetUseCase.connectAssets(ConnectAssetsServiceRequest.builder()
             .backSocialId(request.getBackSocialId())
             .contact(request.getContact())
@@ -123,16 +127,15 @@ public class UserController {
     @Operation(summary = "투자 성향 설정", description = "유저의 투자성향을 설정하는 API",
         security = @SecurityRequirement(name = "bearerAuth"))
     @ApiResponse(responseCode = "201", description = "성공")
-    public GlobalResponse<Void> setTendency(@AuthUser AuthUserInfo authUser, @Valid @RequestBody SetTendencyRequest request) {
-        setTendencyUseCase.setTendency(SetTendencyServiceRequest.builder()
-                .card(request.isCard())
-                .loan(request.isLoan())
-                .account(request.isAccount())
-                .invest(request.isInvest())
-                .purpose(request.getPurpose())
-                .userId(authUser.getId())
-            .build());
-        return ApiUtils.success("유저 성향 설정 완료");
+    public GlobalResponse<SetTendencyResponse> setTendency(@AuthUser AuthUserInfo authUser, @Valid @RequestBody SetTendencyRequest request) {
+        return ApiUtils.success("유저 성향 설정 완료",setTendencyUseCase.setTendency(SetTendencyServiceRequest.builder()
+            .card(request.isCard())
+            .loan(request.isLoan())
+            .account(request.isAccount())
+            .invest(request.isInvest())
+            .purpose(request.getPurpose())
+            .userId(authUser.getId())
+            .build()));
     }
 
     @GetMapping("/detail-info")
@@ -189,11 +192,28 @@ public class UserController {
             .build()));
     }
 
-    @GetMapping("/products")
-    @Operation(summary = "유저 보유 상품 조회", description = "유저 본인의 보유 상품 조회",
-        security = @SecurityRequirement(name = "bearerAuth"), deprecated = true)
+    @GetMapping("/accounts")
+    @Operation(summary = "유저 보유 계좌 조회", description = "유저 본인의 보유한 계좌 조회",
+        security = @SecurityRequirement(name = "bearerAuth"))
     @ApiResponse(responseCode = "200", description = "성공")
-    public GlobalResponse<Void> getAsets(@AuthUser AuthUserInfo authUser) {
-        return ApiUtils.success("유저 보유 상품 조회 완료");
+    public GlobalResponse<List<AssetInfoServiceResponse>> getAsets(@AuthUser AuthUserInfo authUser) {
+        return ApiUtils.success("유저 보유 상품 조회 완료", getUserAssetsUseCase
+            .getAccounts(authUser.getId()));
+    }
+
+    @GetMapping("/birth")
+    @Operation(summary = "유저 생일 조회", description = "유저 생일 조회",
+        security = @SecurityRequirement(name = "bearerAuth"))
+    @ApiResponse(responseCode = "200", description = "성공")
+    public GlobalResponse<LocalDate> getBirth(@AuthUser AuthUserInfo authUser) {
+        return ApiUtils.success("생일 조회 완료", getUserUseCase.getBirth(authUser.getId()));
+    }
+
+    @GetMapping("/assets/status")
+    @Operation(summary = "유저 자산 연결 여부", description = "유저 자산 연결 여부",
+        security = @SecurityRequirement(name = "bearerAuth"))
+    @ApiResponse(responseCode = "200", description = "성공")
+    public GlobalResponse<Boolean> isAssetConnected(@AuthUser AuthUserInfo authUser) {
+        return ApiUtils.success("생일 조회 완료", getUserUseCase.isAssetConnected(authUser.getId()));
     }
 }
