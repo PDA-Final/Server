@@ -139,7 +139,9 @@ public class BoardService {
 
         Board board = boardRepository.findById(boardId).orElseThrow(NotFoundException::new);
 
-        if (board.isLocked() && !unlockedRepository.existsById(new UnlockedPK(boardId, userInfoDto.getId()))) {
+        if(board.getUserId() == userInfoDto.getId()) {
+            log.debug("User's board, SKIP");
+        } else if (board.isLocked() && !unlockedRepository.existsById(new UnlockedPK(boardId, userInfoDto.getId()))) {
             int unlockedCount = unlockedRepository.findAllByBoardId(boardId).size();
             throw new LockedBoardException(unlockedCount ,board.getLikes().size());
         }
