@@ -3,6 +3,7 @@ package com.pda.alertapplication.service;
 import com.pda.alertapplication.dto.AlertMessageSendDto;
 import com.pda.alertapplication.repository.Alert;
 import com.pda.alertapplication.repository.AlertRepository;
+import com.pda.exceptionhandler.exceptions.NotFoundException;
 import com.pda.kafkautils.alert.AlertMessageDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,6 +26,7 @@ public class AlertService {
         log.debug("알림 찾기. 알림 사이즈: {}, 유저 ID: {}", alerts.size(), clientId);
         return alerts.stream()
                 .map(alert -> AlertMessageSendDto.builder()
+                        .id(alert.getId())
                         .clientId(alert.getClientId())
                         .content(alert.getContent())
                         .messageType(alert.getMessageType())
@@ -34,6 +36,24 @@ public class AlertService {
                         .createdAt(alert.getCreatedAt())
                         .build())
                 .collect(Collectors.toList());
+    }
+
+    public AlertMessageSendDto getAlert(Long alertId) {
+        log.debug("Get alert: {}", alertId);
+
+        Alert alert = alertRepository.findById(alertId)
+                .orElseThrow(() -> new NotFoundException("Alert not found with id: " + alertId));
+
+        return AlertMessageSendDto.builder()
+                .id(alert.getId())
+                .clientId(alert.getClientId())
+                .content(alert.getContent())
+                .messageType(alert.getMessageType())
+                .thumbnail(alert.getThumbnail())
+                .targetId(alert.getTargetId())
+                .isViewed(alert.isViewed())
+                .createdAt(alert.getCreatedAt())
+                .build();
     }
 
     @Transactional
@@ -59,6 +79,7 @@ public class AlertService {
         return alertRepository.findAlertsByClientId(userId)
                 .stream()
                 .map(alert -> AlertMessageSendDto.builder()
+                        .id(alert.getId())
                         .clientId(alert.getClientId())
                         .content(alert.getContent())
                         .messageType(alert.getMessageType())

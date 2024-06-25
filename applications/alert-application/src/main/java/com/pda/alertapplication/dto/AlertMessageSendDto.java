@@ -13,6 +13,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor // TODO
 @AllArgsConstructor // TODO
 public class AlertMessageSendDto {
+    private Long id;
     private Long clientId;
     private String messageType; // FOLLOW, FIN, CREDIT
     private Long targetId; // 상대 유저 ID, 보드 ID, null

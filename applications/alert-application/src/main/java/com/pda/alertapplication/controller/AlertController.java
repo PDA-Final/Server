@@ -1,6 +1,7 @@
 package com.pda.alertapplication.controller;
 
 import com.pda.alertapplication.dto.AlertMessageSendDto;
+import com.pda.alertapplication.repository.Alert;
 import com.pda.alertapplication.service.AlertService;
 import com.pda.alertapplication.service.EmitterService;
 import com.pda.apiutils.ApiUtils;
@@ -43,7 +44,7 @@ public class AlertController {
     }
 
     @GetMapping
-    @Operation(summary = "Get alerts", security = @SecurityRequirement(name = "bearerAuth"))
+    @Operation(summary = "Get Alerts", security = @SecurityRequirement(name = "bearerAuth"))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK"),
             @ApiResponse(responseCode = "204", description = "No content")
@@ -60,5 +61,44 @@ public class AlertController {
         result.put("alerts", alerts);
 
         return ApiUtils.success("success", result);
+    }
+
+    @GetMapping("/{alertId}")
+    @Operation(summary = "Get Alert", security = @SecurityRequirement(name = "bearerAuth"))
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "OK"),
+            @ApiResponse(responseCode = "404", description = "Not found")
+    })
+    public GlobalResponse<Object> getAlert(
+            @PathVariable("alertId") Long alertId
+    ) {
+        log.debug("Alert id: {}", alertId);
+        Map<String, Object> result = new HashMap<>();
+
+        AlertMessageSendDto alertMessageSendDto
+                = alertService.getAlert(alertId);
+        result.put("alert", alertMessageSendDto);
+
+        return ApiUtils.success("success", result);
+    }
+
+    @PutMapping("/{alertId}/view")
+    @Operation(summary = "Alert marked as view", security = @SecurityRequirement(name = "bearerAuth"))
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "OK"),
+            @ApiResponse(responseCode = "404", description = "Not Found")
+    })
+    public GlobalResponse<Object> markAlertAsView(
+            @PathVariable("alertId") Long alertId
+    ) {
+        log.debug("알림 읽음 처리 요청: {}", alertId);
+        Map<String, Object> result = new HashMap<>();
+
+        alertService.updateRead(alertId);
+
+        AlertMessageSendDto alertMessageSendDto = alertService.getAlert(alertId);
+        result.put("alert", alertMessageSendDto);
+
+        return ApiUtils.success("Alert marked as read", result);
     }
 }
