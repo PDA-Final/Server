@@ -106,6 +106,10 @@ public class BoardDto {
         @Schema(description = "Whether current user bookmarked board", example = "true")
         private boolean bookmarked;
 
+        private boolean locked;
+
+        private int unlockedCount;
+
         // TODO : tagged product/challenges
     }
 
