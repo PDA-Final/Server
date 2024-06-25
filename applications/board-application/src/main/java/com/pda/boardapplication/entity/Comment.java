@@ -6,6 +6,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import java.util.List;
 
@@ -39,10 +41,14 @@ public class Comment extends BaseEntity {
 
     private int authorType;
 
+    private boolean deleted;
+
     @OneToMany(mappedBy = "parentComment", fetch = FetchType.LAZY)
     private List<Comment> replies;
 
     public void updateEntity(String content) {
         this.content = content.isBlank() ? this.content : content;
     }
+
+    public void updateSoftDelete() { this.deleted = true; }
 }

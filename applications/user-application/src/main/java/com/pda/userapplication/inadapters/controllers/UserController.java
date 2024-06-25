@@ -11,6 +11,7 @@ import com.pda.userapplication.inadapters.controllers.dto.req.SetTendencyRequest
 import com.pda.userapplication.inadapters.controllers.dto.req.UpdateProfileRequest;
 import com.pda.userapplication.services.in.ConnectAssetUseCase;
 import com.pda.userapplication.services.in.GetJobsUseCase;
+import com.pda.userapplication.services.in.GetUserAssetsUseCase;
 import com.pda.userapplication.services.in.GetUserDetailInfo;
 import com.pda.userapplication.services.in.GetUserUseCase;
 import com.pda.userapplication.services.in.IsAvailableContact;
@@ -25,7 +26,7 @@ import com.pda.userapplication.services.in.dto.req.SetTendencyServiceRequest;
 import com.pda.userapplication.services.in.dto.req.UpdateProfileServiceRequest;
 import com.pda.userapplication.services.in.dto.res.AvailableContactServiceResponse;
 import com.pda.userapplication.services.in.dto.res.AvailableTofinIdServiceResponse;
-import com.pda.userapplication.services.in.dto.res.ConnectAssetInfoResponse;
+import com.pda.userapplication.services.in.dto.res.AssetInfoServiceResponse;
 import com.pda.userapplication.services.in.dto.res.GetUserPagingResponse;
 import com.pda.userapplication.services.in.dto.res.TokenInfoServiceResponse;
 import com.pda.userapplication.services.in.dto.res.UserDetailInfoResponse;
@@ -67,6 +68,7 @@ public class UserController {
     private final GetUserDetailInfo getUserDetailInfo;
     private final UpdateUserUseCase updateUserUseCase;
     private final GetUserUseCase getUserUseCase;
+    private final GetUserAssetsUseCase getUserAssetsUseCase;
 
     @GetMapping("/jobs")
     @Operation(summary = "직업 리스트 조회", description = "모든 직업들의 리스트를 한글로 반환합니다")
@@ -89,7 +91,7 @@ public class UserController {
     @Operation(summary = "자산 연결", description = "자산 연결 API (Generate)",
         security = @SecurityRequirement(name = "bearerAuth"))
     @ApiResponse(responseCode = "201", description = "성공")
-    public GlobalResponse<List<ConnectAssetInfoResponse>> connectAssets(@AuthUser AuthUserInfo authUser, @Valid @RequestBody ConnectAssetsRequest request) {
+    public GlobalResponse<List<AssetInfoServiceResponse>> connectAssets(@AuthUser AuthUserInfo authUser, @Valid @RequestBody ConnectAssetsRequest request) {
         return ApiUtils.success("자산 연결 성공", connectAssetUseCase.connectAssets(ConnectAssetsServiceRequest.builder()
             .backSocialId(request.getBackSocialId())
             .contact(request.getContact())
@@ -189,11 +191,12 @@ public class UserController {
             .build()));
     }
 
-    @GetMapping("/products")
-    @Operation(summary = "유저 보유 상품 조회", description = "유저 본인의 보유 상품 조회",
+    @GetMapping("/accounts")
+    @Operation(summary = "유저 보유 계좌 조회", description = "유저 본인의 보유한 계좌 조회",
         security = @SecurityRequirement(name = "bearerAuth"))
     @ApiResponse(responseCode = "200", description = "성공")
-    public GlobalResponse<Void> getAsets(@AuthUser AuthUserInfo authUser) {
-        return ApiUtils.success("유저 보유 상품 조회 완료");
+    public GlobalResponse<List<AssetInfoServiceResponse>> getAsets(@AuthUser AuthUserInfo authUser) {
+        return ApiUtils.success("유저 보유 상품 조회 완료", getUserAssetsUseCase
+            .getAccounts(authUser.getId()));
     }
 }

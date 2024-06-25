@@ -1,0 +1,2 @@
+INSERT INTO user(id, nickname, role, tofin_id, user_info, job, profile_img, birth, created_at, updated_at) value (1074, '관리자', 0, 'superadmin', '$2a$10$sl3OJhk1d/uvmvFLzl7JH.eaALGwD0uZxu4dASBKImWHALWA.F9hi', '무직', 'https://tofin-bucket.s3.ap-northeast-2.amazonaws.com/users/profile/1067/dongwon.jpg', '2000-01-03', '2024-06-19 18:30:09.065726', '2024-06-19 18:30:09.065726');
+INSERT INTO user_detail (public_options, purpose, id, user_id, contact, tendency, back_social_id, social_name) VALUES ('11', null, 10, 1074, '01000000000', null, '3111011', '김동원');

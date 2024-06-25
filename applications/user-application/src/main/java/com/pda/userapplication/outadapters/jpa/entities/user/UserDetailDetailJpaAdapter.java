@@ -1,15 +1,16 @@
 package com.pda.userapplication.outadapters.jpa.entities.user;
 
 import com.pda.exceptionhandler.exceptions.BadRequestException;
-import com.pda.userapplication.domains.NormalUser;
+import com.pda.exceptionhandler.exceptions.InternalServerException;
+import com.pda.userapplication.domains.UserDetail;
 import com.pda.userapplication.domains.User;
 import com.pda.userapplication.domains.vo.TofinId;
 import com.pda.userapplication.domains.vo.UserId;
 import com.pda.userapplication.outadapters.jpa.mapper.UserDetailEntityMapper;
 import com.pda.userapplication.outadapters.jpa.mapper.UserEntityMapper;
-import com.pda.userapplication.services.out.ReadNormalUserOutputPort;
+import com.pda.userapplication.services.out.ReadUserDetailOutputPort;
 import com.pda.userapplication.services.out.ReadUserOutputPort;
-import com.pda.userapplication.services.out.SaveNormalUserOutputPort;
+import com.pda.userapplication.services.out.SaveUserDetailOutputPort;
 import com.pda.userapplication.services.out.SaveUserOutputPort;
 import com.pda.userapplication.services.out.dto.req.SearchUserOutputRequest;
 import com.pda.userapplication.services.out.dto.res.SearchUserPagingOutputResponse;
@@ -21,7 +22,7 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
-public class UserJpaAdapter implements SaveUserOutputPort, ReadUserOutputPort, SaveNormalUserOutputPort, ReadNormalUserOutputPort {
+public class UserDetailDetailJpaAdapter implements SaveUserOutputPort, ReadUserOutputPort, SaveUserDetailOutputPort, ReadUserDetailOutputPort {
     private final UserRepository userRepository;
     private final UserDetailRepository userDetailRepository;
     private final UserEntityMapper userMapper;
@@ -93,13 +94,13 @@ public class UserJpaAdapter implements SaveUserOutputPort, ReadUserOutputPort, S
     }
 
     @Override
-    public NormalUser save(NormalUser normalUser) {
-        return userDetailMapper.toNormalUser(
+    public UserDetail save(UserDetail userDetail) {
+        return userDetailMapper.toDomain(
             userDetailRepository.save(userDetailMapper
-                .toUserDetailEntity(normalUser)));
+                .toUserDetailEntity(userDetail)));
     }
 
-    private String toPublicOptions(NormalUser user) {
+    private String toPublicOptions(UserDetail user) {
         String amountOption = user.isPublicAmount()?"1":"0";
         String percentOption = user.isPublicPercent()?"1":"0";
 
@@ -112,9 +113,15 @@ public class UserJpaAdapter implements SaveUserOutputPort, ReadUserOutputPort, S
     }
 
     @Override
-    public Optional<NormalUser> findNormalUserByUserId(UserId userId) {
-        return Optional.ofNullable(userDetailMapper.toNormalUser(
+    public Optional<UserDetail> findUserDetailById(UserId userId) {
+        return Optional.ofNullable(userDetailMapper.toDomain(
             userDetailRepository.findByUserId(userId.toLong())
                 .orElse(null)));
+    }
+
+    @Override
+    public UserDetail getAdmin() {
+        return userDetailMapper.toDomain(userDetailRepository.findByContact("01000000000")
+            .orElseThrow(() -> new InternalServerException("Can't Find Admin")));
     }
 }

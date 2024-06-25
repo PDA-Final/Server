@@ -20,6 +20,8 @@ public class ProductDto {
         private Long id;
         @Schema(description = "Product name", example = "신한카드 Mr.Life")
         private String name;
+        @Schema(description = "Category name", example = "카드")
+        private String categoryName;
         @Schema(description = "Corporation name", example = "신한카드")
         private String corpName;
         @Schema(description = "Corporation logo image", example = "https://financial.pstatic.net/pie/common-bi/1.0.0/images/CD_SHINHAN_Profile.png")
@@ -146,6 +148,6 @@ public class ProductDto {
     @Getter
     public static class BoardCountReqDto {
         private Long productId;
-        private int boardCount;
+        private int boardCnt;
     }
 }

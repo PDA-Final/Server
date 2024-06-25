@@ -72,6 +72,8 @@ public class CommentDto {
         private List<ReplyInfoDto> replies;
         @Schema(description = "Registered time", example = "2024-06-13T14:59:28.115615")
         private LocalDateTime createdTime;
+        @Schema(description = "Deleted comment or not", example = "true")
+        private boolean deleted;
     }
 
     @Builder
