@@ -17,7 +17,9 @@ import com.pda.boardapplication.utils.UserUtils;
 import com.pda.exceptionhandler.exceptions.BadRequestException;
 import com.pda.exceptionhandler.exceptions.ForbiddenException;
 import com.pda.exceptionhandler.exceptions.NotFoundException;
+import com.pda.kafkautils.alert.AlertMessageDto;
 import com.pda.kafkautils.board.BoardPostSuccessDto;
+import com.pda.kafkautils.credit.AddCreditDto;
 import com.pda.s3utils.service.S3Service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -26,6 +28,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -100,6 +103,15 @@ public class BoardService {
                             .boardId(boardId)
                     .build());
         }
+
+        producerService.sendBoardAlertPosted(AlertMessageDto.builder()
+                .messageType("CREDIT").userId(authorInfoDto.getId())
+                .content("핀 작성으로 1 크레딧을 획득하셨습니다.")
+                .build());
+
+        producerService.sendBoardCreditAcquired(AddCreditDto.builder()
+                .userId(authorInfoDto.getId()).amount(1L)
+                .transactionDateTime(LocalDateTime.now()).build());
 
         return boardId;
     }
