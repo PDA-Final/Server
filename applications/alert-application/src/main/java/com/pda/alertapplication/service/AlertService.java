@@ -20,9 +20,27 @@ import java.util.stream.Collectors;
 public class AlertService {
     private final AlertRepository alertRepository;
 
+    public List<AlertMessageSendDto> getAlertsByClientId(Long clientId) {
+        List<Alert> alerts = alertRepository.findAlertsByClientId(clientId);
+        log.debug("알림 찾기. 알림 사이즈: {}, 유저 ID: {}", alerts.size(), clientId);
+        return alerts.stream()
+                .map(alert -> AlertMessageSendDto.builder()
+                        .clientId(alert.getClientId())
+                        .content(alert.getContent())
+                        .messageType(alert.getMessageType())
+                        .thumbnail(alert.getThumbnail())
+                        .targetId(alert.getTargetId())
+                        .isViewed(alert.isViewed())
+                        .createdAt(alert.getCreatedAt())
+                        .build())
+                .collect(Collectors.toList());
+    }
+
     @Transactional
     public void insertAlert(Alert alert) {
+        log.debug("알림 넣기 전: {}", alert);
         alertRepository.save(alert);
+        log.debug("알림 넣은 후: {}", alert);
     }
 
     @Transactional
@@ -38,7 +56,7 @@ public class AlertService {
 
     @Transactional
     public List<AlertMessageSendDto> selectMessagesByUserId(Long userId) { // TODO
-        return alertRepository.findAlertsByUserId(userId)
+        return alertRepository.findAlertsByClientId(userId)
                 .stream()
                 .map(alert -> AlertMessageSendDto.builder()
                         .clientId(alert.getClientId())
@@ -60,5 +78,4 @@ public class AlertService {
     public Long selectProductIdByAlertId(Long alertId) {
         return alertRepository.findTargetIdByAlertId(alertId);
     }
-
 }

@@ -14,15 +14,15 @@ import java.util.List;
 @Repository
 //@RequiredArgsConstructor
 public interface AlertRepository extends JpaRepository<Alert, Long> {
+    // TODO 쿼리 수정
+
+    List<Alert> findAlertsByClientId(Long clientId);
 
     @Query("SELECT a FROM Alert a WHERE a.clientId = :clientId ORDER BY a.createdAt ASC")
     List<Alert> findOldestAlertsByUserId(@Param("clientId") Long clientId, Pageable pageable);
 
     @Query("SELECT COUNT(a) FROM Alert a WHERE a.clientId = :clientId")
     int countAlertsByUserId(@Param("clientId") Long clientId);
-
-    @Query("SELECT a FROM Alert a WHERE a.clientId = :clientId")
-    List<Alert> findAlertsByUserId(@Param("clientId") Long clientId);
 
     @Modifying
     @Query("UPDATE Alert a SET a.isViewed = true WHERE a.id = :alertId")
