@@ -105,7 +105,7 @@ public class BoardService {
         }
 
         producerService.sendBoardAlertPosted(AlertMessageDto.builder()
-                .messageType("CREDIT").userId(authorInfoDto.getId())
+                .messageType("CREDIT").clientId(authorInfoDto.getId())
                 .content("핀 작성으로 1 크레딧을 획득하셨습니다.")
                 .build());
 
