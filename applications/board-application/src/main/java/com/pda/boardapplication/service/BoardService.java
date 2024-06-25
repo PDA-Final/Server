@@ -153,10 +153,10 @@ public class BoardService {
 //            throw new LockedBoardException(unlockedCount ,board.getLikes().size());
 //        }
 
+        boolean isAccessible = board.isLocked() && !unlockedRepository.existsById(new UnlockedPK(boardId, userInfoDto.getId()));
         return BoardDto.DetailRespDto.builder()
                 .title(board.getTitle())
-                .content(board.isLocked() && !unlockedRepository.existsById(new UnlockedPK(boardId, userInfoDto.getId())) ?
-                        board.getContent() : "")
+                .content(isAccessible ? board.getContent() : "")
                 .category(board.getCategory())
                 .comments(board.getComments().stream().filter((comment) ->
                         comment.getParentComment() == null
@@ -191,7 +191,7 @@ public class BoardService {
                         elem.getUserId() == userInfoDto.getId()))
                 .bookmarked(board.getBookmarks().stream().anyMatch(elem ->
                         elem.getUserId() == userInfoDto.getId()))
-                .locked(board.isLocked())
+                .locked(isAccessible)
                 .unlockedCount(board.isLocked() ? unlockedRepository.findAllByBoardId(boardId).size() : 0)
                 .build();
     }
