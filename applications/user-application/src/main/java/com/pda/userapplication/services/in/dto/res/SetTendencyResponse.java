@@ -7,12 +7,13 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Builder
-@Getter
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
-public class StockResponse {
-    private String code;
-    private String name;
-    private Double rate;
-    private String dartCode;
+@Getter
+public class SetTendencyResponse {
+    private boolean account;
+    private boolean card;
+    private boolean loan;
+    private boolean invest;
+    private String purpose;
 }

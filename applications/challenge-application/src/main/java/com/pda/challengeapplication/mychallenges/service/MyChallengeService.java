@@ -230,11 +230,10 @@ public class MyChallengeService {
     }
 
     @Async
-    public void SendResult(String chellengeName, String logoUrl, Long userId){
+    public void SendResult(String challengeName, String logoUrl, Long userId){
 
         sendMyChallengeResultPort.sendChallengeResult(SendChallengeResultRequest.builder()
-                .result("실패")
-                .challengeName(chellengeName)
+                .result(challengeName + "챌린지를 실패하셨습니다." )
                 .userId(userId)
                 .transactionDateTime(LocalDateTime.now())
                 .logoUrl(logoUrl)

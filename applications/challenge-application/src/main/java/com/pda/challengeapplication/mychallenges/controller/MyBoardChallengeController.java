@@ -31,8 +31,9 @@ public class MyBoardChallengeController {
     public GlobalResponse participateBoardChallenge(
             @RequestBody PostMyBoardChallengeRequest postMyBoardChallengeRequest
             ){
-       myBoardChallengeService.writeBoardChallenge(postMyBoardChallengeRequest);
-        return ApiUtils.success("게시글 작성 완료");
+       long mcid = myBoardChallengeService.writeBoardChallenge(postMyBoardChallengeRequest);
+
+        return ApiUtils.success("게시글 작성 완료", mcid);
 
     }
 
