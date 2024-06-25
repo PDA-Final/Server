@@ -46,7 +46,7 @@ public class KafkaOutputAdapter implements SendCreditOutputPort, SendUpdateUserO
     @Override
     public void sendAlertMessage(final SendMessageRequest request) {
         kafkaTemplate.send("alert-msg", AlertMessageDto.builder()
-                .userId(request.getUserId())
+                .clientId(request.getUserId())
                 .content(request.getMessage())
                 .targetId(request.getTargetId())
                 .messageType(request.getMessageType())

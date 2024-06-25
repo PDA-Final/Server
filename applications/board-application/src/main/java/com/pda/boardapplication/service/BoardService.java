@@ -56,6 +56,8 @@ public class BoardService {
         // Given category cannot be blank by @NotBlack Validation
         Integer categoryId = CategoryUtils.verifyCategory(registerReqDto.getCategory());
 
+        log.info("Given category was : {} verified to : {}", registerReqDto.getCategory(), categoryId);
+
         Board board = Board.builder()
                 .title(registerReqDto.getTitle())
                 .content(boardSummary[2])
@@ -73,14 +75,18 @@ public class BoardService {
         boardCountRepository.save(BoardCount.builder()
                         .board(board).likeCnt(0).viewCnt(0).build());
 
-        if(registerReqDto.getProductId() > 0)
+        log.debug("tagged onfo {} {}", registerReqDto.getProductId(), registerReqDto.getChallengeId());
+
+        if(registerReqDto.getProductId() > 0) {
+            log.debug("Create product tag {} with board {}", registerReqDto.getProductId(), registerReqDto.getProductId());
             boardProductTagRepository.save(BoardProductTag.builder()
                     .board(board).productId(registerReqDto.getProductId()).build());
-
-        if(registerReqDto.getChallengeId() > 0)
+        }
+        if(registerReqDto.getChallengeId() > 0) {
+            log.debug("Create product tag {} with challenge {}", registerReqDto.getProductId(), registerReqDto.getChallengeId());
             boardChallengeTagRepository.save(BoardChallengeTag.builder()
                     .board(board).challengeId(registerReqDto.getChallengeId()).build());
-
+        }
         // CREDIT
         return boardId;
     }

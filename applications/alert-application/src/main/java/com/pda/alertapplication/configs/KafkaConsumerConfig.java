@@ -2,7 +2,7 @@ package com.pda.alertapplication.configs;
 
 import com.pda.kafkautils.KafkaJson;
 import com.pda.kafkautils.KafkaUtils;
-import com.pda.kafkautils.credit.AddCreditDto;
+import com.pda.kafkautils.alert.AlertMessageDto;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.springframework.beans.factory.annotation.Value;
@@ -40,7 +40,7 @@ public class KafkaConsumerConfig {
         props.put(ErrorHandlingDeserializer.VALUE_DESERIALIZER_CLASS, JsonDeserializer.class);
         props.put(JsonDeserializer.TRUSTED_PACKAGES, "*");
         props.put(JsonDeserializer.TYPE_MAPPINGS, KafkaUtils
-                .getJsonTypeMappingInfo(AddCreditDto.class));
+                .getJsonTypeMappingInfo(AlertMessageDto.class));
 
         return props;
     }
