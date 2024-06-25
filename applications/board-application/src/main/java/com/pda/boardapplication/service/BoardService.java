@@ -29,10 +29,16 @@ import com.pda.kafkautils.credit.AddCreditDto;
 import com.pda.s3utils.service.S3Service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -42,6 +48,11 @@ import java.util.List;
 @RequiredArgsConstructor
 public class BoardService {
 
+    @Value("${out-service.product.url}")
+    private String productServerUrl;
+
+    private final RestTemplate restTemplate;
+
     private final BoardRepository boardRepository;
 
     private final CategoryRepository categoryRepository;
@@ -49,13 +60,12 @@ public class BoardService {
     private final BoardCountRepository boardCountRepository;
 
     private final UnlockedRepository unlockedRepository;
+
     private final BoardProductTagRepository boardProductTagRepository;
 
     private final BoardChallengeTagRepository boardChallengeTagRepository;
 
     private final ProducerService producerService;
-
-    private final S3Service s3Service;
 
     /**
      * Register Board
@@ -70,7 +80,7 @@ public class BoardService {
         // Given category cannot be blank by @NotBlack Validation
         Integer categoryId = CategoryUtils.verifyCategory(registerReqDto.getCategory());
 
-        log.info("{}, {}", registerReqDto.isLocked(), categoryId);
+        log.debug("{}, {}", registerReqDto.isLocked(), categoryId);
         if(registerReqDto.isLocked() && (categoryId != 5))
             throw new BadRequestException("Given category cannot be locked");
         log.info("Given category was : {} verified to : {}", registerReqDto.getCategory(), categoryId);
@@ -93,36 +103,31 @@ public class BoardService {
         boardCountRepository.save(BoardCount.builder()
                         .board(board).likeCnt(0).viewCnt(0).build());
 
-        log.debug("tagged onfo {} {}", registerReqDto.getProductId(), registerReqDto.getChallengeId());
+        log.debug("tagged info {} {}", registerReqDto.getProductId(), registerReqDto.getChallengeId());
 
         if(registerReqDto.getProductId() > 0) {
-            log.debug("Create product tag {} with board {}", registerReqDto.getProductId(), registerReqDto.getProductId());
+            log.info("Create product tag {} with board {}", registerReqDto.getProductId(), registerReqDto.getProductId());
             boardProductTagRepository.save(BoardProductTag.builder()
                     .board(board).productId(registerReqDto.getProductId()).build());
         }
         if(registerReqDto.getChallengeId() > 0) {
-            log.debug("Create product tag {} with challenge {}", registerReqDto.getProductId(), registerReqDto.getChallengeId());
+            log.info("Create product tag {} with challenge {}", registerReqDto.getProductId(), registerReqDto.getChallengeId());
             boardChallengeTagRepository.save(BoardChallengeTag.builder()
                     .board(board).challengeId(registerReqDto.getChallengeId()).build());
         }
-        // CREDIT
+
         if(ChallengeUtils.checkIfBoardChallenge(registerReqDto.getChallengeId())) {
-            producerService.sendBoardChallengePosted(
-                    BoardPostSuccessDto.builder()
-                            .userId(authorInfoDto.getId())
-                            .challengeId((long)registerReqDto.getChallengeId())
-                            .boardId(boardId)
-                    .build());
+            producerService.sendBoardChallengePosted(authorInfoDto.getId(),
+                            (long)registerReqDto.getChallengeId(),boardId);
         }
 
-        producerService.sendBoardAlertPosted(AlertMessageDto.builder()
-                .messageType("CREDIT").clientId(authorInfoDto.getId())
-                .content("핀 작성으로 1 크레딧을 획득하셨습니다.")
-                .build());
+        if(registerReqDto.getProductId() > 0) {
+            fetchProductTagIncrement(registerReqDto.getProductId());
+        }
 
-        producerService.sendBoardCreditAcquired(AddCreditDto.builder()
-                .userId(authorInfoDto.getId()).amount(1L)
-                .transactionDateTime(LocalDateTime.now()).build());
+        producerService.sendBoardAlertPosted(authorInfoDto.getId());
+
+        producerService.sendBoardCreditAcquired(authorInfoDto.getId(), 1L);
 
         return boardId;
     }
@@ -142,6 +147,7 @@ public class BoardService {
         if(board.getUserId() == userInfoDto.getId()) {
             log.debug("User's board, SKIP");
         } else if (board.isLocked() && !unlockedRepository.existsById(new UnlockedPK(boardId, userInfoDto.getId()))) {
+            log.info("Target board : {} is locked, user {} has not been unlocked yet", boardId, userInfoDto.getId());
             int unlockedCount = unlockedRepository.findAllByBoardId(boardId).size();
             throw new LockedBoardException(unlockedCount ,board.getLikes().size());
         }
@@ -150,7 +156,6 @@ public class BoardService {
                 .title(board.getTitle())
                 .content(board.getContent())
                 .category(board.getCategory())
-                // TODO : comments and replies
                 .comments(board.getComments().stream().filter((comment) ->
                         comment.getParentComment() == null
                 ).map((elem) ->
@@ -180,11 +185,9 @@ public class BoardService {
                 .authorId(board.getUserId())
                 .authorNickname(board.getAuthorNickname())
                 .authorProfile(board.getAuthorProfile())
-                .liked(userInfoDto != null &&
-                        board.getLikes().stream().anyMatch(elem ->
+                .liked(board.getLikes().stream().anyMatch(elem ->
                         elem.getUserId() == userInfoDto.getId()))
-                .bookmarked(userInfoDto != null &&
-                        board.getBookmarks().stream().anyMatch(elem ->
+                .bookmarked(board.getBookmarks().stream().anyMatch(elem ->
                         elem.getUserId() == userInfoDto.getId()))
                 .build();
     }
@@ -200,7 +203,7 @@ public class BoardService {
             BoardDto.SearchConditionDto searchConditionDto
     ) {
         List<Board> boards;
-        log.info("search dto : {}", searchConditionDto);
+        log.debug("search dto : {}", searchConditionDto);
         Sort sort = getSortBySearchCondition(searchConditionDto);
         Pageable pageable = PageRequest.of(pageNo, size, sort);
         Integer categoryId = CategoryUtils.verifyCategory(searchConditionDto.getCategory());
@@ -277,14 +280,24 @@ public class BoardService {
         return 1;
     }
 
+    /**
+     * Get tagged board list
+     * @param pageNo
+     * @param size
+     * @param productId   zero for none
+     * @param challengeId zero for none
+     * @return
+     */
     public List<BoardDto.AbstractRespDto> getTaggedBoards(int pageNo, int size, long productId, long challengeId) {
         List<Board> boards;
         Pageable pageable = PageRequest.of(pageNo, size);
 
         if(productId > 0) {
+            log.info("Search by product id : {}", productId);
             boards = boardProductTagRepository.findByProductId(pageable, productId)
                     .getContent().stream().map(BoardProductTag::getBoard).toList();
         } else if(challengeId > 0){
+            log.info("Search by challenge id : {}", challengeId);
             boards = boardChallengeTagRepository.findByChallengeId(pageable, challengeId)
                     .getContent().stream().map(BoardChallengeTag::getBoard).toList();
         } else {
@@ -350,5 +363,29 @@ public class BoardService {
         }
 
         return ret;
+    }
+
+    /**
+     * Fetch product tag increment request
+     * @param productId target product id
+     * @throws BadRequestException Failed to create associated product, might be absent
+     * @throws RuntimeException Failed with Unexpected error
+     */
+    private void fetchProductTagIncrement(long productId) {
+        HttpEntity<Object> entity = new HttpEntity<>(null);
+
+        ResponseEntity<Object> response =
+                restTemplate.exchange(productServerUrl + "/products" + productId + "/boards",
+                        HttpMethod.POST, entity, Object.class);
+
+        log.info("Response from product : {}", response.getStatusCode());
+
+        if(response.getStatusCode() == HttpStatus.NOT_FOUND ||
+                response.getStatusCode() == HttpStatus.BAD_REQUEST) {
+            throw new BadRequestException("Failed to create associated product, might be absent");
+        } else if(response.getStatusCode() != HttpStatus.OK){
+            log.warn("Failed with unexpected error code : {}", response.getStatusCode());
+            throw new RuntimeException(String.format("Failed with status code : {}", response.getStatusCode()));
+        }
     }
 }

@@ -21,6 +21,7 @@ public class UserUpdateService {
     @Transactional
     @KafkaListener(topics = "user-update", concurrency = "3")
     public void userUpdate(UserUpdateDto userUpdateDto) {
+        log.info("Consumer: user {} has been update", userUpdateDto.getUserId());
         boardRepository.updateAuthorByUserId(from(userUpdateDto));
         commentRepository.updateAuthorByUserId(from(userUpdateDto));
     }

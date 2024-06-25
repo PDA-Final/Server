@@ -3,6 +3,8 @@ service-url: /api/board-service
 out-service:
   credit:
     url: http://localhost:8085
+  product:
+    url: http://
 
 server:
   port: 8082
