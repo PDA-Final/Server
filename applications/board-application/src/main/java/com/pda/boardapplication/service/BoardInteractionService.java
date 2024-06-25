@@ -3,15 +3,28 @@ package com.pda.boardapplication.service;
 import com.pda.boardapplication.dto.UserDto;
 import com.pda.boardapplication.entity.*;
 import com.pda.boardapplication.repository.*;
+import com.pda.exceptionhandler.exceptions.BadRequestException;
+import com.pda.exceptionhandler.exceptions.ConflictException;
 import com.pda.exceptionhandler.exceptions.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.*;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
+
+import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.Map;
 
 @Service
 @Slf4j
 @RequiredArgsConstructor
 public class BoardInteractionService {
+
+    @Value("${out-service.credit.url}")
+    private String creditServerUrl;
+    private final RestTemplate restTemplate;
 
     private final BoardRepository boardRepository;
     private final LikeRepository likeRepository;
@@ -76,6 +89,62 @@ public class BoardInteractionService {
         } else {
             bookmarkRepository.delete(bookmark);
             return -1;
+        }
+    }
+
+    /**
+     * Unlock board item
+     * @param boardId target board's id
+     * @param userInfoDto request user's info
+     * @return affected count
+     * @throws NotFoundException target board not found
+     */
+    public int unlockBoard(long boardId, UserDto.InfoDto userInfoDto) {
+        Board board = boardRepository.findById(boardId).orElseThrow(() ->
+                new NotFoundException("Target board does not exists"));
+
+        if(!board.isLocked())
+            throw new BadRequestException("Target board is not locked");
+
+        Unlocked unlocked = Unlocked.builder().board(board).userId(userInfoDto.getId()).build();
+        if(unlockedRepository.existsById(new UnlockedPK(boardId, userInfoDto.getId()))) {
+            throw new ConflictException("Already unlocked");
+        }
+
+        getTransferResponse(boardId, 10, userInfoDto.getToken());
+        unlockedRepository.save(unlocked);
+
+        return 1;
+    }
+
+    /**
+     * Perform transfer
+     * @param targetId target user's id
+     * @param amount credit amount to transfer
+     * @param token user's access token
+     * @throws BadRequestException failed to transfer
+     */
+    private void getTransferResponse(long targetId, int amount, String token) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", String.format("Bearer %s", token));
+
+        Map<String, Object> reqBody = new HashMap<>();
+        reqBody.put("toUserId", targetId);
+        reqBody.put("amount", amount);
+        reqBody.put("transactionDateTime", LocalDateTime.now());
+
+        HttpEntity<Map<String, Object>> entity = new HttpEntity<>(reqBody, headers);
+
+        log.warn(creditServerUrl);
+        ResponseEntity<Object> response
+                = restTemplate.exchange(
+                        creditServerUrl+"/credit/transfer", HttpMethod.POST,
+                        entity, Object.class);
+
+        log.info("Response from credit : {}", response.getStatusCode());
+
+        if(response.getStatusCode() != HttpStatus.OK) {
+            throw new BadRequestException("Failed to transfer");
         }
     }
 }

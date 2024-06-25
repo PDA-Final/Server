@@ -166,4 +166,16 @@ public class BoardController {
                 ApiUtils.created("created", result) :
                 ApiUtils.success("deleted", result);
     }
+
+    @PostMapping("/{boardId}/unlock")
+    @Operation(summary = "Unlock board item using credit", security = @SecurityRequirement(name = "bearerAuth"))
+    public GlobalResponse<String> unlockBoard(@PathVariable("boardId") long boardId, @AuthUser AuthUserInfo user) {
+        log.debug("Unlock board {} by user {}", boardId, user.getId());
+
+        UserDto.InfoDto userInfoDto = UserDto.InfoDto.fromAuthUserInfo(user);
+
+        boardInteractionService.unlockBoard(boardId, userInfoDto);
+
+        return ApiUtils.success("success");
+    }
 }
