@@ -26,7 +26,7 @@ public class Alert {
     @Column(name = "id")
     private Long id;
 
-    @Column(name = "client_id", unique = true)
+    @Column(name = "client_id")
     private Long clientId;
 
     @Column(name = "message_type", nullable = false)

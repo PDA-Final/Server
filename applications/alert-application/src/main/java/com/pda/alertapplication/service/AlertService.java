@@ -92,8 +92,25 @@ public class AlertService {
     }
 
     @Transactional
-    public void updateRead(Long alertId) {
-        alertRepository.markAsRead(alertId);
+    public void updateView(Long alertId) {
+        alertRepository.markAsView(alertId);
+    }
+
+    @Transactional
+    public void updateAllView(Long clientId) {
+        alertRepository.markAllAsViewByClientId(clientId);
+    }
+
+    @Transactional
+    public void deleteAllAlerts(Long clientId) {
+        alertRepository.deleteAllByClientId(clientId);
+    }
+
+
+
+    @Transactional(readOnly = true)
+    public int countUnviewAlerts(Long clientId) {
+        return alertRepository.countUnviewAlertsByClientId(clientId);
     }
 
     public Long selectProductIdByAlertId(Long alertId) {

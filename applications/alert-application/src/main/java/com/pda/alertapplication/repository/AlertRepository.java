@@ -18,6 +18,9 @@ public interface AlertRepository extends JpaRepository<Alert, Long> {
 
     List<Alert> findAlertsByClientId(Long clientId);
 
+    @Query("SELECT COUNT(a) FROM Alert a WHERE a.clientId = :clientId AND a.isViewed = false")
+    int countUnviewAlertsByClientId(@Param("clientId") Long clientId);
+
     @Query("SELECT a FROM Alert a WHERE a.clientId = :clientId ORDER BY a.createdAt ASC")
     List<Alert> findOldestAlertsByUserId(@Param("clientId") Long clientId, Pageable pageable);
 
@@ -26,7 +29,15 @@ public interface AlertRepository extends JpaRepository<Alert, Long> {
 
     @Modifying
     @Query("UPDATE Alert a SET a.isViewed = true WHERE a.id = :alertId")
-    void markAsRead(@Param("alertId") Long alertId);
+    void markAsView(@Param("alertId") Long alertId);
+
+    @Modifying
+    @Query("UPDATE Alert a SET a.isViewed = true WHERE a.clientId = :clientId")
+    void markAllAsViewByClientId(@Param("clientId") Long clientId);
+
+    @Modifying
+    @Query("DELETE FROM Alert a WHERE a.clientId = :clientId")
+    void deleteAllByClientId(@Param("clientId") Long clientId);
 
     @Query("SELECT a.targetId FROM Alert a WHERE a.id = :alertId")
     Long findTargetIdByAlertId(@Param("alertId") Long alertId);

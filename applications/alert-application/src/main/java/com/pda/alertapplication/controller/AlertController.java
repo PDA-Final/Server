@@ -34,6 +34,7 @@ public class AlertController {
     private final EmitterService emitterService;
     private final AlertService alertService;
 
+    // SSE 세션 연결
     @GetMapping(value = "/subscribe", produces = "text/event-stream")
     @Operation(summary = "SSE Subscribe", security = @SecurityRequirement(name = "bearerAuth"))
     @ApiResponse(responseCode = "200", description = "Success!")
@@ -43,6 +44,7 @@ public class AlertController {
         return emitterService.addEmitter(authUserInfo.getId(), lastEventId);
     }
 
+    // 전체 조회
     @GetMapping
     @Operation(summary = "Get Alerts", security = @SecurityRequirement(name = "bearerAuth"))
     @ApiResponses(value = {
@@ -63,6 +65,7 @@ public class AlertController {
         return ApiUtils.success("success", result);
     }
 
+    // 개별 조회
     @GetMapping("/{alertId}")
     @Operation(summary = "Get Alert", security = @SecurityRequirement(name = "bearerAuth"))
     @ApiResponses(value = {
@@ -82,8 +85,9 @@ public class AlertController {
         return ApiUtils.success("success", result);
     }
 
+    // 개별 읽음
     @PutMapping("/{alertId}/view")
-    @Operation(summary = "Alert marked as view", security = @SecurityRequirement(name = "bearerAuth"))
+    @Operation(summary = "Mark alert as view", security = @SecurityRequirement(name = "bearerAuth"))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK"),
             @ApiResponse(responseCode = "404", description = "Not Found")
@@ -94,11 +98,58 @@ public class AlertController {
         log.debug("알림 읽음 처리 요청: {}", alertId);
         Map<String, Object> result = new HashMap<>();
 
-        alertService.updateRead(alertId);
+        alertService.updateView(alertId);
 
         AlertMessageSendDto alertMessageSendDto = alertService.getAlert(alertId);
         result.put("alert", alertMessageSendDto);
 
         return ApiUtils.success("Alert marked as read", result);
+    }
+
+    // 전체 읽음
+    @PutMapping("/viewall")
+    @Operation(summary = "Mark all alerts as view", security = @SecurityRequirement(name = "bearerAuth"))
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "OK"),
+            @ApiResponse(responseCode = "404", description = "Not Found")
+    })
+    public GlobalResponse<Object> markAllAlertsAsView(
+            @AuthUser AuthUserInfo authUserInfo
+    ) {
+        log.debug("모든 알림 읽음 처리 요청: userId {}", authUserInfo.getId());
+
+        alertService.updateAllView(authUserInfo.getId());
+        return ApiUtils.success("success", null);
+    }
+
+    // 전체 삭제
+    @DeleteMapping("/delete")
+    @Operation(summary = "Delete all alerts", security = @SecurityRequirement(name = "bearerAuth"))
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "OK"),
+            @ApiResponse(responseCode = "404", description = "Not Found")
+    })
+    public GlobalResponse<Object> deleteAllAlerts(
+            @AuthUser AuthUserInfo authUserInfo
+    ) {
+        log.debug("모든 알림 삭제 요청: userId {}", authUserInfo.getId());
+
+        alertService.deleteAllAlerts(authUserInfo.getId());
+        return ApiUtils.success("success", null);
+    }
+
+    @GetMapping("/unviewed")
+    @Operation(summary = "Get unviewed alert count", security = @SecurityRequirement(name = "bearerAuth"))
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "OK"),
+            @ApiResponse(responseCode = "404", description = "Not Found")
+    })
+    public GlobalResponse<Object> getUnviewAlertCount(
+            @AuthUser AuthUserInfo authUserInfo
+    ) {
+        log.debug("안 읽은 알림 개수 조회 요청");
+        int unviewCount = alertService.countUnviewAlerts(authUserInfo.getId());
+
+        return ApiUtils.success("success", unviewCount);
     }
 }
