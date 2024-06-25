@@ -19,7 +19,6 @@ import com.pda.boardapplication.utils.UserUtils;
 import com.pda.exceptionhandler.exceptions.BadRequestException;
 import com.pda.exceptionhandler.exceptions.ForbiddenException;
 import com.pda.exceptionhandler.exceptions.NotFoundException;
-import com.pda.s3utils.service.S3Service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
@@ -41,8 +40,6 @@ public class BoardService {
     private final BoardCountRepository boardCountRepository;
 
     private final UnlockedRepository unlockedRepository;
-
-    private final S3Service s3Service;
 
     /**
      * Register Board
@@ -85,7 +82,7 @@ public class BoardService {
      * Get board detail
      * @param boardId target board id
      * @return
-     * @throws NotFoundException - target does not exists
+     * @throws NotFoundException - target does not exist
      * @throws LockedBoardException - target is locked
      */
     public BoardDto.DetailRespDto getBoardDetail(long boardId, UserDto.InfoDto userInfoDto) throws LockedBoardException {
