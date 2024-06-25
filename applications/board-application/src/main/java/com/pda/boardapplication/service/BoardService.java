@@ -29,10 +29,16 @@ import com.pda.kafkautils.credit.AddCreditDto;
 import com.pda.s3utils.service.S3Service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -42,6 +48,11 @@ import java.util.List;
 @RequiredArgsConstructor
 public class BoardService {
 
+    @Value("${out-service.product.url}")
+    private String productServerUrl;
+
+    private final RestTemplate restTemplate;
+
     private final BoardRepository boardRepository;
 
     private final CategoryRepository categoryRepository;
@@ -49,6 +60,7 @@ public class BoardService {
     private final BoardCountRepository boardCountRepository;
 
     private final UnlockedRepository unlockedRepository;
+
     private final BoardProductTagRepository boardProductTagRepository;
 
     private final BoardChallengeTagRepository boardChallengeTagRepository;
@@ -111,6 +123,10 @@ public class BoardService {
                             .challengeId((long)registerReqDto.getChallengeId())
                             .boardId(boardId)
                     .build());
+        }
+
+        if(registerReqDto.getProductId() > 0) {
+            fetchProductTagIncrement(registerReqDto.getProductId());
         }
 
         producerService.sendBoardAlertPosted(AlertMessageDto.builder()
@@ -346,5 +362,29 @@ public class BoardService {
         }
 
         return ret;
+    }
+
+    /**
+     * Fetch product tag increment request
+     * @param productId target product id
+     * @throws BadRequestException Failed to create associated product, might be absent
+     * @throws RuntimeException Failed with Unexpected error
+     */
+    private void fetchProductTagIncrement(long productId) {
+        HttpEntity<Object> entity = new HttpEntity<>(null);
+
+        ResponseEntity<Object> response =
+                restTemplate.exchange(productServerUrl + "/products" + productId + "/boards",
+                        HttpMethod.POST, entity, Object.class);
+
+        log.info("Response from product : {}", response.getStatusCode());
+
+        if(response.getStatusCode() == HttpStatus.NOT_FOUND ||
+                response.getStatusCode() == HttpStatus.BAD_REQUEST) {
+            throw new BadRequestException("Failed to create associated product, might be absent");
+        } else if(response.getStatusCode() != HttpStatus.OK){
+            log.warn("Failed with unexpected error code : {}", response.getStatusCode());
+            throw new RuntimeException(String.format("Failed with status code : {}", response.getStatusCode()));
+        }
     }
 }
