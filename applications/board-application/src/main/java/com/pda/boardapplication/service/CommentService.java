@@ -2,6 +2,7 @@ package com.pda.boardapplication.service;
 
 import com.pda.boardapplication.dto.CommentDto;
 import com.pda.boardapplication.dto.UserDto;
+import com.pda.boardapplication.entity.Board;
 import com.pda.boardapplication.entity.Comment;
 import com.pda.boardapplication.repository.BoardRepository;
 import com.pda.boardapplication.repository.CommentRepository;
@@ -23,6 +24,7 @@ public class CommentService {
 
     private final CommentRepository commentRepository;
     private final BoardRepository boardRepository;
+    private final ProducerService producerService;
 
     /**
      * Register comment
@@ -36,9 +38,12 @@ public class CommentService {
         Comment parentComment = registerReqDto.getParentId() == 0 ? null
                 : verifyParentComment(boardId, registerReqDto.getParentId());
 
+        Board board = boardRepository.findById(boardId).orElseThrow(() ->
+                new BadRequestException("Invalid Target board id"));
+
         Comment comment = Comment.builder()
                 .content(registerReqDto.getContent())
-                .board(boardRepository.getReferenceById(boardId))
+                .board(board)
                 .parentComment(parentComment)
                 .userId(userInfoDto.getId())
                 .authorNickname(userInfoDto.getNickname())
@@ -46,7 +51,12 @@ public class CommentService {
                 .authorType(UserUtils.getUserRoleCode(userInfoDto.getType()))
                 .build();
 
-        return commentRepository.save(comment).getId();
+        long commentId = commentRepository.save(comment).getId();
+
+        producerService.sendCommentAlertPosted(board.getUserId(),
+                userInfoDto.getNickname(), boardId, board.getThumbnail());
+
+        return commentId;
     }
 
     /**
