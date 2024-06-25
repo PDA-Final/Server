@@ -37,7 +37,7 @@ public class ProducerService {
         log.info("Produce: board posted alert");
         kafkaTemplate.send("alert-msg",
                 AlertMessageDto.builder()
-                    .messageType("CREDIT").clientId(clientId)
+                    .messageType("CREDIT").clientId(clientId).targetId(clientId)
                     .content("핀 작성으로 1 크레딧을 획득하셨습니다.")
                     .build());
     }
