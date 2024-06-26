@@ -154,6 +154,11 @@ public class BoardService {
 //        }
 
         boolean isAccessible = !(board.isLocked() && !unlockedRepository.existsById(new UnlockedPK(boardId, userInfoDto.getId())));
+
+        if(board.getUserId() == userInfoDto.getId()) {
+            isAccessible = true;
+        }
+
         return BoardDto.DetailRespDto.builder()
                 .title(board.getTitle())
                 .content(isAccessible ? board.getContent() : "")
