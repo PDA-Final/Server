@@ -379,7 +379,7 @@ public class BoardService {
         HttpEntity<Object> entity = new HttpEntity<>(null);
 
         ResponseEntity<Object> response =
-                restTemplate.exchange(productServerUrl + "/products" + productId + "/boards",
+                restTemplate.exchange(productServerUrl + "/products/" + productId + "/boards",
                         HttpMethod.POST, entity, Object.class);
 
         log.info("Response from product : {}", response.getStatusCode());
