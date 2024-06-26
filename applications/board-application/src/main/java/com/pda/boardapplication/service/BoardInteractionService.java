@@ -181,7 +181,9 @@ public class BoardInteractionService {
 
         ChallengeUtils.BoardChallengeInfo taggedChallengeInfo =
                 ChallengeUtils.getBoardChallengeInfoById(
-                        board.getTaggedChallenges().get(0).getChallengeId());
+                        !board.getTaggedChallenges().isEmpty() ?
+                                board.getTaggedChallenges().get(0).getChallengeId()
+                                : 0L);
 
         log.info("Tagged challenge for board {} was : {}", boardId, taggedChallengeInfo);
 
