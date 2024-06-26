@@ -12,7 +12,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 public class BoardPostSuccessDto implements KafkaJson {
-    private long boardId;
-    private long userId;
-    private long challengeId;
+    private Long boardId;
+    private Long userId;
+    private Long challengeId;
 }
