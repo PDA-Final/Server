@@ -389,7 +389,7 @@ public class BoardService {
             throw new BadRequestException("Failed to create associated product, might be absent");
         } else if(response.getStatusCode() != HttpStatus.OK){
             log.warn("Failed with unexpected error code : {}", response.getStatusCode());
-            throw new RuntimeException(String.format("Failed with status code : {}", response.getStatusCode()));
+            throw new RuntimeException(String.format("Failed with status code : %s", response.getStatusCode()));
         }
     }
 }
