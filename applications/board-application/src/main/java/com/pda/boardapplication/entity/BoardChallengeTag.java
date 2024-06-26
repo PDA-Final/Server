@@ -15,7 +15,7 @@ import lombok.NoArgsConstructor;
 public class BoardChallengeTag extends BaseEntity {
 
     @Id
-    @ManyToOne(cascade = CascadeType.REMOVE)
+    @ManyToOne
     @JoinColumn(name = "board_id")
     private Board board;
 

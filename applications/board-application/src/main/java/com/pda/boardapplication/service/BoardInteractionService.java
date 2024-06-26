@@ -75,7 +75,7 @@ public class BoardInteractionService {
 
             ret = 1;
         } else {
-            likeRepository.delete(like);
+            likeRepository.deleteById(new LikePK(boardId, userInfoDto.getId()));
             ret = -1;
         }
 
