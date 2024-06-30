@@ -37,7 +37,7 @@ else
 fi
 
 echo 'run container'
-docker run --name ${IMAGE_NAME}-$NEXT --net host -e PORT_NUM=$NEXT_PORT -d bkkmw/${IMAGE_NAME}
+docker run --name ${IMAGE_NAME}-$NEXT --net host -e PORT_NUM=$NEXT_PORT -e TZ=Asia/Seoul -d bkkmw/${IMAGE_NAME}
 
 count=1
 url="http://localhost:$NEXT_PORT/actuator/health"

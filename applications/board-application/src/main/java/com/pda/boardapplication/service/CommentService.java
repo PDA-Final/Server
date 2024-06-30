@@ -53,8 +53,9 @@ public class CommentService {
 
         long commentId = commentRepository.save(comment).getId();
 
-        producerService.sendCommentAlertPosted(board.getUserId(),
-                userInfoDto.getNickname(), boardId, board.getThumbnail());
+        if(board.getUserId() != userInfoDto.getId())
+            producerService.sendCommentAlertPosted(board.getUserId(),
+                    userInfoDto.getNickname(), boardId, board.getThumbnail());
 
         return commentId;
     }
@@ -68,7 +69,7 @@ public class CommentService {
 
         List<Comment> comments = commentRepository.findAllByBoardId(boardId).orElse(new ArrayList<>());
 
-        log.info("Total {} comments found for board {}", comments.size(), boardId);
+        log.debug("Total {} comments found for board {}", comments.size(), boardId);
 
         return comments.stream()
                 .filter((comment) -> comment.getParentComment() == null)

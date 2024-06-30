@@ -194,10 +194,10 @@ public class PortfolioService implements PortfolioUseCase {
     }
 
     private long getAmountRange(long amount) {
-        if (amount < 1000)
+        if (amount < 10000000)
             return -1;
 
-        return amount / 1000 * 1000;
+        return amount / 10000000 * 10000000;
     }
 
     private double getRate(long part, long total) {

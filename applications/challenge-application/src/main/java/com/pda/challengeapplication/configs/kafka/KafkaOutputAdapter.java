@@ -20,6 +20,7 @@ public class KafkaOutputAdapter implements SendMyChallengeResultPort {
         kafkaTemplate.send("alert-msg", AlertMessageDto.builder()
                 .clientId(request.getUserId())
                 .messageType("CREDIT")
+                .targetId(request.getUserId())
                 .content(request.getResult())
                 .thumbnail(request.getLogoUrl())
                 .build());

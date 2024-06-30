@@ -11,7 +11,6 @@ import com.pda.boardapplication.repository.BookmarkRepository;
 import com.pda.boardapplication.repository.LikeRepository;
 import com.pda.boardapplication.utils.ChallengeUtils;
 import com.pda.exceptionhandler.exceptions.NotFoundException;
-import com.pda.kafkautils.board.BoardPostSuccessDto;
 import com.pda.kafkautils.challenge.ChallengeSuccessDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -68,15 +67,15 @@ public class BoardInteractionService {
             long challengeId = checkBoardChallengeSuccess(boardId);
 
             if(challengeId > -1)
-                producerService.sendBoardChallengeSuccess(
-                        ChallengeSuccessDto.builder().boardId(boardId).build());
+                producerService.sendBoardChallengeSuccess(boardId);
 
-            producerService.sendLikeAlertPosted(board.getUserId(), userInfoDto.getNickname(),
-                    boardId, board.getThumbnail());
+            if(board.getUserId() != userInfoDto.getId())
+                producerService.sendLikeAlertPosted(board.getUserId(), userInfoDto.getNickname(),
+                        boardId, board.getThumbnail());
 
             ret = 1;
         } else {
-            likeRepository.delete(like);
+            likeRepository.deleteById(new LikePK(boardId, userInfoDto.getId()));
             ret = -1;
         }
 
@@ -133,6 +132,10 @@ public class BoardInteractionService {
         }
 
         getTransferResponse(boardId, 10, userInfoDto.getToken());
+        producerService.sendBoardAlertUnlocked(
+                board.getUserId(), userInfoDto.getId(),
+                boardId, board.getThumbnail());
+
         unlockedRepository.save(unlocked);
 
         return 1;
@@ -156,7 +159,6 @@ public class BoardInteractionService {
 
         HttpEntity<Map<String, Object>> entity = new HttpEntity<>(reqBody, headers);
 
-        log.warn(creditServerUrl);
         ResponseEntity<Object> response
                 = restTemplate.exchange(
                 creditServerUrl + "/credit/transfer", HttpMethod.POST,
@@ -179,7 +181,9 @@ public class BoardInteractionService {
 
         ChallengeUtils.BoardChallengeInfo taggedChallengeInfo =
                 ChallengeUtils.getBoardChallengeInfoById(
-                        board.getTaggedChallenges().get(0).getChallengeId());
+                        !board.getTaggedChallenges().isEmpty() ?
+                                board.getTaggedChallenges().get(0).getChallengeId()
+                                : 0L);
 
         log.info("Tagged challenge for board {} was : {}", boardId, taggedChallengeInfo);
 

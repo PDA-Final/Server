@@ -85,9 +85,7 @@ public class BoardController {
     ) {
         log.debug("Get board lists with page {}, size {}", pageNo, size);
 
-        log.info("{}", searchConditionDto);
-        if(searchConditionDto != null)
-            log.info(searchConditionDto.getCategory());
+        log.debug("{}", searchConditionDto);
 
         List<BoardDto.AbstractRespDto> boards = boardService.getBoards(pageNo, size, searchConditionDto);
 
@@ -140,7 +138,7 @@ public class BoardController {
         int count = boardInteractionService.toggleLike(boardId, userInfoDto);
         result.put("modifiedStatus", count > 0 ? "created" : "canceled");
 
-        log.info("Like to board {} toggled : {}", boardId, count);
+        log.debug("Like to board {} toggled : {}", boardId, count);
 
         return count > 0 ?
                 ApiUtils.created("created",result) :
